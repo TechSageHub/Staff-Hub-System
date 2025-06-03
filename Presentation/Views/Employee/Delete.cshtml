@@ -1,0 +1,34 @@
+﻿@model Presentation.Models.EmployeeViewModel
+
+@{
+    ViewData["Title"] = "Delete Employee";
+}
+
+<h2>Delete Employee</h2>
+
+<div class="alert alert-danger">
+    <strong>Are you sure you want to delete this employee?</strong>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">First Name</dt>
+    <dd class="col-sm-9">@Model.FirstName</dd>
+
+    <dt class="col-sm-3">Last Name</dt>
+    <dd class="col-sm-9">@Model.LastName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Hire Date</dt>
+    <dd class="col-sm-9">@Model.HireDate.ToString("yyyy-MM-dd")</dd>
+
+    <dt class="col-sm-3">Salary</dt>
+    <dd class="col-sm-9">@Model.Salary.ToString("C")</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

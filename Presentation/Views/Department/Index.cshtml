@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Departments";
+}
+@model DepartmentsViewModel
+
+<h1>@ViewData["Title"]</h1>
+
+<a asp-action="Create" class="btn btn-outline-success">Create New Department</a>
+<hr>
+
+@if (!Model.Departments.Any())
+{
+    <p class="text-danger">No records available!</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th> 
+                <th>Action</th>    
+            </tr>  
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Departments)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">Detail</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post"
+                                  onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
