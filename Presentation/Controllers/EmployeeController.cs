@@ -203,7 +203,7 @@ public class EmployeeController : BaseController
         return View(viewModel);
     }
 
-    [HttpPost("Delete")]
+    [HttpPost("Employee/Delete")]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
         await _employeeService.DeleteEmployeeAsync(id);

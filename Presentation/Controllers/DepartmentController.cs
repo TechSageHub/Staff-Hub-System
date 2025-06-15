@@ -11,7 +11,6 @@ public class DepartmentController : BaseController
 {
     private readonly IDepartmentService _departmentService;
     private readonly INotyfService _notyf;
-
     public DepartmentController(IDepartmentService departmentService, INotyfService notyf)
     {
         _departmentService = departmentService; 
@@ -158,7 +157,7 @@ public class DepartmentController : BaseController
         return View(viewModel);
     }
 
-    [HttpPost("Delete")]
+    [HttpPost("Department/Delete")]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
         await _departmentService.DeleteDepartmentAsync(id);

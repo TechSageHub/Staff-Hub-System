@@ -1,6 +1,61 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+
+    .privacy-container {
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .privacy-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 30px 40px;
+        border-radius: 12px;
+        max-width: 800px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+    }
+
+        .privacy-box h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .privacy-box p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+</style>
+
+<div class="privacy-container">
+    <div class="privacy-box">
+        <h1>@ViewData["Title"]</h1>
+        <p>
+            We value your privacy. This page explains how we collect, use, and protect your personal information.
+            Any data provided will be handled with the utmost care and will not be shared with third parties without your consent.
+        </p>
+        <p>
+            Our application uses industry-standard encryption and data protection protocols to ensure your information stays safe.
+            By continuing to use our services, you agree to this privacy policy.
+        </p>
+        <p>
+            For further questions or concerns, feel free to contact us at <a href="mailto:support@example.com" style="color: #a2d5f2;">ilyasabdulmannan@gmail.com</a>.
+        </p>
+    </div>
+</div>

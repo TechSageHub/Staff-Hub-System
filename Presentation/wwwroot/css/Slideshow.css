@@ -1,0 +1,135 @@
+﻿.slideshow-container {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.slideshow-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    animation: fade 18s infinite;
+    opacity: 0;
+}
+
+    .slideshow-image:nth-child(1) {
+        background-image: url('https://www.insperity.com/wp-content/uploads/employee_training_1200x630.png');
+        animation-delay: 0s;
+    }
+
+    .slideshow-image:nth-child(2) {
+        background-image: url('https://cdn.elearningindustry.com/wp-content/uploads/2022/09/8-Practical-Ways-To-Improve-Employee-Performance.jpg');
+        animation-delay: 6s;
+    }
+
+    .slideshow-image:nth-child(3) {
+        background-image: url('https://www.pageuppeople.com/wp-content/uploads/2019/01/Top-60-Employee-Engagement-image43-1200x720.png');
+        animation-delay: 12s;
+    }
+
+@keyframes fade {
+    0%, 100% {
+        opacity: 0;
+    }
+
+    10%, 30% {
+        opacity: 1;
+    }
+
+    40%, 100% {
+        opacity: 0;
+    }
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+    z-index: 1;
+}
+
+.hero-text {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 2rem;
+}
+
+    .hero-text h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    .hero-text p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        color: #eee;
+    }
+
+.hero-btn {
+    background-color: #28a745;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+    .hero-btn:hover {
+        background-color: #218838;
+    }
+
+@media (max-width: 768px) {
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+    }
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.employee-page {
+    height: 100vh;
+    width: 100%;
+    background: url('/images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    color: white;
+}
+
+    .employee-page::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7); /* dark overlay */
+        z-index: 0;
+    }
+
+    .employee-page > * {
+        position: relative;
+        z-index: 1;
+    }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}

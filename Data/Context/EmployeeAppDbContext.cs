@@ -1,9 +1,11 @@
 using Data.Model;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context;
 
-public class EmployeeAppDbContext : DbContext
+public class EmployeeAppDbContext : IdentityDbContext<IdentityUser>
 {
     public EmployeeAppDbContext(DbContextOptions<EmployeeAppDbContext> options)
         : base(options) {}
