@@ -24,6 +24,3 @@ namespace Data.Configurations
         }
     }
 }
-
-
-
