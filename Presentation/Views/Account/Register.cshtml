@@ -14,6 +14,7 @@
         <div class="circle one"></div>
         <div class="circle two"></div>
     </div>
+
     <div class="auth-right">
         <h2 class="mb-4 fw-bold">Sign Up</h2>
         <form asp-action="Register" method="post">
@@ -23,15 +24,25 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 position-relative">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" type="password" />
+                <div class="input-group">
+                    <input asp-for="Password" class="form-control pe-5" type="password" id="registerPassword" />
+                    <button type="button" class="btn btn-outline-secondary position-absolute end-0 top-0 mt-1 me-2 border-0 bg-transparent" onclick="togglePassword('registerPassword', 'registerPasswordIcon')" tabindex="-1">
+                        <i class="bi bi-eye" id="registerPasswordIcon"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 position-relative">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                <div class="input-group">
+                    <input asp-for="ConfirmPassword" class="form-control pe-5" type="password" id="confirmPassword" />
+                    <button type="button" class="btn btn-outline-secondary position-absolute end-0 top-0 mt-1 me-2 border-0 bg-transparent" onclick="togglePassword('confirmPassword', 'confirmPasswordIcon')" tabindex="-1">
+                        <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
@@ -44,4 +55,21 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            const type = passwordInput.getAttribute('type');
+
+            if (type === 'password') {
+                passwordInput.setAttribute('type', 'text');
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.setAttribute('type', 'password');
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
 }

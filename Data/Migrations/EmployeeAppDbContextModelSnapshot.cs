@@ -19,6 +19,43 @@ namespace Data.Migrations
                 .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("Data.Model.Address", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("Addresses");
+                });
+
             modelBuilder.Entity("Data.Model.Department", b =>
                 {
                     b.Property<Guid>("Id")
@@ -72,6 +109,249 @@ namespace Data.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("Data.Model.NigeriaState", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("States");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "AB",
+                            Name = "Abia"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "AD",
+                            Name = "Adamawa"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "AK",
+                            Name = "Akwa Ibom"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "AN",
+                            Name = "Anambra"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Code = "BA",
+                            Name = "Bauchi"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Code = "BY",
+                            Name = "Bayelsa"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Code = "BN",
+                            Name = "Benue"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Code = "BO",
+                            Name = "Borno"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Code = "CR",
+                            Name = "Cross River"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Code = "DE",
+                            Name = "Delta"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Code = "EB",
+                            Name = "Ebonyi"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Code = "ED",
+                            Name = "Edo"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Code = "EK",
+                            Name = "Ekiti"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Code = "EN",
+                            Name = "Enugu"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Code = "GO",
+                            Name = "Gombe"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Code = "IM",
+                            Name = "Imo"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Code = "JI",
+                            Name = "Jigawa"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Code = "KD",
+                            Name = "Kaduna"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Code = "KN",
+                            Name = "Kano"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Code = "KT",
+                            Name = "Katsina"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Code = "KE",
+                            Name = "Kebbi"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Code = "KO",
+                            Name = "Kogi"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Code = "KW",
+                            Name = "Kwara"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Code = "LA",
+                            Name = "Lagos"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Code = "NA",
+                            Name = "Nasarawa"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Code = "NI",
+                            Name = "Niger"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Code = "OG",
+                            Name = "Ogun"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Code = "ON",
+                            Name = "Ondo"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Code = "OS",
+                            Name = "Osun"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Code = "OY",
+                            Name = "Oyo"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Code = "PL",
+                            Name = "Plateau"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Code = "RI",
+                            Name = "Rivers"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Code = "SO",
+                            Name = "Sokoto"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Code = "TA",
+                            Name = "Taraba"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Code = "YO",
+                            Name = "Yobe"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Code = "ZA",
+                            Name = "Zamfara"
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Code = "FCT",
+                            Name = "Federal Capital Territory"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -266,6 +546,17 @@ namespace Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Data.Model.Address", b =>
+                {
+                    b.HasOne("Data.Model.Employee", "Employee")
+                        .WithOne("Address")
+                        .HasForeignKey("Data.Model.Address", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("Data.Model.Employee", b =>
                 {
                     b.HasOne("Data.Model.Department", "Department")
@@ -331,6 +622,11 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Model.Department", b =>
                 {
                     b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("Data.Model.Employee", b =>
+                {
+                    b.Navigation("Address");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,12 +1,13 @@
 ﻿using Application.Dtos;
 using Application.Services.Department;
 using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.DtoMapping;
 using Presentation.Models;
 
 namespace Presentation.Controllers;
-
+[Authorize]
 public class DepartmentController : BaseController
 {
     private readonly IDepartmentService _departmentService;
@@ -56,7 +57,7 @@ public class DepartmentController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            _notyf("Please fill in all required fields correctly.", "error");
+            _notyf.Information("Please fill in all required fields correctly.");
             return View(model);
         }
 

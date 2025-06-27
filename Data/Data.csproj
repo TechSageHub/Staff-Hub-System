@@ -16,6 +16,10 @@
     </PackageReference>
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5" />
+
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="9.0.0" />
+
+   
 	  
   </ItemGroup>
 

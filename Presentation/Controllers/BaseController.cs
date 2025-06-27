@@ -4,9 +4,9 @@ namespace Presentation.Controllers;
 
 public class BaseController : Controller
 {
-    protected void _notyf(string message, string type = "info")
-    {
-        TempData["Message"] = message;
-        TempData["MessageType"] = type.ToLower();
-    }
+    //protected void _notyf(string message, string type = "info")
+    //{
+    //    TempData["Message"] = message;
+    //    TempData["MessageType"] = type.ToLower();
+    //}
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace Data.Model;
 
 public class Department

@@ -2,10 +2,13 @@
 
 namespace Application.Services.Authentication
 {
-    public interface IAunthenticationService
+    public interface IAuthenticationService
     {
-        Task<UserDto> SignUp(UserDto createUserDto);
-        Task<UserDto> SignIn(string credential, string Password);
-        Task<bool> changePassword(string? email, string? username, string password);
+        Task<UserDto> SignUp(CreateUserDto createUserDto);
+        Task<UserDto> SignIn(string credential, string password);
+        Task<bool> ChangePassword(string email, string username, string password);
+        Task<bool> ForgotPasswordAsync(string email);
+        Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
     }
+
 }

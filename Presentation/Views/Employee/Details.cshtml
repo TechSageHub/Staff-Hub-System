@@ -18,7 +18,9 @@
         {
             <span>No photo available</span>
         }
+
     </dd>
+
 
     <dt class="col-sm-3">First Name</dt>
     <dd class="col-sm-9">@Model.FirstName</dd>
@@ -36,5 +38,53 @@
     <dd class="col-sm-9">@Model.Salary.ToString("C")</dd>
 </dl>
 
+<hr />
+<h4>Address</h4>
+
+@if (Model.Address == null)
+{
+    <div class="alert alert-warning">This employee has no address on file.</div>
+    <a asp-controller="Address" asp-action="Add" asp-route-employeeId="@Model.Id" class="btn btn-success">
+        Add Address
+    </a>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-3">Street</dt>
+        <dd class="col-sm-9">@Model.Address.Street</dd>
+
+        <dt class="col-sm-3">City</dt>
+        <dd class="col-sm-9">@Model.Address.City</dd>
+
+        <dt class="col-sm-3">State</dt>
+        <dd class="col-sm-9">@Model.Address.State</dd>
+
+        <dt class="col-sm-3">Country</dt>
+        <dd class="col-sm-9">@Model.Address.Country</dd>
+    </dl>
+
+    <a asp-controller="Address" asp-action="Update" asp-route-employeeId="@Model.Id" class="btn btn-primary me-2">
+        Update Address
+    </a>
+    <form asp-controller="Address" asp-action="Delete" asp-route-employeeId="@Model.Id" method="post" class="d-inline">
+        <button type="submit" class="btn btn-danger me-2">Delete Address</button>
+    </form>
+
+}
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <form asp-controller="Employee" asp-action="DeleteImage" asp-route-employeeId="@Model.Id" method="post" class="d-inline">
+        <button type="submit" class="btn btn-danger me-2">Delete Image</button>
+    </form>
+}
+
+
+<hr />
 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
 <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
+<!-- Hidden form to store the anti-forgery token -->
+<form id="antiforgeryForm">
+    @Html.AntiForgeryToken()
+</form>

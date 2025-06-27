@@ -14,6 +14,10 @@ public class EmployeeDto
     public Guid DepartmentId { get; set; } = default!;
     public string DepartmentName { get; set; }
     public string? ImageUrl { get; set; }
+    public string? Street { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public AddressDto? Address { get; set; }
 }
 
 public class  EmployeesDto 
@@ -42,5 +46,8 @@ public class  UpdateEmployeeDto
     public Guid DepartmentId { get; set; } = default!;
     public IFormFile? Photo { get; set; }
     public string? ImageUrl { get; set; }
+    public string? Street { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
 }
 

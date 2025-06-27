@@ -1,0 +1,41 @@
+﻿@model Presentation.Models.CreateAddressViewModel
+@{
+    ViewData["Title"] = "Create Address";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<form asp-action="Add" method="post">
+    <input type="hidden" asp-for="EmployeeId" />
+
+    <div class="mb-3">
+        <label asp-for="Street" class="form-label"></label>
+        <input asp-for="Street" class="form-control" />
+        <span asp-validation-for="Street" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Country" class="form-label"></label>
+        <input asp-for="Country" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="State" class="form-label"></label>
+        <select asp-for="State" class="form-select" asp-items="ViewBag.States">
+            <option value="">-- Select State --</option>
+        </select>
+        <span asp-validation-for="State" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Address</button>
+</form>
+
+<a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-secondary mt-3">Back to Employee Details</a>

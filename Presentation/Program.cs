@@ -1,33 +1,36 @@
-using Data.Context;
-using MySql.EntityFrameworkCore.Extensions;
 using Application;
+using Application.Services.Address;
+using Application.Services.StateServices;
+using Application.Services.UploadImage;
 using AspNetCoreHero.ToastNotification;
-using Microsoft.AspNetCore.Identity;
 using CloudinaryDotNet;
+using Data.Context;
 using Data.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MySql.EntityFrameworkCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// AddAddress services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(
-        options =>
-    {
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 7;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = true;
-    })
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
 
+   
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); 
+    options.Lockout.MaxFailedAccessAttempts = 3; 
+    options.Lockout.AllowedForNewUsers = true;
 
-
-.AddEntityFrameworkStores<EmployeeAppDbContext>()
-.AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<EmployeeAppDbContext>()
+  .AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    options.ExpireTimeSpan = TimeSpan.FromDays(10);
     options.SlidingExpiration = false;
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
@@ -41,13 +44,20 @@ builder.Services.AddServices();
 
 builder.Services.AddNotyf(config =>
 {
-    config.DurationInSeconds = 10;
+    config.DurationInSeconds = 5;
     config.IsDismissable = true;
     config.Position = NotyfPosition.TopRight;
 }
 );
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IStateService, StateService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddHttpContextAccessor();
+
 
 builder.Services.AddSingleton(provider =>
 {
