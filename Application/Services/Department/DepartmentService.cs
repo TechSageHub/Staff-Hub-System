@@ -2,20 +2,16 @@
 using Application.Dtos;
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Department;
 
-public class DepartmentService : IDepartmentService
+public class DepartmentService(EmployeeAppDbContext _context, ILogger<DepartmentService> _logger) : IDepartmentService
 {
-    private readonly EmployeeAppDbContext _context;
-
-    public DepartmentService(EmployeeAppDbContext context)
-    {
-        _context = context;
-    }
 
     public async Task<DepartmentDto> CreateDepartmentAsync(CreateDepartmentDto dto)
     {
+        _logger.LogInformation("Creating a new department with Name: {Name}", dto.Name);
         var data = new CreateDepartmentDto
         {
             Id = Guid.NewGuid(),
@@ -29,12 +25,12 @@ public class DepartmentService : IDepartmentService
         {
             await _context.Departments.AddAsync(department);
             await _context.SaveChangesAsync();
-
+            _logger.LogInformation("Department created with ID: {Id}", department.Id);
             return department.ToDto();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An error occurred while creating the department.", ex);
+            _logger.LogError("An error occurred while creating the department.", ex);
             return new DepartmentDto();
         }
     }
@@ -77,15 +73,15 @@ public class DepartmentService : IDepartmentService
         return departmentDto;
     }
 
-    public async Task<DepartmentDto> UpdateDepartmentAsync(UpdateDepartmentDto departmentDto) 
+    public async Task<DepartmentDto> UpdateDepartmentAsync(UpdateDepartmentDto departmentDto)
     {
         var department = await _context.Departments.FindAsync(departmentDto.Id);
 
         if (department == null)
-        { 
+        {
             return null;
         }
-        
+
         department.Name = departmentDto.Name;
         department.Description = departmentDto.Description;
 
