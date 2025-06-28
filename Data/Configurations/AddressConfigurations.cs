@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-
 namespace Data.Configurations
 {
     public class AddressConfiguration : IEntityTypeConfiguration<EmployeeAddress>

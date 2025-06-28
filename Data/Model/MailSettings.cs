@@ -15,6 +15,4 @@ namespace Data.Model
         public string Host { get; set; }
         public int Port { get; set; }
     }
-
-
 }

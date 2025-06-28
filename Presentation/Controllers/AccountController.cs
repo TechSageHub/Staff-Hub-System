@@ -17,7 +17,8 @@ namespace Presentation.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly INotyfService _notyf;
 
-        public AccountController(
+        public AccountController
+            (
             IAuthenticationService authService,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
@@ -116,7 +117,6 @@ namespace Presentation.Controllers
         }
 
 
-        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
@@ -197,7 +197,6 @@ namespace Presentation.Controllers
             return View(model);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
@@ -223,6 +222,5 @@ namespace Presentation.Controllers
             _notyf.Error("Password reset failed.");
             return View(model);
         }
-
     }
 }

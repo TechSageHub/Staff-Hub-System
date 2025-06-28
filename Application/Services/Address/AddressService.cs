@@ -41,7 +41,6 @@ namespace Application.Services.Address
             }
         }
 
-
         public async Task<Dtos.AddressDto?> GetAddressByEmployeeIdAsync(Guid employeeId)
         {
             var address = await _context.Addresses
@@ -88,6 +87,7 @@ namespace Application.Services.Address
             await _context.SaveChangesAsync();
             return true;
         }
+
         public async Task DeleteAddressAsync(Guid employeeId)
         {
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.EmployeeId == employeeId);
@@ -98,7 +98,6 @@ namespace Application.Services.Address
             }
         }
 
-
         public List<string> GetAllStates()
         {
             return _context.States
@@ -106,6 +105,5 @@ namespace Application.Services.Address
                 .Select(s => s.Name)
                 .ToList();
         }
-
     }
 }

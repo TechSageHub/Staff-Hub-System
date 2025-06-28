@@ -24,15 +24,7 @@ public class EmployeeController : BaseController
         _notyf = notyf;
     }
 
-    private async Task PopulateDepartments(CreateEmployeeViewModel model)
-    {
-        var departmentsDto = await _departmentService.GetAllDepartmentsAsync();
-        model.Departments = departmentsDto.Departments.Select(d => new SelectListItem
-        {
-            Value = d.Id.ToString(),
-            Text = d.Name
-        }).ToList();
-    }
+    
 
     public async Task<IActionResult> Index()
     {
@@ -234,5 +226,15 @@ public class EmployeeController : BaseController
     {
         await _employeeService.DeleteImageAsync(employeeId);
         return RedirectToAction("Details", "Employee", new { id = employeeId });
+    }
+
+    private async Task PopulateDepartments(CreateEmployeeViewModel model)
+    {
+        var departmentsDto = await _departmentService.GetAllDepartmentsAsync();
+        model.Departments = departmentsDto.Departments.Select(d => new SelectListItem
+        {
+            Value = d.Id.ToString(),
+            Text = d.Name
+        }).ToList();
     }
 }

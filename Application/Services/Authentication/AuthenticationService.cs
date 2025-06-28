@@ -26,7 +26,7 @@ namespace Application.Services.Authentication
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // ✅ Sign Up
+        //  Sign Up
         public async Task<UserDto> SignUp(CreateUserDto createUserDto)
         {
             var user = new IdentityUser
@@ -51,7 +51,7 @@ namespace Application.Services.Authentication
             return new UserDto(user.Id, user.Email, user.UserName);
         }
 
-        // ✅ Sign In
+        //  Sign In
         public async Task<UserDto> SignIn(string credential, string password)
         {
             var user = await _userManager.FindByEmailAsync(credential);
@@ -68,7 +68,7 @@ namespace Application.Services.Authentication
             return new UserDto(user.Id, user.Email, user.UserName);
         }
 
-        // ✅ Change Password
+        //  Change Password
         public async Task<bool> ChangePassword(string email, string username, string newPassword)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -81,6 +81,7 @@ namespace Application.Services.Authentication
 
             return result.Succeeded;
         }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -97,6 +98,7 @@ namespace Application.Services.Authentication
             await _emailService.SendEmailAsync(email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
             return true;
         }
+
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         {
             var user = await _userManager.FindByEmailAsync(email);

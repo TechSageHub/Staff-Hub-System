@@ -100,6 +100,4 @@ public class DepartmentService : IDepartmentService
 
         return updatedDto;
     }
-
-
 }

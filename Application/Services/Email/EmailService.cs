@@ -15,26 +15,7 @@ public class EmailService : IEmailService
         _mailSettings = mailSettings.Value;
     }
 
-    //public async Task SendEmailAsync(string toEmail, string subject, string body)
-    //{
-    //    var message = new MailMessage
-    //    {
-    //        From = new MailAddress(_mailSettings.Mail, _mailSettings.DisplayName),
-    //        Subject = subject,
-    //        Body = body,
-    //        IsBodyHtml = true
-    //    };
-
-    //    message.To.Add(toEmail);
-
-    //    using (var smtp = new SmtpClient(_mailSettings.Host, _mailSettings.Port))
-    //    {
-    //        smtp.Credentials = new NetworkCredential(_mailSettings.Mail, _mailSettings.Password);
-    //        smtp.EnableSsl = true;
-
-    //        await smtp.SendMailAsync(message);
-    //    }
-    //}
+   
     public async Task SendEmailAsync(string toEmail, string subject, string body)
     {
         var message = new MailMessage
