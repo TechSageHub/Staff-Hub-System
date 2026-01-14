@@ -1,5 +1,4 @@
-﻿using Data.Migrations;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Data.Model
 {

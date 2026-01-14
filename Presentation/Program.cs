@@ -2,6 +2,7 @@ using Application;
 using Application.Services.Address;
 using Application.Services.StateServices;
 using Application.Services.UploadImage;
+using Application.Settings;
 using AspNetCoreHero.ToastNotification;
 using CloudinaryDotNet;
 using Data.Context;
@@ -50,7 +51,7 @@ builder.Services.AddNotyf(config =>
 }
 );
 
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings")); 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IStateService, StateService>();
