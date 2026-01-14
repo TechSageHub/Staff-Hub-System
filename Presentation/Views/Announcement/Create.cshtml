@@ -1,0 +1,55 @@
+@model Application.Dtos.CreateAnnouncementDto
+@{
+    ViewData["Title"] = "Post Announcement";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-4 text-center">
+                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-3 rounded-circle mb-3">
+                        <i class="bi bi-megaphone fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-0">Post Announcement</h3>
+                    <p class="text-muted">Share important updates with your team.</p>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <form asp-action="Create" method="post">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Title</label>
+                            <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g., Holiday Schedule Update" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Message</label>
+                            <textarea asp-for="Content" class="form-control" rows="5" placeholder="Write your announcement here..." required></textarea>
+                            <span asp-validation-for="Content" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsPinned" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label fw-medium">
+                                    Pin this announcement to the top
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-send me-2"></i>Post Announcement
+                            </button>
+                            <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

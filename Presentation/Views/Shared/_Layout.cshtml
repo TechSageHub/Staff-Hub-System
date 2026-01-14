@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Employee Manager</title>
+    <title>@ViewData["Title"] - StaffHubSystem</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-people-fill me-2"></i>StaffHub
+                    <i class="bi bi-people-fill me-2"></i>StaffHubSystem
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -33,9 +33,18 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Employee" asp-action="Index">Employees</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Department" asp-action="Index">Departments</a>
-                            </li>
+                             <li class="nav-item">
+                                 <a class="nav-link" asp-controller="Department" asp-action="Index">Departments</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link" asp-controller="Leave" asp-action="Index">Leave Portal</a>
+                             </li>
+                             @if (User.IsInRole("Admin"))
+                             {
+                                 <li class="nav-item">
+                                     <a class="nav-link" asp-controller="Leave" asp-action="AdminDashboard">Approvals</a>
+                                 </li>
+                             }
                         }
                     </ul>
                     <ul class="navbar-nav">
@@ -79,7 +88,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    &copy; 2026 - StaffHub Manager - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">Privacy Policy</a>
+                    &copy; 2026 - StaffHubSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">Privacy Policy</a>
                 </div>
                 <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
                     <div class="social-links">

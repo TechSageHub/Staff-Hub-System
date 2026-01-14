@@ -310,4 +310,13 @@ public class EmployeeService : IEmployeeService
             }
         }
     }
+
+    public async Task<EmployeeDto?> GetEmployeeByUserIdAsync(string userId)
+    {
+        var employee = await _context.Employees
+            .Include(e => e.Department)
+            .FirstOrDefaultAsync(e => e.UserId == userId);
+            
+        return employee?.ToDto();
+    }
 }

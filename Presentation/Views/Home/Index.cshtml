@@ -11,7 +11,7 @@
         <div class="slideshow-image"></div>
         <div class="overlay"></div>
         <div class="hero-text text-start ps-5">
-            <h1 class="display-4 fw-bold mb-2">StaffHub Dashboard</h1>
+            <h1 class="display-4 fw-bold mb-2">StaffHubSystem Dashboard</h1>
             <p class="lead mb-0 opacity-75">Streamlined workforce management at your fingertips.</p>
         </div>
     </div>
@@ -103,15 +103,77 @@
                 <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 h-100">
                     <h5 class="fw-bold mb-3">Quick Actions</h5>
                     <div class="d-grid gap-3">
-                        <a asp-controller="Employee" asp-action="Create" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
-                            <i class="bi bi-person-plus me-2 text-primary"></i> Add New Employee
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Employee" asp-action="Create" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
+                                <i class="bi bi-person-plus me-2 text-primary"></i> Add New Employee
+                            </a>
+                            <a asp-controller="Department" asp-action="Create" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
+                                <i class="bi bi-building-plus me-2 text-primary"></i> New Department
+                            </a>
+                            <a asp-controller="Employee" asp-action="BulkUpload" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
+                                <i class="bi bi-cloud-upload me-2 text-primary"></i> Bulk Upload Data
+                            </a>
+                        }
+                        <a asp-controller="Leave" asp-action="Create" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
+                            <i class="bi bi-calendar-check me-2 text-primary"></i> Request Leave
                         </a>
-                        <a asp-controller="Department" asp-action="Create" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
-                            <i class="bi bi-building-plus me-2 text-primary"></i> New Department
-                        </a>
-                        <a asp-controller="Employee" asp-action="BulkUpload" class="btn btn-light text-start py-3 rounded-3 shadow-sm border-0">
-                            <i class="bi bi-cloud-upload me-2 text-primary"></i> Bulk Upload Data
-                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-megaphone me-2"></i>Company Announcements</h5>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Announcement" asp-action="Create" class="btn btn-sm btn-primary rounded-pill px-3">Post Announcement</a>
+                        }
+                    </div>
+                    <div class="card-body p-4">
+                        @{
+                            var announcements = ViewBag.Announcements as List<Application.Dtos.AnnouncementDto> ?? new List<Application.Dtos.AnnouncementDto>();
+                        }
+                        @if (!announcements.Any())
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-megaphone fs-1 opacity-25 d-block mb-2"></i>
+                                No announcements yet.
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var announcement in announcements)
+                            {
+                                <div class="alert alert-@(announcement.IsPinned ? "primary" : "light") border-0 shadow-sm mb-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">
+                                                @if (announcement.IsPinned)
+                                                {
+                                                    <i class="bi bi-pin-angle-fill me-1"></i>
+                                                }
+                                                @announcement.Title
+                                            </h6>
+                                            <p class="mb-2">@announcement.Content</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-person-circle me-1"></i>@announcement.AuthorName • 
+                                                <i class="bi bi-calendar3 me-1"></i>@announcement.DatePosted.ToString("MMM dd, yyyy")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="text-center mt-3">
+                                    <a asp-controller="Announcement" asp-action="Index" class="btn btn-light rounded-pill">Manage All Announcements</a>
+                                </div>
+                            }
+                        }
                     </div>
                 </div>
             </div>

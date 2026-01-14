@@ -15,6 +15,12 @@ public class EmployeeAppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Department> Departments { get; set; } = default!;
     public DbSet<EmployeeAddress> Addresses { get; set; }
     public DbSet<NigeriaState> States { get; set; }
+    public DbSet<LeaveRequest> LeaveRequests { get; set; }
+    public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
+    public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<AttendanceLog> AttendanceLogs { get; set; }
+    public DbSet<PerformanceAppraisal> PerformanceAppraisals { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

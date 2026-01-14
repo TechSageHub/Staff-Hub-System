@@ -9,5 +9,6 @@ namespace Application.Services.Employee
         Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId, string? userId = null);
         Task<EmployeeDto> UpdateEmployeeAsync(UpdateEmployeeDto employeeDto);
         Task DeleteImageAsync(Guid employeeId);
+        Task<EmployeeDto?> GetEmployeeByUserIdAsync(string userId);
     }
 }

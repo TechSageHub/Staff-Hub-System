@@ -1,0 +1,64 @@
+@model List<Application.Dtos.AnnouncementDto>
+@{
+    ViewData["Title"] = "Manage Announcements";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-0">Company Announcements</h2>
+            <p class="text-muted">Manage organization-wide communications.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>New Announcement
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-4 rounded-circle mb-3 mx-auto">
+                        <i class="bi bi-megaphone fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold">No Announcements Yet</h4>
+                    <p class="text-muted mb-3">Start communicating with your team by posting your first announcement.</p>
+                    <a asp-action="Create" class="btn btn-primary rounded-pill px-4">Create Announcement</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var announcement in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            @if (announcement.IsPinned)
+                            {
+                                <span class="badge bg-warning text-dark mb-2"><i class="bi bi-pin-angle-fill me-1"></i>Pinned</span>
+                            }
+                            <h5 class="fw-bold mb-2">@announcement.Title</h5>
+                            <p class="text-muted mb-3">@announcement.Content</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-person-circle me-1"></i>@announcement.AuthorName<br/>
+                                    <i class="bi bi-calendar3 me-1"></i>@announcement.DatePosted.ToString("MMM dd, yyyy")
+                                </small>
+                                <form asp-action="Delete" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@announcement.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this announcement?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

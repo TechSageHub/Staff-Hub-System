@@ -1,0 +1,72 @@
+@model List<Application.Dtos.LeaveRequestDto>
+@{
+    ViewData["Title"] = "Leave Approvals";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="fw-bold mb-0">Leave Approval Dashboard</h2>
+            <p class="text-muted">Review and process pending time-off requests from staff.</p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <div class="bg-success bg-opacity-10 text-success d-inline-block p-4 rounded-circle mb-3 mx-auto">
+                <i class="bi bi-check2-circle fs-1"></i>
+            </div>
+            <h4 class="fw-bold">All caught up!</h4>
+            <p class="text-muted mb-0">There are no pending leave requests to process.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var leave in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-3">
+                                    @leave.EmployeeName[0]
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h6 class="fw-bold mb-0 text-truncate">@leave.EmployeeName</h6>
+                                    <span class="badge bg-light text-dark border small fw-normal">@leave.LeaveType</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Period</div>
+                                <div class="fw-medium">@leave.StartDate.ToString("MMM dd") - @leave.EndDate.ToString("MMM dd, yyyy")</div>
+                                <div class="small text-muted">@leave.DurationInDays Days Requested</div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(leave.Reason))
+                            {
+                                <div class="mb-4">
+                                    <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Staff Reason</div>
+                                    <div class="bg-light p-2 rounded small">"@leave.Reason"</div>
+                                </div>
+                            }
+
+                            <form asp-action="Process" method="post">
+                                <input type="hidden" name="LeaveId" value="@leave.Id" />
+                                <div class="mb-3">
+                                    <input type="text" name="AdminComment" class="form-control form-control-sm" placeholder="Add optional comment..." />
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" name="Approved" value="true" class="btn btn-success flex-grow-1 rounded-pill">Approve</button>
+                                    <button type="submit" name="Approved" value="false" class="btn btn-outline-danger flex-grow-1 rounded-pill">Reject</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,67 @@
+@model Application.Dtos.CreateLeaveRequestDto
+@{
+    ViewData["Title"] = "Request Leave";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-4 text-center">
+                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-3 rounded-circle mb-3">
+                        <i class="bi bi-calendar-plus fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-0">Book Time Off</h3>
+                    <p class="text-muted">Enter your leave details below.</p>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <form asp-action="Create" method="post">
+                        <input type="hidden" asp-for="EmployeeId" />
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Leave Type</label>
+                            <select asp-for="LeaveType" class="form-select form-select-lg" required>
+                                <option value="Annual">Annual Leave</option>
+                                <option value="Sick">Sick Leave</option>
+                                <option value="Maternity/Paternity">Maternity/Paternity</option>
+                                <option value="Study">Study Leave</option>
+                                <option value="Compassionate">Compassionate</option>
+                            </select>
+                            <span asp-validation-for="LeaveType" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">Start Date</label>
+                                <input asp-for="StartDate" type="date" class="form-control form-control-lg" required />
+                                <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">End Date</label>
+                                <input asp-for="EndDate" type="date" class="form-control form-control-lg" required />
+                                <span asp-validation-for="EndDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Reason (Optional)</label>
+                            <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Briefly describe why you need this leave..."></textarea>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                Submit Request
+                            </button>
+                            <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

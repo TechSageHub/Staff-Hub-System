@@ -1,0 +1,94 @@
+@model List<Application.Dtos.LeaveRequestDto>
+@{
+    ViewData["Title"] = "My Leave History";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-0">My Leave Portal</h2>
+            <p class="text-muted">Manage your time off requests and track your balance.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Request Leave
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4">
+                <h6 class="text-uppercase small fw-bold opacity-75 mb-1">Annual Balance</h6>
+                <h2 class="fw-bold mb-0">@ViewBag.RemainingDays Days</h2>
+                <div class="mt-2 small opacity-75">Remaining for this year</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">Leave History</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Type</th>
+                            <th>Period</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Date Requested</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x fs-1 opacity-25 d-block mb-2"></i>
+                                    No leave requests found.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var leave in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-medium">@leave.LeaveType</span>
+                                    @if (!string.IsNullOrEmpty(leave.Reason))
+                                    {
+                                        <div class="small text-muted">@leave.Reason</div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="small fw-medium">@leave.StartDate.ToString("MMM dd") - @leave.EndDate.ToString("MMM dd, yyyy")</div>
+                                </td>
+                                <td>@leave.DurationInDays</td>
+                                <td>
+                                    @switch (leave.Status)
+                                    {
+                                        case "Approved":
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Approved</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Rejected</span>
+                                            break;
+                                        case "Pending":
+                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Pending</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">@leave.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-end pe-4 text-muted small">@leave.DateRequested.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

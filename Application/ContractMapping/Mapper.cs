@@ -252,4 +252,38 @@ public static class Mapper
             Employees = employees?.Select(d => d.ToDto()).ToList() ?? new List<EmployeeDto>()
         };
     }
+
+    public static LeaveRequestDto ToDto(this LeaveRequest leave)
+    {
+        if (leave == null) return null!;
+        return new LeaveRequestDto
+        {
+            Id = leave.Id,
+            EmployeeId = leave.EmployeeId,
+            EmployeeName = leave.Employee != null ? $"{leave.Employee.FirstName} {leave.Employee.LastName}" : "Unknown",
+            StartDate = leave.StartDate,
+            EndDate = leave.EndDate,
+            LeaveType = leave.LeaveType,
+            Reason = leave.Reason,
+            Status = leave.Status.ToString(),
+            DateRequested = leave.DateRequested,
+            AdminComment = leave.AdminComment
+        };
+    }
+
+    public static LeaveRequest ToModel(this CreateLeaveRequestDto dto)
+    {
+        if (dto == null) return null!;
+        return new LeaveRequest
+        {
+            Id = Guid.NewGuid(),
+            EmployeeId = dto.EmployeeId,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
+            LeaveType = dto.LeaveType,
+            Reason = dto.Reason,
+            Status = LeaveStatus.Pending,
+            DateRequested = DateTime.Now
+        };
+    }
 }
