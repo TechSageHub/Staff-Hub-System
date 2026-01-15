@@ -1,0 +1,176 @@
+@model List<Application.Dtos.AttendanceLogDto>
+@{
+    ViewData["Title"] = "My Attendance";
+    var todayAttendance = ViewBag.TodayAttendance as Application.Dtos.AttendanceLogDto;
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-0">Time & Attendance</h2>
+            <p class="text-muted">Track your work hours and attendance history.</p>
+        </div>
+    </div>
+
+    <!-- Clock In/Out Card -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                            <i class="bi bi-clock fs-2"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Today's Status</h5>
+                            <small class="text-muted">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</small>
+                        </div>
+                    </div>
+
+                    @if (todayAttendance == null)
+                    {
+                        <div class="alert alert-light border mb-3">
+                            <i class="bi bi-info-circle me-2"></i>You haven't clocked in yet today.
+                        </div>
+                        <form asp-action="ClockIn" method="post" class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-play-circle me-2"></i>Clock In
+                            </button>
+                        </form>
+                    }
+                    else if (todayAttendance.IsActive)
+                    {
+                        <div class="alert alert-success border-0 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="bi bi-check-circle me-2"></i>Clocked In</strong>
+                                    <div class="small mt-1">Started at @todayAttendance.ClockInTime.ToString("HH:mm")</div>
+                                </div>
+                                <div class="badge bg-success fs-6">Active</div>
+                            </div>
+                        </div>
+                        <form asp-action="ClockOut" method="post" class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-stop-circle me-2"></i>Clock Out
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info border-0 mb-3">
+                            <strong><i class="bi bi-check-circle-fill me-2"></i>Completed</strong>
+                            <div class="small mt-1">
+                                @todayAttendance.ClockInTime.ToString("HH:mm") - @todayAttendance.ClockOutTime?.ToString("HH:mm")
+                                <span class="badge bg-info ms-2">@todayAttendance.TotalHours</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-light btn-lg rounded-pill w-100" disabled>
+                            Day Complete
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4 text-white">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-calendar-week me-2"></i>This Month</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="small opacity-75">Days Worked</div>
+                                <h3 class="fw-bold mb-0">@Model.Count(a => a.ClockOutTime.HasValue)</h3>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="small opacity-75">Total Hours</div>
+                                <h3 class="fw-bold mb-0">@Model.Where(a => a.TotalHours != null).Count() * 8</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">Attendance History (Last 30 Days)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Date</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Total Hours</th>
+                            <th class="text-end pe-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x fs-1 opacity-25 d-block mb-2"></i>
+                                    No attendance records found.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-medium">@log.ClockInTime.ToString("MMM dd, yyyy")</span>
+                                    <div class="small text-muted">@log.ClockInTime.ToString("dddd")</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>@log.ClockInTime.ToString("HH:mm")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (log.ClockOutTime.HasValue)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">
+                                            <i class="bi bi-box-arrow-right me-1"></i>@log.ClockOutTime.Value.ToString("HH:mm")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning bg-opacity-10 text-warning">In Progress</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.TotalHours))
+                                    {
+                                        <span class="fw-medium">@log.TotalHours</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">--</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (log.IsActive)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border rounded-pill px-3">Complete</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
