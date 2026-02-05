@@ -31,6 +31,10 @@
           ContinueOnError="true"
           StandardOutputImportance="Low"
           StandardErrorImportance="Low" />
+    <Exec Command="taskkill /F /IM Presentation.exe /T"
+          ContinueOnError="true"
+          StandardOutputImportance="Low"
+          StandardErrorImportance="Low" />
   </Target>
 
 </Project>
