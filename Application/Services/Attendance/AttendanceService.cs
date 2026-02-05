@@ -107,4 +107,41 @@ public class AttendanceService(EmployeeAppDbContext _context) : IAttendanceServi
             Notes = log.Notes
         }).ToList();
     }
+
+    public async Task<List<AttendanceLogDto>> GetAllAttendanceAsync(DateTime? from = null, DateTime? to = null, Guid? employeeId = null)
+    {
+        var query = _context.AttendanceLogs
+            .Include(a => a.Employee)
+            .AsQueryable();
+
+        if (employeeId.HasValue)
+        {
+            query = query.Where(a => a.EmployeeId == employeeId.Value);
+        }
+
+        if (from.HasValue)
+        {
+            query = query.Where(a => a.ClockInTime.Date >= from.Value.Date);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(a => a.ClockInTime.Date <= to.Value.Date);
+        }
+
+        var logs = await query
+            .OrderByDescending(a => a.ClockInTime)
+            .ToListAsync();
+
+        return logs.Select(log => new AttendanceLogDto
+        {
+            Id = log.Id,
+            EmployeeId = log.EmployeeId,
+            EmployeeName = $"{log.Employee.FirstName} {log.Employee.LastName}",
+            ClockInTime = log.ClockInTime,
+            ClockOutTime = log.ClockOutTime,
+            TotalHours = log.TotalHours.HasValue ? $"{log.TotalHours.Value.Hours}h {log.TotalHours.Value.Minutes}m" : null,
+            Notes = log.Notes
+        }).ToList();
+    }
 }

@@ -13,7 +13,7 @@ public class EmployeeDto
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; } = default!;
+    public Guid? DepartmentId { get; set; }
     public string DepartmentName { get; set; }
     public string? ImageUrl { get; set; }
     public string? Street { get; set; }
@@ -36,7 +36,7 @@ public class  CreateEmployeeDto
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; } = default!;
+    public Guid? DepartmentId { get; set; }
     public IFormFile? Photo { get; set; }
     public string? UserId { get; set; }
 
@@ -56,7 +56,7 @@ public class  UpdateEmployeeDto
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; } = default!;
+    public Guid? DepartmentId { get; set; }
     public IFormFile? Photo { get; set; }
     public string? ImageUrl { get; set; }
     public string? Street { get; set; }

@@ -28,10 +28,10 @@ public class AnnouncementController(IAnnouncementService _announcementService, I
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateAnnouncementDto dto)
     {
-        if (!ModelState.IsValid) return View(dto);
-
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         dto.AuthorId = userId!;
+
+        if (!ModelState.IsValid) return View(dto);
 
         await _announcementService.CreateAnnouncementAsync(dto);
         _notyf.Success("Announcement posted successfully!");

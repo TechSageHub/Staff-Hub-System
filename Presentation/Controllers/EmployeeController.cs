@@ -49,6 +49,18 @@ public class EmployeeController : BaseController
         return View(viewModel);
     }
 
+    public async Task<IActionResult> MyProfile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var self = await _employeeService.GetEmployeeByUserIdAsync(userId!);
+        if (self == null)
+        {
+            return RedirectToAction("EditProfile", "Account");
+        }
+
+        return RedirectToAction(nameof(Details), new { id = self.Id });
+    }
+
     public async Task<IActionResult> Details(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -115,7 +127,7 @@ public class EmployeeController : BaseController
             Gender = model.Gender,
             PhoneNumber = model.PhoneNumber,
             Photo = model.Photo,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            UserId = null,
             Street = model.Street,
             City = model.City,
             State = model.State,

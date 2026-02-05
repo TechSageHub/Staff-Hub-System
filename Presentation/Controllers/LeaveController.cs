@@ -16,6 +16,11 @@ public class LeaveController(
 {
     public async Task<IActionResult> Index()
     {
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction(nameof(AdminDashboard));
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var employee = await _employeeService.GetEmployeeByUserIdAsync(userId!);
         
@@ -77,10 +82,11 @@ public class LeaveController(
     }
 
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AdminDashboard()
+    public async Task<IActionResult> AdminDashboard(string? status)
     {
-        var pendingRequests = await _leaveService.GetAllPendingRequestsAsync();
-        return View(pendingRequests);
+        var requests = await _leaveService.GetAllLeaveRequestsAsync(status);
+        ViewBag.SelectedStatus = string.IsNullOrWhiteSpace(status) ? "all" : status;
+        return View(requests);
     }
 
     [HttpPost]
@@ -91,7 +97,7 @@ public class LeaveController(
         var result = await _leaveService.ProcessLeaveRequestAsync(dto);
         if (result)
         {
-            _notyf.Success(dto.Approved ? "Leave approved!" : "Leave rejected.");
+            _notyf.Success($"Leave marked as {dto.Status}.");
         }
         else
         {

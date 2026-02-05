@@ -27,6 +27,6 @@ public class CreateLeaveRequestDto
 public class LeaveApprovalDto
 {
     public Guid LeaveId { get; set; }
-    public bool Approved { get; set; }
+    public string Status { get; set; } = default!;
     public string? AdminComment { get; set; }
 }

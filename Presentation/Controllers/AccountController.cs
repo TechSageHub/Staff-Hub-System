@@ -243,12 +243,12 @@ namespace Presentation.Controllers
         public async Task<IActionResult> EditProfile()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var employees = await _employeeService.GetAllEmployeesAsync(userId);
-            var employee = employees.Employees.FirstOrDefault();
+            var employee = await _employeeService.GetEmployeeByUserIdAsync(userId!);
+            var user = await _userManager.FindByIdAsync(userId!);
 
             var model = new EditProfileViewModel
             {
-                Email = User.Identity?.Name ?? ""
+                Email = user?.Email ?? User.Identity?.Name ?? ""
             };
 
             if (employee != null)
@@ -280,6 +280,7 @@ namespace Presentation.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId!);
             string? imageUrl = model.ImageUrl;
 
             if (model.Photo != null && model.Photo.Length > 0)
@@ -295,7 +296,7 @@ namespace Presentation.Controllers
                     Id = model.EmployeeId.Value,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Email = model.Email,
+                    Email = user?.Email ?? model.Email,
                     ImageUrl = imageUrl,
                     Gender = model.Gender,
                     PhoneNumber = model.PhoneNumber,
@@ -328,7 +329,7 @@ namespace Presentation.Controllers
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Email = model.Email,
+                    Email = user?.Email ?? model.Email,
                     UserId = userId,
                     Gender = model.Gender,
                     PhoneNumber = model.PhoneNumber,
@@ -337,7 +338,7 @@ namespace Presentation.Controllers
                     State = model.State,
                     Country = model.Country,
                     // Admins might not have a department, or we use a default
-                    DepartmentId = Guid.Empty, 
+                    DepartmentId = null, 
                     HireDate = DateTime.Now,
                     Salary = 0
                 };

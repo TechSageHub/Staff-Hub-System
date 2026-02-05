@@ -10,8 +10,8 @@ public class Employee
     public decimal Salary { get; set; }  
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; }
-    public Department Department { get; set; } = default!;
+    public Guid? DepartmentId { get; set; }
+    public Department? Department { get; set; }
     public string? ImageUrl { get; set; }
     public string? UserId { get; set; }
     public EmployeeAddress? Address { get; set; }

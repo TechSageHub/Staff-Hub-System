@@ -16,6 +16,13 @@ public class AttendanceController(
 {
     public async Task<IActionResult> Index()
     {
+        if (User.IsInRole("Admin"))
+        {
+            var employees = await _employeeService.GetAllEmployeesAsync();
+            ViewBag.Employees = employees.Employees;
+            return View("Admin", await _attendanceService.GetAllAttendanceAsync());
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var employee = await _employeeService.GetEmployeeByUserIdAsync(userId!);
 
@@ -30,6 +37,20 @@ public class AttendanceController(
 
         ViewBag.TodayAttendance = todayAttendance;
         return View(history);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> Admin(DateTime? from, DateTime? to, Guid? employeeId)
+    {
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        ViewBag.Employees = employees.Employees;
+
+        var logs = await _attendanceService.GetAllAttendanceAsync(from, to, employeeId);
+        ViewBag.From = from;
+        ViewBag.To = to;
+        ViewBag.EmployeeId = employeeId;
+        return View("Admin", logs);
     }
 
     [HttpPost]

@@ -14,6 +14,6 @@ public class CreateAnnouncementDto
 {
     public string Title { get; set; } = default!;
     public string Content { get; set; } = default!;
-    public string AuthorId { get; set; } = default!;
+    public string? AuthorId { get; set; }
     public bool IsPinned { get; set; } = false;
 }

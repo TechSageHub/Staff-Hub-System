@@ -53,33 +53,59 @@ public class EmployeeService : IEmployeeService
                 return null;
             }
 
-            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-            if (existingUser != null)
-            {
-                return null;
-            }
-
-            // Create Identity User for the employee
-            var tempPassword = GenerateTempPassword();
-            var user = new IdentityUser
-            {
-                UserName = dto.Email,
-                Email = dto.Email,
-                EmailConfirmed = true
-            };
+            IdentityUser? user = null;
+            var isExistingIdentityUser = !string.IsNullOrWhiteSpace(dto.UserId);
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
-            var createUserResult = await _userManager.CreateAsync(user, tempPassword);
-            if (!createUserResult.Succeeded)
-            {
-                return null;
-            }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "User");
-            if (!roleResult.Succeeded)
+            if (isExistingIdentityUser)
             {
-                await _userManager.DeleteAsync(user);
-                return null;
+                user = await _userManager.FindByIdAsync(dto.UserId!);
+                if (user == null)
+                {
+                    return null;
+                }
+
+                if (!await _userManager.IsInRoleAsync(user, "User"))
+                {
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, "User");
+                    if (!addRoleResult.Succeeded)
+                    {
+                        return null;
+                    }
+                }
+
+                dto.Email = user.Email ?? dto.Email;
+            }
+            else
+            {
+                var existingUserByEmail = await _userManager.FindByEmailAsync(dto.Email);
+                if (existingUserByEmail != null)
+                {
+                    return null;
+                }
+
+                // Create Identity User for the employee
+                var tempPassword = GenerateTempPassword();
+                user = new IdentityUser
+                {
+                    UserName = dto.Email,
+                    Email = dto.Email,
+                    EmailConfirmed = true
+                };
+
+                var createUserResult = await _userManager.CreateAsync(user, tempPassword);
+                if (!createUserResult.Succeeded)
+                {
+                    return null;
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                if (!roleResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return null;
+                }
             }
 
             var employee = dto.ToModel();
@@ -110,35 +136,38 @@ public class EmployeeService : IEmployeeService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            // Send Onboarding Email with password reset link
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var request = _httpContextAccessor.HttpContext?.Request;
-            var baseUrl = request == null ? string.Empty : $"{request.Scheme}://{request.Host}";
-            var resetLink = string.IsNullOrEmpty(baseUrl)
-                ? "#"
-                : $"{baseUrl}/Account/ResetPassword?email={dto.Email}&token={encodedToken}";
+            if (!isExistingIdentityUser)
+            {
+                // Send Onboarding Email with password reset link
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var request = _httpContextAccessor.HttpContext?.Request;
+                var baseUrl = request == null ? string.Empty : $"{request.Scheme}://{request.Host}";
+                var resetLink = string.IsNullOrEmpty(baseUrl)
+                    ? "#"
+                    : $"{baseUrl}/Account/ResetPassword?email={dto.Email}&token={encodedToken}";
 
-            var subject = "Welcome to StaffHub - Set Your Password";
-            var body = $@"
-                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;'>
-                    <h2 style='color: #0d6efd;'>Welcome to the Team, {dto.FirstName}!</h2>
-                    <p>Hi {dto.FirstName},</p>
-                    <p>Your employee account has been created in the <strong>StaffHub</strong> portal.</p>
+                var subject = "Welcome to StaffHub - Set Your Password";
+                var body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;'>
+                        <h2 style='color: #0d6efd;'>Welcome to the Team, {dto.FirstName}!</h2>
+                        <p>Hi {dto.FirstName},</p>
+                        <p>Your employee account has been created in the <strong>StaffHub</strong> portal.</p>
 
-                    <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
-                        <h4 style='margin-top: 0;'>Your Login Username:</h4>
-                        <p style='margin-bottom: 0;'><strong>Email/Username:</strong> {dto.Email}</p>
-                    </div>
+                        <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                            <h4 style='margin-top: 0;'>Your Login Username:</h4>
+                            <p style='margin-bottom: 0;'><strong>Email/Username:</strong> {dto.Email}</p>
+                        </div>
 
-                    <p>For security, please set your password using the link below:</p>
-                    <a href='{resetLink}' style='display: inline-block; background-color: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;'>Set Password</a>
+                        <p>For security, please set your password using the link below:</p>
+                        <a href='{resetLink}' style='display: inline-block; background-color: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;'>Set Password</a>
 
-                    <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
-                    <p style='font-size: 12px; color: #777;'>Sent from StaffHub Employee Management System.</p>
-                </div>";
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                        <p style='font-size: 12px; color: #777;'>Sent from StaffHub Employee Management System.</p>
+                    </div>";
 
-            await _emailService.SendEmailAsync(dto.Email, subject, body);
+                await _emailService.SendEmailAsync(dto.Email, subject, body);
+            }
 
             return employee.ToDto();
         }
@@ -200,6 +229,12 @@ public class EmployeeService : IEmployeeService
         if (!isAdmin && !string.IsNullOrEmpty(userId))
         {
             query = query.Where(e => e.UserId == userId);
+        }
+        else if (isAdmin)
+        {
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminIds = admins.Select(a => a.Id).ToHashSet(StringComparer.Ordinal);
+            query = query.Where(e => e.UserId == null || !adminIds.Contains(e.UserId));
         }
 
         var employees = await query.ToListAsync();

@@ -1,12 +1,13 @@
 using Application.Dtos;
 using Data.Context;
 using Data.Model;
+using Application.Services.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Announcement;
 
-public class AnnouncementService(EmployeeAppDbContext _context, UserManager<IdentityUser> _userManager) : IAnnouncementService
+public class AnnouncementService(EmployeeAppDbContext _context, UserManager<IdentityUser> _userManager, IEmailService _emailService) : IAnnouncementService
 {
     public async Task<AnnouncementDto> CreateAnnouncementAsync(CreateAnnouncementDto dto)
     {
@@ -24,6 +25,25 @@ public class AnnouncementService(EmployeeAppDbContext _context, UserManager<Iden
         await _context.SaveChangesAsync();
 
         var author = await _userManager.FindByIdAsync(dto.AuthorId);
+
+        var recipients = await _userManager.Users
+            .Where(u => !string.IsNullOrEmpty(u.Email))
+            .Select(u => u.Email!)
+            .ToListAsync();
+
+        var subject = $"Announcement: {announcement.Title}";
+        var body = $@"
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;'>
+                <h2 style='color: #0d6efd;'>{announcement.Title}</h2>
+                <p>{announcement.Content}</p>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                <p style='font-size: 12px; color: #777;'>Sent from StaffHub Employee Management System.</p>
+            </div>";
+
+        foreach (var email in recipients)
+        {
+            await _emailService.SendEmailAsync(email, subject, body);
+        }
         
         return new AnnouncementDto
         {

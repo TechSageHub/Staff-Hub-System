@@ -41,7 +41,7 @@ namespace Data.Configurations
             builder.HasOne(e => e.Department)
                    .WithMany(d => d.Employees)
                    .HasForeignKey(e => e.DepartmentId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(e => e.Address)
                    .WithOne(a => a.Employee)

@@ -14,7 +14,7 @@ namespace Presentation.Models
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
         public string DepartmentName { get; set; }
         public string? ImageUrl { get; set; }
         public AddressViewModel? Address { get; set; }
@@ -30,7 +30,7 @@ namespace Presentation.Models
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
         public List<SelectListItem> Departments { get; set; } = new();
         public IFormFile? Photo { get; set; }
 
@@ -53,7 +53,7 @@ namespace Presentation.Models
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
         public List<SelectListItem> Departments { get; set; } = new();
         public IFormFile? Photo { get; set; }
         public string? ImageUrl { get; set; }

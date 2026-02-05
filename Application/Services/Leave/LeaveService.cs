@@ -37,23 +37,43 @@ public class LeaveService(EmployeeAppDbContext _context, ILogger<LeaveService> _
         return leaves.Select(l => l.ToDto()).ToList();
     }
 
+    public async Task<List<LeaveRequestDto>> GetAllLeaveRequestsAsync(string? status = null)
+    {
+        IQueryable<LeaveRequest> query = _context.LeaveRequests.Include(l => l.Employee);
+
+        if (!string.IsNullOrWhiteSpace(status) && !string.Equals(status, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Enum.TryParse<LeaveStatus>(status, true, out var parsedStatus))
+            {
+                query = query.Where(l => l.Status == parsedStatus);
+            }
+        }
+
+        var leaves = await query
+            .OrderByDescending(l => l.DateRequested)
+            .ToListAsync();
+
+        return leaves.Select(l => l.ToDto()).ToList();
+    }
+
     public async Task<List<LeaveRequestDto>> GetAllPendingRequestsAsync()
     {
-        var leaves = await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Where(l => l.Status == LeaveStatus.Pending)
-            .OrderBy(l => l.DateRequested)
-            .ToListAsync();
-            
-        return leaves.Select(l => l.ToDto()).ToList();
+        return await GetAllLeaveRequestsAsync(LeaveStatus.Pending.ToString());
     }
 
     public async Task<bool> ProcessLeaveRequestAsync(LeaveApprovalDto approvalDto)
     {
         var leave = await _context.LeaveRequests.FindAsync(approvalDto.LeaveId);
         if (leave == null) return false;
-        
-        leave.Status = approvalDto.Approved ? LeaveStatus.Approved : LeaveStatus.Rejected;
+
+        if (leave.Status != LeaveStatus.Pending) return false;
+
+        if (!Enum.TryParse<LeaveStatus>(approvalDto.Status, true, out var parsedStatus))
+        {
+            return false;
+        }
+
+        leave.Status = parsedStatus;
         leave.AdminComment = approvalDto.AdminComment;
         
         await _context.SaveChangesAsync();
