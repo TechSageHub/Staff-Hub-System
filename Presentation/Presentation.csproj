@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <KillLockedPresentationProcessBeforeBuild Condition="'$(KillLockedPresentationProcessBeforeBuild)' == ''">true</KillLockedPresentationProcessBeforeBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,5 +23,14 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
+
+  <Target Name="KillPresentationProcessBeforeBuild"
+          BeforeTargets="Build"
+          Condition="'$(OS)' == 'Windows_NT' and '$(KillLockedPresentationProcessBeforeBuild)' == 'true'">
+    <Exec Command="taskkill /F /IM Presentation.exe /T"
+          ContinueOnError="true"
+          StandardOutputImportance="Low"
+          StandardErrorImportance="Low" />
+  </Target>
 
 </Project>
