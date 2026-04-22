@@ -1,487 +1,157 @@
 @using Application.Dtos
 @{
     ViewData["Title"] = "Dashboard";
-    var recentEmployees = ViewBag.RecentEmployees as List<EmployeeDto> ?? new List<EmployeeDto>();
+    var myEmployee = ViewBag.MyEmployee as EmployeeDto;
+    int? leaveBalance = ViewBag.LeaveBalance as int?;
+    var todayAttendance = ViewBag.TodayAttendance as AttendanceLogDto;
     var announcements = ViewBag.Announcements as List<AnnouncementDto> ?? new List<AnnouncementDto>();
+
+    string DisplayName()
+    {
+        if (myEmployee != null) return $"{myEmployee.FirstName} {myEmployee.LastName}".Trim();
+        var name = User.Identity?.Name ?? "there";
+        var at = name.IndexOf('@');
+        return at > 0 ? name.Substring(0, at) : name;
+    }
 }
 
-<style>
-    .dashboard-hero {
-        background: linear-gradient(135deg, #0b5ed7 0%, #0dcaf0 55%, #20c997 100%);
-        color: #fff;
-    }
-    .dashboard-hero .muted {
-        color: rgba(255, 255, 255, 0.75);
-    }
-    .kpi-card {
-        border: 1px solid rgba(13, 110, 253, 0.08);
-    }
-    .kpi-icon {
-        width: 44px;
-        height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 14px;
-    }
-    .section-title {
-        letter-spacing: 0.04em;
-    }
-    .panel {
-        border: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    .action-tile {
-        border: 1px solid rgba(13, 110, 253, 0.12);
-    }
-</style>
-
-<div class="container-fluid px-0">
-    <div class="card-premium border-0 shadow-lg p-4 p-md-5 mb-5 overflow-hidden position-relative" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
-        <div class="position-absolute top-0 end-0 p-5 opacity-10 d-none d-lg-block">
-            <i class="bi bi-grid-3x3-gap" style="font-size: 10rem;"></i>
+@if (User.Identity!.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <partial name="_AdminDashboard" />
+}
+else
+{
+    <div class="sh-page-header">
+        <div>
+            <h1 class="sh-page-title">Hi @DisplayName() &#128075;</h1>
+            <p class="sh-page-subtitle">Here's what's happening across your workspace today.</p>
         </div>
-        <div class="position-relative z-1">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
-                <div>
-                    <h1 class="display-5 fw-bold text-white mb-2">System <span class="text-primary-light">Dashboard</span></h1>
-                    <p class="text-white opacity-75 fs-5 mb-0">Manage your workforce easily and quickly.</p>
-                </div>
-                <div class="d-flex gap-3">
-                    <div class="bg-white bg-opacity-10 backdrop-blur rounded-3 px-3 py-2 text-white border border-white border-opacity-10">
-                        <i class="bi bi-shield-check me-2 text-success"></i><span class="small fw-bold">Secure Access</span>
-                    </div>
-                    <div class="bg-white bg-opacity-10 backdrop-blur rounded-3 px-3 py-2 text-white border border-white border-opacity-10">
-                        <i class="bi bi-lightning-charge me-2 text-warning"></i><span class="small fw-bold">v2.4.0</span>
-                    </div>
-                </div>
+        <div class="sh-page-actions">
+            <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="EditProfile">
+                <i class="bi bi-person-gear"></i> Profile
+            </a>
+            <a class="btn btn-primary" asp-controller="Leave" asp-action="Create">
+                <i class="bi bi-calendar-plus"></i> Request leave
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-stat-grid">
+        <div class="admin-stat-card success">
+            <div class="admin-stat-icon"><i class="bi bi-calendar2-heart"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@(leaveBalance?.ToString() ?? "—")</div>
+                <div class="admin-stat-label">Days of leave remaining</div>
+            </div>
+        </div>
+        <div class="admin-stat-card info">
+            <div class="admin-stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="admin-stat-content">
+                @if (todayAttendance == null)
+                {
+                    <div class="admin-stat-value">Not clocked in</div>
+                    <div class="admin-stat-label">Head to attendance when you start your day</div>
+                }
+                else if (todayAttendance.IsActive)
+                {
+                    <div class="admin-stat-value">@todayAttendance.ClockInTime.ToLocalTime().ToString("HH:mm")</div>
+                    <div class="admin-stat-label">Clocked in today</div>
+                }
+                else
+                {
+                    <div class="admin-stat-value">@todayAttendance.TotalHours</div>
+                    <div class="admin-stat-label">Hours logged today</div>
+                }
+            </div>
+        </div>
+        <div class="admin-stat-card @(myEmployee?.IsOnboardingComplete == true ? "success" : "warning")">
+            <div class="admin-stat-icon"><i class="bi bi-clipboard-check"></i></div>
+            <div class="admin-stat-content">
+                @if (myEmployee?.IsOnboardingComplete == true)
+                {
+                    <div class="admin-stat-value">Complete</div>
+                    <div class="admin-stat-label">Your profile is fully onboarded</div>
+                }
+                else
+                {
+                    <div class="admin-stat-value">In progress</div>
+                    <div class="admin-stat-label"><a asp-controller="Onboarding" asp-action="Index">Finish your onboarding</a></div>
+                }
+            </div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon"><i class="bi bi-building"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@(string.IsNullOrWhiteSpace(myEmployee?.DepartmentName) ? "—" : myEmployee!.DepartmentName)</div>
+                <div class="admin-stat-label">Your department</div>
             </div>
         </div>
     </div>
 
-    @if (User.Identity!.IsAuthenticated)
-    {
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
-                <div>
-                    <h5 class="text-muted small text-uppercase ls-wide fw-bold mb-1">Admin</h5>
-                    <h2 class="fw-bold mb-0">Summary</h2>
-                </div>
-                <a asp-controller="Announcement" asp-action="Create" class="btn btn-premium btn-premium-primary">
-                    <i class="bi bi-plus-lg"></i> Post News
-                </a>
-            </div>
-
-            <div class="row g-4 mb-5">
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <h6 class="text-muted small text-uppercase fw-bold mb-3 ls-wide">Employees</h6>
-                                <h2 class="display-6 fw-bold mb-2">@ViewBag.TotalEmployees</h2>
-                                <p class="text-success small mb-0 fw-bold"><i class="bi bi-arrow-up-short"></i> +2% this month</p>
-                            </div>
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 text-primary">
-                                <i class="bi bi-people fs-3"></i>
-                            </div>
-                        </div>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Announcements</h2>
+                        <div class="sh-card-subtitle">The latest from your HR team.</div>
                     </div>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Announcement" asp-action="Index">View all</a>
                 </div>
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4 border-start border-4 border-info">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <h6 class="text-muted small text-uppercase fw-bold mb-3 ls-wide">Departments</h6>
-                                <h2 class="display-6 fw-bold mb-2">@ViewBag.TotalDepartments</h2>
-                                <p class="text-muted small mb-0">Active working groups</p>
-                            </div>
-                            <div class="bg-info bg-opacity-10 p-3 rounded-3 text-info">
-                                <i class="bi bi-building fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4 border-start border-4 border-success">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <h6 class="text-muted small text-uppercase fw-bold mb-3 ls-wide">Server Status</h6>
-                                <h2 class="display-6 fw-bold mb-2">99.9%</h2>
-                                <p class="text-success small mb-0 fw-bold"><i class="bi bi-check-circle-fill me-1"></i>All systems working</p>
-                            </div>
-                            <div class="bg-success bg-opacity-10 p-3 rounded-3 text-success">
-                                <i class="bi bi-activity fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="row g-4 mb-5">
-                <div class="col-lg-8">
-                    <div class="card-premium h-100 overflow-hidden">
-                        <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-50">
-                            <div>
-                                <h5 class="fw-bold mb-0">New Employees</h5>
-                                <p class="text-muted small mb-0">Latest additions to the team</p>
-                            </div>
-                            <a asp-controller="Employee" asp-action="Index" class="btn btn-sm btn-outline-secondary px-3">Full Directory</a>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table-modern mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Unit</th>
-                                        <th class="text-end">Joined</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (!recentEmployees.Any())
-                                    {
-                                        <tr>
-                                            <td colspan="3" class="text-center py-5 text-muted">No recent data available.</td>
-                                        </tr>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var emp in recentEmployees)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-3">
-                                                        <div class="avatar-sm bg-primary-light bg-opacity-10 text-primary-light rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                                                            @emp.FirstName[0]@emp.LastName[0]
-                                                        </div>
-                                                        <div>
-                                                            <div class="fw-bold">@emp.FirstName @emp.LastName</div>
-                                                            <div class="text-muted small">@emp.Email</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><span class="badge bg-light text-dark border-0 px-3 py-2">@emp.DepartmentName</span></td>
-                                                <td class="text-end text-muted fw-medium">@emp.HireDate.ToString("dd MMM yyyy")</td>
-                                            </tr>
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card-premium h-100 p-4">
-                        <h5 class="fw-bold mb-4">Quick Actions</h5>
-                        <div class="d-grid gap-3">
-                            <a asp-controller="Employee" asp-action="Create" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                                        <i class="bi bi-person-plus"></i>
-                                    </div>
-                                    <span class="fw-bold">Add Employee</span>
-                                </div>
-                            </a>
-                            <a asp-controller="Department" asp-action="Create" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-info bg-opacity-10 p-2 rounded text-info">
-                                        <i class="bi bi-building-add"></i>
-                                    </div>
-                                    <span class="fw-bold">Add Department</span>
-                                </div>
-                            </a>
-                            <a asp-controller="Employee" asp-action="BulkUpload" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-warning bg-opacity-10 p-2 rounded text-warning">
-                                        <i class="bi bi-cloud-upload"></i>
-                                    </div>
-                                    <span class="fw-bold">Bulk Upload</span>
-                                </div>
-                            </a>
-                            <a asp-controller="Leave" asp-action="AdminDashboard" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-danger bg-opacity-10 p-2 rounded text-danger">
-                                        <i class="bi bi-clipboard-data"></i>
-                                    </div>
-                                    <span class="fw-bold">Leave Management</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="card-premium mb-5">
-                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-megaphone me-2 text-primary"></i>Announcements</h5>
-                    <a asp-controller="Announcement" asp-action="Index" class="btn btn-sm btn-outline-primary px-3">Manage News</a>
-                </div>
-                <div class="p-4">
+                <div class="sh-card-body">
                     @if (!announcements.Any())
                     {
-                        <div class="text-center py-5 text-muted opacity-50">
-                            <i class="bi bi-megaphone-fill display-4 mb-3"></i>
-                            <p class="fw-bold mb-0">No active broadcasts</p>
-                            <small>Announcements will appear here once posted.</small>
+                        <div class="sh-empty">
+                            <div class="sh-empty-icon"><i class="bi bi-megaphone"></i></div>
+                            <div class="sh-empty-title">No announcements yet</div>
+                            <p class="sh-empty-text">New announcements from HR will appear here.</p>
                         </div>
                     }
                     else
                     {
-                        <div class="row g-4">
-                            @foreach (var announcement in announcements.Take(3))
-                            {
-                                <div class="col-md-4">
-                                    <div class="bg-light bg-opacity-50 p-4 rounded-4 h-100 position-relative border transition-all hover-shadow-sm">
-                                        @if (announcement.IsPinned)
-                                        {
-                                            <span class="position-absolute top-0 end-0 m-3 badge bg-primary bg-opacity-10 text-primary border-0"><i class="bi bi-pin-angle-fill"></i></span>
-                                        }
-                                        <h6 class="fw-bold mb-2">@announcement.Title</h6>
-                                        <p class="text-muted small mb-3 text-truncate-2">@announcement.Content</p>
-                                        <div class="d-flex align-items-center gap-2 mt-auto">
-                                            <div class="avatar-sm bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 24px; height: 24px; font-size: 10px;">
-                                                @announcement.AuthorName[0]
-                                            </div>
-                                            <span class="text-muted" style="font-size: 0.75rem;">@announcement.DatePosted.ToString("MMM dd")</span>
-                                        </div>
-                                    </div>
+                        foreach (var a in announcements)
+                        {
+                            <div class="border-bottom pb-3 mb-3" style="border-color: var(--sh-border) !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    @if (a.IsPinned)
+                                    {
+                                        <span class="sh-badge sh-badge-warning"><i class="bi bi-pin-angle"></i> Pinned</span>
+                                    }
+                                    <span class="text-muted small">@a.DatePosted.ToLocalTime().ToString("MMM dd, yyyy")</span>
                                 </div>
-                            }
-                        </div>
+                                <h3 style="font-size:15px; font-weight:600; margin:0 0 4px;">@a.Title</h3>
+                                <p class="text-muted small mb-1" style="white-space:pre-wrap;">@a.Content</p>
+                                <div class="text-muted" style="font-size:11px;">&mdash; @a.AuthorName</div>
+                            </div>
+                        }
                     }
                 </div>
             </div>
-
-        }
-        else
-        {
-            var myEmployee = ViewBag.MyEmployee as EmployeeDto;
-            var leaveBalance = ViewBag.LeaveBalance as int? ?? 0;
-            var todayAttendance = ViewBag.TodayAttendance as AttendanceLogDto;
-
-            <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
-                <div>
-                    <h5 class="text-muted small text-uppercase ls-wide fw-bold mb-1">Employee Menu</h5>
-                    <h2 class="fw-bold mb-0">My Dashboard</h2>
+        </div>
+        <div class="col-lg-5">
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <h2 class="sh-card-title">Quick actions</h2>
                 </div>
-                <a asp-controller="Leave" asp-action="Create" class="btn btn-premium btn-premium-primary">
-                    <i class="bi bi-calendar2-plus"></i> Request Leave
-                </a>
-            </div>
-
-            <div class="row g-4 mb-5">
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4">
-                        <div class="d-flex align-items-center gap-4">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                                <i class="bi bi-person-badge fs-3"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted small text-uppercase fw-bold mb-1 ls-wide">Joined</h6>
-                                <div class="fw-bold fs-5">@((myEmployee == null) ? "Active Member" : myEmployee.HireDate.ToString("MMMM yyyy"))</div>
-                                <div class="mt-2">
-                                    <a asp-controller="Employee" asp-action="MyProfile" class="text-primary-light small text-decoration-none fw-bold">View My Profile <i class="bi bi-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4 border-start border-4 border-info">
-                        <div class="d-flex align-items-center gap-4">
-                            <div class="bg-info bg-opacity-10 p-3 rounded-circle text-info">
-                                <i class="bi bi-calendar-check fs-3"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted small text-uppercase fw-bold mb-1 ls-wide">Leave Credit</h6>
-                                <div class="fs-2 fw-bold">@leaveBalance <span class="fs-6 text-muted fw-normal">days available</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card-premium h-100 p-4 border-start border-4 border-success">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="flex-grow-1">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-1 ls-wide">Attendance Stat</h6>
-                                <div class="fw-bold fs-5 mt-2">
-                                    @if (todayAttendance?.ClockOutTime != null)
-                                    {
-                                        <span class="text-success"><i class="bi bi-check-all me-1"></i> Shift Completed</span>
-                                    }
-                                    else if (todayAttendance != null)
-                                    {
-                                        <span class="text-primary"><i class="bi bi-clock-history me-1"></i> Currently Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted"><i class="bi bi-slash-circle me-1"></i> Not Plogged</span>
-                                    }
-                                </div>
-                                <div class="mt-2">
-                                    <a asp-controller="Attendance" asp-action="Index" class="text-success small text-decoration-none fw-bold">Track Today <i class="bi bi-arrow-right"></i></a>
-                                </div>
-                            </div>
-                            <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
-                                <i class="bi bi-calendar3-range fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="row g-4 mb-5">
-                <div class="col-lg-4">
-                    <div class="card-premium h-100 p-4">
-                        <h5 class="fw-bold mb-4">Workflow Actions</h5>
-                        <div class="d-grid gap-3">
-                            <a asp-controller="Attendance" asp-action="Index" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                                        <i class="bi bi-clock-history"></i>
-                                    </div>
-                                    <span class="fw-bold">Daily Time Log</span>
-                                </div>
-                            </a>
-                            <a asp-controller="Leave" asp-action="Index" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-info bg-opacity-10 p-2 rounded text-info">
-                                        <i class="bi bi-calendar-range"></i>
-                                    </div>
-                                    <span class="fw-bold">Absence Planner</span>
-                                </div>
-                            </a>
-                            <a asp-controller="Announcement" asp-action="Index" class="btn btn-light text-start p-3 border-0 transition-all hover-translate-x" style="background: #f8fafc;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-warning bg-opacity-10 p-2 rounded text-warning">
-                                        <i class="bi bi-megaphone"></i>
-                                    </div>
-                                    <span class="fw-bold">Announcements</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-8">
-                    <div class="card-premium h-100 overflow-hidden">
-                        <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-50">
-                            <h5 class="fw-bold mb-0"><i class="bi bi-megaphone me-2 text-primary"></i>Latest News</h5>
-                            <a asp-controller="Announcement" asp-action="Index" class="btn btn-sm btn-outline-secondary px-3">View History</a>
-                        </div>
-                        <div class="p-4">
-                            @if (!announcements.Any())
-                            {
-                                <div class="text-center py-5 text-muted opacity-50">
-                                    <i class="bi bi-megaphone display-4 mb-3"></i>
-                                    <p class="fw-bold mb-0">No updates</p>
-                                    <small>New news will be posted here.</small>
-                                </div>
-                            }
-                            else
-                            {
-                                @foreach (var announcement in announcements.Take(2))
-                                {
-                                    <div class="bg-light bg-opacity-50 p-4 rounded-4 mb-3 border position-relative">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex align-items-center gap-2 mb-2">
-                                                    @if (announcement.IsPinned)
-                                                    {
-                                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0"><i class="bi bi-pin-angle-fill"></i></span>
-                                                    }
-                                                    <h6 class="fw-bold mb-0">@announcement.Title</h6>
-                                                </div>
-                                                <p class="mb-3 text-muted">@announcement.Content</p>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="avatar-sm bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center text-primary-light fw-bold" style="width: 24px; height: 24px; font-size: 10px;">
-                                                        @announcement.AuthorName[0]
-                                                    </div>
-                                                    <span class="text-muted small">@announcement.AuthorName • @announcement.DatePosted.ToString("dd MMM")</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        }
-    }
-    else
-    {
-        Layout = "_AuthLayout";
-        <div class="container py-5">
-            <div class="row min-vh-75 align-items-center">
-                <div class="col-lg-6 fade-in-up">
-                    <div class="feature-pill" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2);">
-                        <span class="badge bg-primary me-2">New</span> StaffHub is ready
-                    </div>
-                    <h1 class="hero-title display-4 fw-bold" style="color: #0f172a;">The easy way <br> to manage your <br> <span style="color: #2563eb;">Team.</span></h1>
-                    <p class="hero-subtitle pe-lg-5" style="color: #475569;">Manage leave, track attendance, and post announcements all in one place. Built for teams that want to work better.</p>
-                    
-                    <div class="d-flex flex-wrap gap-3 mb-5">
-                        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm border-0" style="background: #2563eb;">
-                            Start for Free <i class="bi bi-chevron-right ms-2 small"></i>
-                        </a>
-                        <a href="#features" class="btn btn-outline-secondary btn-lg rounded-pill px-5">
-                            Learn More
-                        </a>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-4 text-muted small">
-                        <div><i class="bi bi-check-circle-fill text-success me-2"></i>No Card Required</div>
-                        <div><i class="bi bi-check-circle-fill text-success me-2"></i>14-Day Trial</div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 d-none d-lg-block fade-in-up">
-                    <div class="glass-card p-2 overflow-hidden position-relative border-0 shadow-sm" style="background: white;">
-                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Dashboard Preview" class="img-fluid rounded-4 shadow-sm">
-                    </div>
-                </div>
-            </div>
-
-            <div id="features" class="row g-4 mt-5 pt-5">
-                <div class="col-md-4 fade-in-up">
-                    <div class="benefit-card h-100 p-4 border rounded-4 shadow-sm bg-white">
-                        <div class="benefit-icon mb-4" style="background: #eff6ff; color: #2563eb; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; rounded-3: 12px; font-size: 1.5rem; border-radius: 12px;">
-                            <i class="bi bi-calendar2-check"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3">Leave Management</h4>
-                        <p class="text-muted">Easily track and approve leave requests for your whole team.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 fade-in-up">
-                    <div class="benefit-card h-100 p-4 border rounded-4 shadow-sm bg-white">
-                        <div class="benefit-icon mb-4" style="background: #f5f3ff; color: #7c3aed; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; rounded-3: 12px; font-size: 1.5rem; border-radius: 12px;">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3">Attendance</h4>
-                        <p class="text-muted">Simple clock-in/out system to keep track of daily work hours.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 fade-in-up">
-                    <div class="benefit-card h-100 p-4 border rounded-4 shadow-sm bg-white">
-                        <div class="benefit-icon mb-4" style="background: #fffbeb; color: #d97706; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; rounded-3: 12px; font-size: 1.5rem; border-radius: 12px;">
-                            <i class="bi bi-megaphone"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3">Announcements</h4>
-                        <p class="text-muted">Post news and keep everyone on the same page instantly.</p>
-                    </div>
+                <div class="sh-card-body d-grid gap-2">
+                    <a class="btn btn-outline-secondary d-flex justify-content-between align-items-center" asp-controller="Leave" asp-action="Create">
+                        <span><i class="bi bi-calendar-plus"></i> Request time off</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary d-flex justify-content-between align-items-center" asp-controller="HrTicket" asp-action="Create">
+                        <span><i class="bi bi-ticket-detailed"></i> Open an HR ticket</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary d-flex justify-content-between align-items-center" asp-controller="Attendance" asp-action="Index">
+                        <span><i class="bi bi-clock-history"></i> View attendance</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary d-flex justify-content-between align-items-center" asp-controller="Employee" asp-action="MyProfile">
+                        <span><i class="bi bi-person-badge"></i> My profile</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
-
-        <style>
-            .min-vh-75 { min-height: 75vh; }
-            .benefit-card { transition: transform 0.3s ease; border: 1px solid #e2e8f0 !important; }
-            .benefit-card:hover { transform: translateY(-5px); }
-        </style>
-    }
-</div>
-
+    </div>
+}

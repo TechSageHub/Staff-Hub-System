@@ -1,0 +1,97 @@
+@*
+    Generic pagination partial. Pass a PaginationModel via the model.
+
+    Usage:
+        @await Html.PartialAsync("_Pagination", new PaginationModel {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.FilteredCount,
+            FirstItemNumber = Model.FirstItemNumber,
+            LastItemNumber = Model.LastItemNumber,
+            RouteValues = new Dictionary<string, string?> { ["search"] = Model.Search, ["status"] = Model.Status }
+        })
+*@
+@model Presentation.Models.PaginationModel
+
+@{
+    if (Model == null || Model.TotalPages <= 1)
+    {
+        // Still show the footer summary when there is only one page and we have any items.
+        if (Model != null && Model.TotalCount > 0)
+        {
+            <div class="sh-pagination">
+                <div class="sh-pagination-summary">
+                    Showing <strong>@Model.FirstItemNumber</strong>–<strong>@Model.LastItemNumber</strong> of <strong>@Model.TotalCount</strong>
+                </div>
+            </div>
+        }
+        return;
+    }
+
+    string BuildUrl(int page)
+    {
+        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        if (Model.RouteValues != null)
+        {
+            foreach (var kv in Model.RouteValues)
+            {
+                if (!string.IsNullOrWhiteSpace(kv.Value))
+                {
+                    values[kv.Key] = kv.Value;
+                }
+            }
+        }
+        values["page"] = page.ToString();
+        values["pageSize"] = Model.PageSize.ToString();
+
+        var qs = string.Join("&", values.Where(v => !string.IsNullOrEmpty(v.Value))
+            .Select(v => $"{Uri.EscapeDataString(v.Key)}={Uri.EscapeDataString(v.Value!)}"));
+        return "?" + qs;
+    }
+
+    // Build a compact page list: first, last, current ±2, with ellipses.
+    var pages = new List<int>();
+    int total = Model.TotalPages;
+    int current = Model.Page;
+    pages.Add(1);
+    for (int i = current - 2; i <= current + 2; i++)
+    {
+        if (i > 1 && i < total) pages.Add(i);
+    }
+    if (total > 1) pages.Add(total);
+    pages = pages.Distinct().OrderBy(p => p).ToList();
+}
+
+<div class="sh-pagination">
+    <div class="sh-pagination-summary">
+        Showing <strong>@Model.FirstItemNumber</strong>–<strong>@Model.LastItemNumber</strong> of <strong>@Model.TotalCount</strong>
+    </div>
+    <nav aria-label="Pagination">
+        <ul class="sh-pagination-list">
+            <li class="@(Model.HasPrevious ? "" : "disabled")">
+                <a class="sh-pagination-link" href="@(Model.HasPrevious ? BuildUrl(current - 1) : "#")" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            @{
+                int prev = 0;
+            }
+            @foreach (var p in pages)
+            {
+                if (prev != 0 && p - prev > 1)
+                {
+                    <li class="disabled"><span class="sh-pagination-link sh-pagination-ellipsis">…</span></li>
+                }
+                <li class="@(p == current ? "active" : "")">
+                    <a class="sh-pagination-link" href="@BuildUrl(p)">@p</a>
+                </li>
+                prev = p;
+            }
+            <li class="@(Model.HasNext ? "" : "disabled")">
+                <a class="sh-pagination-link" href="@(Model.HasNext ? BuildUrl(current + 1) : "#")" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

@@ -1,64 +1,41 @@
-﻿@model Presentation.Models.DepartmentViewModel
+@model Presentation.Models.DepartmentViewModel
 @{
-    ViewData["Title"] = "Department Details";
+    ViewData["Title"] = Model.Name;
 }
 
-<div class="mb-4">
-    <a asp-action="Index" class="text-decoration-none text-muted">
-        <i class="bi bi-arrow-left me-1"></i> Back to Departments
-    </a>
+<div class="sh-page-header">
+    <div>
+        <a asp-action="Index" class="btn btn-link btn-sm px-0 mb-2" style="text-decoration:none;"><i class="bi bi-arrow-left"></i> Back to departments</a>
+        <h1 class="sh-page-title">@Model.Name</h1>
+        <p class="sh-page-subtitle">Organizational unit</p>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="sh-page-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+        </div>
+    }
 </div>
 
-<div class="row justify-content-center">
+<div class="row g-4">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm p-4">
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <h2 class="fw-bold text-primary mb-1">@Model.Name</h2>
-                    <p class="text-muted mb-0">Organizational Unit Details</p>
-                </div>
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill px-4">
-                        <i class="bi bi-pencil me-2"></i>Edit Department
-                    </a>
-                }
+        <div class="sh-card">
+            <div class="sh-card-header">
+                <h2 class="sh-card-title">Description</h2>
             </div>
-
-            <div class="bg-light rounded-4 p-4 mb-4">
-                <h6 class="text-uppercase text-muted fw-bold small mb-3">Description</h6>
-                <p class="fs-5 mb-0">
-                    @(string.IsNullOrEmpty(Model.Description) ? "No description provided for this department." : Model.Description)
-                </p>
+            <div class="sh-card-body">
+                <p class="mb-0" style="white-space:pre-wrap;">@(string.IsNullOrEmpty(Model.Description) ? "No description provided for this department." : Model.Description)</p>
             </div>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card border-0 bg-primary bg-opacity-10 p-3 h-100">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-primary text-white p-3 rounded-3 me-3">
-                                <i class="bi bi-people-fill fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 text-primary fw-bold small text-uppercase">Total Staff</h6>
-                                <p class="mb-0 h4 fw-bold">@Model.EmployeeCount</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-0 bg-info bg-opacity-10 p-3 h-100">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-info text-white p-3 rounded-3 me-3">
-                                <i class="bi bi-calendar-check fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 text-info fw-bold small text-uppercase">Created</h6>
-                                <p class="mb-0 h4 fw-bold">Active</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="admin-stat-card info">
+            <div class="admin-stat-icon"><i class="bi bi-people"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@Model.EmployeeCount</div>
+                <div class="admin-stat-label">Total staff in this department</div>
             </div>
         </div>
     </div>

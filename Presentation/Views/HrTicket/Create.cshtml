@@ -1,0 +1,75 @@
+@model Application.Dtos.CreateHrTicketDto
+@{
+    ViewData["Title"] = "New ticket";
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">New HR ticket</h1>
+        <p class="sh-page-subtitle">Tell us what you need help with. HR will respond soon.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<form asp-action="Create" method="post" class="sh-card" style="max-width: 760px;">
+    @Html.AntiForgeryToken()
+    <div class="sh-card-header">
+        <div>
+            <h2 class="sh-card-title">Ticket details</h2>
+            <div class="sh-card-subtitle">Provide enough context to help us resolve it quickly.</div>
+        </div>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Category" class="form-label">Category</label>
+                <select asp-for="Category" class="form-select">
+                    <option value="">Select category</option>
+                    <option>Payroll</option>
+                    <option>Leave</option>
+                    <option>Benefits</option>
+                    <option>Profile Update</option>
+                    <option>Workplace Issue</option>
+                    <option>Other</option>
+                </select>
+                <span asp-validation-for="Category" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Priority" class="form-label">Priority</label>
+                <select asp-for="Priority" class="form-select">
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                    <option>Urgent</option>
+                </select>
+                <span asp-validation-for="Priority" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Subject" class="form-label">Subject</label>
+                <input asp-for="Subject" class="form-control" placeholder="Brief summary of your issue" />
+                <span asp-validation-for="Subject" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" rows="6" class="form-control" placeholder="Provide details to help HR resolve your request faster"></textarea>
+                <span asp-validation-for="Description" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+    </div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send"></i> Submit ticket
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

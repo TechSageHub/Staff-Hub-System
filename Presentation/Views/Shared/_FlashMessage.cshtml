@@ -1,4 +1,4 @@
-﻿@{
+@{
     var message = TempData["Message"] as string;
     var type = TempData["MessageType"]?.ToString()?.ToLower() ?? "info";
 
@@ -6,15 +6,24 @@
     {
         "success" => "alert-success",
         "error" => "alert-danger",
+        "danger" => "alert-danger",
         "warning" => "alert-warning",
         _ => "alert-info"
+    };
+    var icon = type switch
+    {
+        "success" => "bi-check-circle-fill",
+        "error" or "danger" => "bi-exclamation-octagon-fill",
+        "warning" => "bi-exclamation-triangle-fill",
+        _ => "bi-info-circle-fill"
     };
 }
 
 @if (!string.IsNullOrEmpty(message))
 {
-    <div class="alert @alertClass alert-dismissible fade show" role="alert">
-        @message
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert @alertClass alert-dismissible fade show sh-alert" role="alert">
+        <i class="bi @icon"></i>
+        <span class="flex-grow-1">@message</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }

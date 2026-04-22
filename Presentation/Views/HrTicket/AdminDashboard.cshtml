@@ -1,0 +1,129 @@
+@model Application.Dtos.Paging.PagedResult<Application.Dtos.HrTicketDto>
+@{
+    ViewData["Title"] = "Ticket queue";
+    var selectedStatus = (ViewBag.SelectedStatus as string ?? "all").ToLowerInvariant();
+    var search = ViewBag.Search as string;
+
+    string PillClass(string key) => selectedStatus == key ? "sh-filter-pill active" : "sh-filter-pill";
+    string PriorityBadge(string p) => p switch
+    {
+        "Low" => "sh-badge sh-badge-neutral",
+        "Medium" => "sh-badge sh-badge-info",
+        "High" => "sh-badge sh-badge-warning",
+        "Urgent" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-neutral"
+    };
+    string StatusBadge(string s) => s switch
+    {
+        "Resolved" => "sh-badge sh-badge-success",
+        "InProgress" => "sh-badge sh-badge-info",
+        "Rejected" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-warning"
+    };
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Ticket queue</h1>
+        <p class="sh-page-subtitle">All HR tickets across the organisation.</p>
+    </div>
+</div>
+
+<div class="sh-card mb-3">
+    <div class="sh-card-body">
+        <form method="get" asp-action="AdminDashboard" class="row g-3 align-items-end">
+            <div class="col-lg-6 col-md-8">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" value="@search" placeholder="Subject, category, or employee" />
+                </div>
+            </div>
+            <input type="hidden" name="status" value="@selectedStatus" />
+            <div class="col-lg-2 col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sh-filter-pills mb-4">
+    <a class="@PillClass("all")" asp-action="AdminDashboard" asp-route-search="@search">All</a>
+    <a class="@PillClass("pending")" asp-action="AdminDashboard" asp-route-status="pending" asp-route-search="@search">Pending</a>
+    <a class="@PillClass("inprogress")" asp-action="AdminDashboard" asp-route-status="inprogress" asp-route-search="@search">In progress</a>
+    <a class="@PillClass("resolved")" asp-action="AdminDashboard" asp-route-status="resolved" asp-route-search="@search">Resolved</a>
+    <a class="@PillClass("rejected")" asp-action="AdminDashboard" asp-route-status="rejected" asp-route-search="@search">Rejected</a>
+</div>
+
+<div class="sh-card">
+    @if (Model == null || !Model.Items.Any())
+    {
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-inbox"></i></div>
+                <div class="sh-empty-title">No tickets match</div>
+                <p class="sh-empty-text">Try another filter or wait for new requests to come in.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sh-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Subject</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="sh-avatar sh-avatar-primary">@(ticket.EmployeeName.Length > 0 ? ticket.EmployeeName[0].ToString() : "?")</div>
+                                    <div>
+                                        <div style="font-weight:600;">@ticket.EmployeeName</div>
+                                        <div class="text-muted small">@ticket.EmployeeEmail</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight:600;">@ticket.Subject</div>
+                                <div class="text-muted small text-truncate" style="max-width:280px;">@ticket.Description</div>
+                            </td>
+                            <td>@ticket.Category</td>
+                            <td><span class="@PriorityBadge(ticket.Priority)">@ticket.Priority</span></td>
+                            <td><span class="@StatusBadge(ticket.Status)">@ticket.Status</span></td>
+                            <td class="text-muted small">@ticket.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-arrow-right"></i> Open
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @await Html.PartialAsync("_Pagination", new Presentation.Models.PaginationModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.TotalCount,
+            FirstItemNumber = Model.FirstItemNumber,
+            LastItemNumber = Model.LastItemNumber,
+            RouteValues = new Dictionary<string, string?>
+            {
+                ["status"] = selectedStatus,
+                ["search"] = search
+            }
+        })
+    }
+</div>

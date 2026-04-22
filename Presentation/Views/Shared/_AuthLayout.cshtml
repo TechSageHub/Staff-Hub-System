@@ -1,90 +1,107 @@
+@{
+    var pageTitle = ViewData["Title"] as string;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StaffHub Professional</title>
+    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " · StaffHub")</title>
     <link rel="icon" type="image/png" href="~/favicon.png">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('staffhub.theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-bs-theme', t);
+            } catch (e) { /* noop */ }
+        })();
+    </script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <style>
-        :root {
-            --auth-bg: #f8fafc;
-        }
-
-        body.auth-body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--auth-bg);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .auth-nav {
-            padding: 1.5rem 0;
-            position: absolute;
-            top: 0;
-            width: 100%;
-            z-index: 10;
-        }
-
-        .auth-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            letter-spacing: -0.5px;
-        }
-
-        .auth-main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            padding: 80px 0;
-        }
-
-        .auth-footer {
-            padding: 2rem 0;
-            border-top: 1px solid rgba(0,0,0,0.05);
-        }
-    </style>
 </head>
 <body class="auth-body">
-    <nav class="auth-nav">
-        <div class="container">
+    <div class="auth-shell">
+        <nav class="auth-nav">
             <a class="auth-brand" href="/">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary-light d-flex align-items-center justify-content-center">
-                    <i class="bi bi-layers-fill"></i>
-                </div>
-                <span>StaffHub<span class="text-primary-light">.</span></span>
+                <span class="sh-brand-badge"><i class="bi bi-people-fill"></i></span>
+                <span>StaffHub</span>
             </a>
-        </div>
-    </nav>
-
-    <main role="main" class="auth-main">
-        @RenderBody()
-    </main>
-
-    <footer class="auth-footer">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <div class="text-muted small fw-medium">
-                &copy; @DateTime.Now.Year StaffHub. All rights reserved.
+            <div class="d-flex align-items-center gap-2">
+                <span class="status-pill d-none d-md-inline-flex" style="color:var(--sh-text-muted); background:var(--sh-surface-2); border-color:var(--sh-border);">
+                    <span class="status-dot"></span>
+                    <span>Secure workspace</span>
+                </span>
+                <button type="button" class="sh-icon-btn" data-sh-theme-toggle aria-pressed="false" aria-label="Toggle theme">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
             </div>
-            <div class="d-flex gap-4">
-                <a href="#" class="text-muted small text-decoration-none hover-text-primary transition-all">Privacy Policy</a>
-                <a href="#" class="text-muted small text-decoration-none hover-text-primary transition-all">Terms of Service</a>
-                <a href="#" class="text-muted small text-decoration-none hover-text-primary transition-all">Support</a>
+        </nav>
+
+        <main role="main" class="auth-main">
+            <div class="auth-form-panel">
+                @RenderBody()
             </div>
-        </div>
-    </footer>
+            <aside class="auth-visual d-none d-lg-flex">
+                <div class="auth-visual-content">
+                    <span class="status-pill mb-4">
+                        <span class="status-dot"></span>
+                        <span>Trusted by people operations teams</span>
+                    </span>
+                    <h2>The HR operating system your team will actually love.</h2>
+                    <p>StaffHub consolidates the day-to-day of people operations &mdash; employee records, leave, attendance, tickets and onboarding &mdash; into one calm, auditable workspace.</p>
+
+                    <div class="auth-feature-list">
+                        <div class="auth-feature">
+                            <span class="auth-feature-icon"><i class="bi bi-shield-check"></i></span>
+                            <div>
+                                <div class="auth-feature-title">Role-aware by design</div>
+                                <p class="auth-feature-desc">Administrators and employees see the information and actions that are relevant to them &mdash; nothing more.</p>
+                            </div>
+                        </div>
+                        <div class="auth-feature">
+                            <span class="auth-feature-icon"><i class="bi bi-bar-chart"></i></span>
+                            <div>
+                                <div class="auth-feature-title">Live HR analytics</div>
+                                <p class="auth-feature-desc">Headcount, onboarding progress, attendance and leave balances are always one click away.</p>
+                            </div>
+                        </div>
+                        <div class="auth-feature">
+                            <span class="auth-feature-icon"><i class="bi bi-lightning-charge"></i></span>
+                            <div>
+                                <div class="auth-feature-title">Low-friction workflows</div>
+                                <p class="auth-feature-desc">Bulk employee imports, one-click leave approvals and a ticketed HR helpdesk, all in one place.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="auth-stat-grid">
+                        <div class="auth-stat-card">
+                            <div class="auth-stat-value">99.9%</div>
+                            <div class="auth-stat-label">Workspace uptime</div>
+                        </div>
+                        <div class="auth-stat-card">
+                            <div class="auth-stat-value">SOC 2</div>
+                            <div class="auth-stat-label">Ready controls</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="auth-footer d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div>&copy; @DateTime.Now.Year StaffHub. Structured for people operations at scale.</div>
+            <div>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Support</a>
+            </div>
+        </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

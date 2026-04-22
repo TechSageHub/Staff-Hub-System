@@ -1,73 +1,77 @@
 @model List<Application.Dtos.AnnouncementDto>
 @{
-    ViewData["Title"] = User.IsInRole("Admin") ? "Manage Announcements" : "Company Announcements";
+    ViewData["Title"] = User.IsInRole("Admin") ? "Manage announcements" : "Announcements";
 }
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2 class="fw-bold mb-0">Company Announcements</h2>
-            <p class="text-muted">Manage organization-wide communications.</p>
-        </div>
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="col-md-4 text-md-end">
-                <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                    <i class="bi bi-plus-lg me-2"></i>New Announcement
-                </a>
-            </div>
-        }
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Announcements</h1>
+        <p class="sh-page-subtitle">Organization-wide communications and updates.</p>
     </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="sh-page-actions">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> New announcement
+            </a>
+        </div>
+    }
+</div>
 
-    <div class="row g-4">
-        @if (!Model.Any())
-        {
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
-                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-4 rounded-circle mb-3 mx-auto">
-                        <i class="bi bi-megaphone fs-1"></i>
-                    </div>
-                    <h4 class="fw-bold">No Announcements Yet</h4>
-                    <p class="text-muted mb-3">Start communicating with your team by posting your first announcement.</p>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-action="Create" class="btn btn-primary rounded-pill px-4">Create Announcement</a>
-                    }
-                </div>
+@if (!Model.Any())
+{
+    <div class="sh-card">
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-megaphone"></i></div>
+                <div class="sh-empty-title">No announcements yet</div>
+                <p class="sh-empty-text">Keep your team informed by posting company-wide updates here.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Create" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> Post announcement</a>
+                }
             </div>
-        }
-        else
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var announcement in Model)
         {
-            @foreach (var announcement in Model)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-4">
-                            @if (announcement.IsPinned)
-                            {
-                                <span class="badge bg-warning text-dark mb-2"><i class="bi bi-pin-angle-fill me-1"></i>Pinned</span>
-                            }
-                            <h5 class="fw-bold mb-2">@announcement.Title</h5>
-                            <p class="text-muted mb-3">@announcement.Content</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="bi bi-person-circle me-1"></i>@announcement.AuthorName<br/>
-                                    <i class="bi bi-calendar3 me-1"></i>@announcement.DatePosted.ToString("MMM dd, yyyy")
-                                </small>
-                                @if (User.IsInRole("Admin"))
+            <div class="col-md-6 col-xl-4">
+                <div class="sh-card h-100">
+                    <div class="sh-card-body d-flex flex-column">
+                        <div class="d-flex align-items-start gap-3 mb-2">
+                            <div class="sh-brand-badge" style="width:40px; height:40px; font-size:16px;">
+                                <i class="bi bi-megaphone"></i>
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <h3 style="font-size:16px; font-weight:600; margin:0;">@announcement.Title</h3>
+                                @if (announcement.IsPinned)
                                 {
-                                    <form asp-action="Delete" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@announcement.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this announcement?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <span class="sh-badge sh-badge-warning mt-1"><i class="bi bi-pin-angle-fill"></i> Pinned</span>
                                 }
                             </div>
                         </div>
+                        <p class="text-muted small mb-3" style="white-space:pre-wrap;">@announcement.Content</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-end gap-2">
+                            <div class="small text-muted">
+                                <div><i class="bi bi-person-circle"></i> @announcement.AuthorName</div>
+                                <div><i class="bi bi-calendar3"></i> @announcement.DatePosted.ToString("MMM dd, yyyy")</div>
+                            </div>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this announcement?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@announcement.Id" />
+                                    <button type="submit" class="sh-icon-btn sh-icon-btn-danger" title="Delete"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            }
+                        </div>
                     </div>
                 </div>
-            }
+            </div>
         }
     </div>
-</div>
+}

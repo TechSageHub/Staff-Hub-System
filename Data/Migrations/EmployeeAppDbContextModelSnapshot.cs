@@ -403,6 +403,88 @@ namespace Data.Migrations
                     b.ToTable("LeaveRequests");
                 });
 
+            modelBuilder.Entity("Data.Model.HrTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdminComment")
+                        .HasMaxLength(800)
+                        .HasColumnType("nvarchar(800)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("HrTickets");
+                });
+
+            modelBuilder.Entity("Data.Model.HrTicketComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CommenterName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("HrTicketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAdminComment")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HrTicketId");
+
+                    b.ToTable("HrTicketComments");
+                });
+
             modelBuilder.Entity("Data.Model.NigeriaState", b =>
                 {
                     b.Property<int>("Id")
@@ -1067,6 +1149,28 @@ namespace Data.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("Data.Model.HrTicket", b =>
+                {
+                    b.HasOne("Data.Model.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("Data.Model.HrTicketComment", b =>
+                {
+                    b.HasOne("Data.Model.HrTicket", "HrTicket")
+                        .WithMany("Comments")
+                        .HasForeignKey("HrTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HrTicket");
+                });
+
             modelBuilder.Entity("Data.Model.LeaveRequest", b =>
                 {
                     b.HasOne("Data.Model.Employee", "Employee")
@@ -1158,7 +1262,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Model.Employee", b =>
                 {
-                    b.Navigation("Address");
+                b.Navigation("Address");
 
                     b.Navigation("HrInfo");
 
@@ -1167,6 +1271,11 @@ namespace Data.Migrations
                     b.Navigation("OnboardingProgress");
 
                     b.Navigation("Qualifications");
+                });
+
+            modelBuilder.Entity("Data.Model.HrTicket", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("Data.Model.OnboardingModule", b =>

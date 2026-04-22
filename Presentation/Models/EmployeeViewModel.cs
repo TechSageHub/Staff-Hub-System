@@ -14,9 +14,10 @@ namespace Presentation.Models
     public decimal Salary { get; set; }
     public string? Gender { get; set; }
     public string? PhoneNumber { get; set; }
-    public Guid? DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
         public string DepartmentName { get; set; }
         public string? ImageUrl { get; set; }
+        public bool IsOnboardingComplete { get; set; }
         public AddressViewModel? Address { get; set; }
         public List<QualificationViewModel> Qualifications { get; set; } = new();
         public NextOfKinViewModel? NextOfKin { get; set; }
@@ -72,7 +73,21 @@ namespace Presentation.Models
 
     public class EmployeesViewModel
     {
-        public List<EmployeeViewModel> Employees { get; set; } = default!;
+        public List<EmployeeViewModel> Employees { get; set; } = new();
+        public List<string> Departments { get; set; } = new();
+        public string? Search { get; set; }
+        public string? Department { get; set; }
+        public string? Onboarding { get; set; }
+        public string Sort { get; set; } = "name_asc";
+        public int TotalCount { get; set; }
+        public int FilteredCount { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        public int TotalPages => PageSize <= 0 ? 0 : (int)Math.Ceiling(FilteredCount / (double)PageSize);
+        public bool HasPrevious => Page > 1;
+        public bool HasNext => Page < TotalPages;
+        public int FirstItemNumber => FilteredCount == 0 ? 0 : ((Page - 1) * PageSize) + 1;
+        public int LastItemNumber => Math.Min(Page * PageSize, FilteredCount);
     }
 
     public class EmployeeDetailsViewModel

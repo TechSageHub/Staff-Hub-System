@@ -154,6 +154,8 @@ public static class Mapper
             DepartmentId = employee.DepartmentId,
             DepartmentName = employee.Department?.Name ?? "Unassigned",
             ImageUrl = employee.ImageUrl,
+            UserId = employee.UserId,
+            IsOnboardingComplete = employee.IsOnboardingComplete,
             Address = employee.Address?.ToDto()
         };
     }
@@ -266,6 +268,7 @@ public static class Mapper
             Id = leave.Id,
             EmployeeId = leave.EmployeeId,
             EmployeeName = leave.Employee != null ? $"{leave.Employee.FirstName} {leave.Employee.LastName}" : "Unknown",
+            DepartmentName = leave.Employee?.Department?.Name ?? "Unassigned",
             StartDate = leave.StartDate,
             EndDate = leave.EndDate,
             LeaveType = leave.LeaveType,

@@ -1,24 +1,32 @@
-﻿@{
-    ViewData["Title"] = "Email Confirmed";
-    Layout = "_Layout";
+@{
+    ViewData["Title"] = "Check your email";
+    Layout = "_AuthLayout";
+    var email = ViewBag.Email as string;
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm mt-5 text-center p-5">
-            <div class="mb-4">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
-                    <i class="bi bi-check-circle-fill display-3"></i>
+<div class="auth-form text-center">
+    <div class="sh-empty-icon mx-auto mb-3" style="background: var(--sh-info-50); color: var(--sh-info); width: 64px; height: 64px; font-size: 28px;">
+        <i class="bi bi-envelope-check"></i>
+    </div>
+    <h1 class="mb-2" style="font-size: 24px;">Confirm your email</h1>
+    <p class="lead mb-4">
+        We sent a confirmation link to @(string.IsNullOrWhiteSpace(email) ? "your email address" : Html.Raw($"<strong>{email}</strong>")). Click the link to activate your StaffHub account.
+    </p>
+
+    <div class="sh-card mb-4 text-start">
+        <div class="sh-card-body">
+            <div class="d-flex gap-3">
+                <div class="sh-stat-icon" style="background: var(--sh-primary-50); color: var(--sh-primary-600); width: 36px; height: 36px; font-size: 16px;">
+                    <i class="bi bi-info-circle"></i>
                 </div>
-            </div>
-            <h2 class="fw-bold text-dark mb-3">Email Verified!</h2>
-            <p class="text-muted mb-4 fs-5">Your email address has been successfully verified. You now have full access to your StaffHub account.</p>
-            
-            <div class="d-grid gap-2 col-md-8 mx-auto">
-                <a asp-action="Login" asp-controller="Account" class="btn btn-primary py-2 rounded-pill shadow-sm">
-                    Go to Login <i class="bi bi-arrow-right ms-2"></i>
-                </a>
+                <div class="small text-muted">
+                    Didn't get the email? Check your spam folder. The link expires for your safety &mdash; request a new one if needed.
+                </div>
             </div>
         </div>
     </div>
+
+    <a asp-action="Login" asp-controller="Account" class="btn btn-primary w-100 btn-lg">
+        <span>Back to sign in</span> <i class="bi bi-arrow-right"></i>
+    </a>
 </div>

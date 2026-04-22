@@ -1,45 +1,43 @@
-﻿@model Presentation.Models.EmployeeViewModel
-
+@model Presentation.Models.EmployeeViewModel
 @{
-    ViewData["Title"] = "Confirm Deletion";
+    ViewData["Title"] = "Delete employee";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm overflow-hidden">
-            <div class="card-header bg-danger text-white p-4">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Deletion</h4>
-                <p class="mb-0 small opacity-75">This action cannot be undone</p>
-            </div>
-            <div class="card-body p-4 text-center">
-                <div class="mb-4">
-                    <i class="bi bi-person-x text-danger display-1 opacity-25"></i>
-                </div>
-                <h5 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h5>
-                <p class="text-muted mb-4">Are you sure you want to permanently remove this employee from the directory?</p>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Delete employee</h1>
+        <p class="sh-page-subtitle">This action cannot be undone.</p>
+    </div>
+</div>
 
-                <div class="bg-light rounded p-3 mb-4 text-start">
-                    <div class="row small g-2">
-                        <div class="col-5 text-muted">Email:</div>
-                        <div class="col-7 fw-medium">@Model.Email</div>
-                        <div class="col-5 text-muted">Joined:</div>
-                        <div class="col-7 fw-medium">@Model.HireDate.ToString("MMM dd, yyyy")</div>
-                        <div class="col-5 text-muted">Position:</div>
-                        <div class="col-7 fw-medium">@Model.DepartmentName</div>
-                    </div>
-                </div>
+<div class="sh-card" style="max-width: 560px;">
+    <div class="sh-card-body text-center">
+        <div class="sh-empty-icon mx-auto mb-3" style="background: var(--sh-danger-50); color: var(--sh-danger); width:64px; height:64px; font-size:28px;">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h2 class="mb-2" style="font-size:18px;">Remove @Model.FirstName @Model.LastName?</h2>
+        <p class="text-muted mb-4">Their profile and records will be permanently deleted from the directory.</p>
 
-                <form asp-action="DeleteConfirmed" asp-controller="Employee" asp-route-id="@Model.Id" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Id" />
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger py-2 rounded-pill">
-                            <i class="bi bi-trash me-2"></i>Delete Permanently
-                        </button>
-                        <a asp-action="Index" class="btn btn-light py-2 rounded-pill">Cancel and Keep</a>
-                    </div>
-                </form>
+        <div class="sh-info-tile text-start mb-4">
+            <div class="row g-2 small">
+                <div class="col-5 text-muted">Email</div>
+                <div class="col-7" style="font-weight:500;">@Model.Email</div>
+                <div class="col-5 text-muted">Joined</div>
+                <div class="col-7" style="font-weight:500;">@Model.HireDate.ToString("MMM dd, yyyy")</div>
+                <div class="col-5 text-muted">Department</div>
+                <div class="col-7" style="font-weight:500;">@(string.IsNullOrWhiteSpace(Model.DepartmentName) ? "Unassigned" : Model.DepartmentName)</div>
             </div>
         </div>
+
+        <form asp-action="DeleteConfirmed" asp-controller="Employee" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash3"></i> Delete permanently
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
     </div>
 </div>

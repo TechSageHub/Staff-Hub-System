@@ -1,70 +1,62 @@
-﻿@model Presentation.Models.UpdateAddressViewModel
+@model Presentation.Models.UpdateAddressViewModel
 @{
-    ViewData["Title"] = "Update Employee Address";
+    ViewData["Title"] = "Update address";
 }
 
-<div class="mb-4">
-    <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId" class="text-decoration-none text-muted">
-        <i class="bi bi-arrow-left me-1"></i> Back to Employee Details
-    </a>
-</div>
-
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white p-4">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-pencil-square fs-3 me-3"></i>
-                    <div>
-                        <h4 class="mb-0 fw-bold">@ViewData["Title"]</h4>
-                        <p class="mb-0 small opacity-75">Update the physical location details for this employee</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="Update" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="EmployeeId" />
-                    <input type="hidden" asp-for="Id" />
-
-                    <div class="mb-3">
-                        <label asp-for="Street" class="form-label fw-medium"></label>
-                        <input asp-for="Street" class="form-control shadow-none" placeholder="e.g. 123 Business Way" />
-                        <span asp-validation-for="Street" class="text-danger small"></span>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="City" class="form-label fw-medium"></label>
-                            <input asp-for="City" class="form-control shadow-none" placeholder="e.g. Ikeja" />
-                            <span asp-validation-for="City" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="State" class="form-label fw-medium"></label>
-                            <select asp-for="State" class="form-select shadow-none" asp-items="ViewBag.States">
-                                <option value="">-- Select State --</option>
-                            </select>
-                            <span asp-validation-for="State" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Country" class="form-label fw-medium"></label>
-                        <input asp-for="Country" class="form-control shadow-none" placeholder="e.g. Nigeria" />
-                        <span asp-validation-for="Country" class="text-danger small"></span>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
-                            <i class="bi bi-arrow-repeat me-2"></i>Update Address
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="sh-page-header">
+    <div>
+        <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-link btn-sm px-0 mb-2" style="text-decoration:none;">
+            <i class="bi bi-arrow-left"></i> Back to employee details
+        </a>
+        <h1 class="sh-page-title">Update employee address</h1>
+        <p class="sh-page-subtitle">Update the physical location details for this staff member.</p>
     </div>
 </div>
+
+<form asp-action="Update" method="post" class="sh-card" style="max-width: 720px;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="EmployeeId" />
+    <input type="hidden" asp-for="Id" />
+    <div class="sh-card-header">
+        <h2 class="sh-card-title">Address details</h2>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+        <div class="mb-3">
+            <label asp-for="Street" class="form-label"></label>
+            <input asp-for="Street" class="form-control" placeholder="e.g. 123 Business Way" />
+            <span asp-validation-for="Street" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="City" class="form-label"></label>
+                <input asp-for="City" class="form-control" placeholder="e.g. Ikeja" />
+                <span asp-validation-for="City" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="State" class="form-label"></label>
+                <select asp-for="State" class="form-select" asp-items="ViewBag.States">
+                    <option value="">-- Select state --</option>
+                </select>
+                <span asp-validation-for="State" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+
+        <div class="mb-0 mt-3">
+            <label asp-for="Country" class="form-label"></label>
+            <input asp-for="Country" class="form-control" placeholder="e.g. Nigeria" />
+            <span asp-validation-for="Country" class="invalid-feedback d-block"></span>
+        </div>
+    </div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat"></i> Update address
+        </button>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

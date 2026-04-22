@@ -1,106 +1,175 @@
-﻿@model Presentation.Models.EmployeesViewModel
-
+@model Presentation.Models.EmployeesViewModel
 @{
     ViewData["Title"] = "Employees";
+    var hasFilters = !string.IsNullOrWhiteSpace(Model.Search)
+        || !string.IsNullOrWhiteSpace(Model.Department)
+        || !string.IsNullOrWhiteSpace(Model.Onboarding)
+        || (!string.IsNullOrWhiteSpace(Model.Sort) && Model.Sort != "name_asc");
 }
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5 mt-2">
+<div class="sh-page-header">
     <div>
-        <h5 class="text-muted small text-uppercase ls-wide fw-bold mb-1">Staff</h5>
-        <h2 class="fw-bold mb-0">Employee List</h2>
+        <h1 class="sh-page-title">Employees</h1>
+        <p class="sh-page-subtitle">Showing @Model.FilteredCount of @Model.TotalCount people across @Model.Departments.Count department@(Model.Departments.Count == 1 ? "" : "s").</p>
     </div>
-    <div class="d-flex align-items-center gap-3">
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="BulkUpload" class="btn btn-premium btn-light border shadow-sm">
-                <i class="bi bi-cloud-upload"></i> Bulk Import
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="sh-page-actions">
+            <a asp-action="BulkUpload" class="btn btn-outline-secondary">
+                <i class="bi bi-cloud-upload"></i> Bulk upload
             </a>
-            <a asp-action="Create" class="btn btn-premium btn-premium-primary">
-                <i class="bi bi-person-plus-fill"></i> Add Employee
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> New employee
             </a>
-        }
+        </div>
+    }
+</div>
+
+<div class="sh-card mb-4">
+    <div class="sh-card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" value="@Model.Search" placeholder="Name, email, or department" />
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label">Department</label>
+                <select class="form-select" name="department">
+                    <option value="">All departments</option>
+                    @foreach (var dept in Model.Departments)
+                    {
+                        <option value="@dept" selected="@(Model.Department == dept)">@dept</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label">Onboarding</label>
+                <select class="form-select" name="onboarding">
+                    <option value="">All</option>
+                    <option value="complete" selected="@(Model.Onboarding == "complete")">Complete</option>
+                    <option value="incomplete" selected="@(Model.Onboarding == "incomplete")">Incomplete</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label">Sort</label>
+                <select class="form-select" name="sort">
+                    <option value="name_asc" selected="@(Model.Sort == "name_asc")">Name A–Z</option>
+                    <option value="name_desc" selected="@(Model.Sort == "name_desc")">Name Z–A</option>
+                    <option value="salary_desc" selected="@(Model.Sort == "salary_desc")">Salary high–low</option>
+                    <option value="salary_asc" selected="@(Model.Sort == "salary_asc")">Salary low–high</option>
+                    <option value="hire_newest" selected="@(Model.Sort == "hire_newest")">Newest hire</option>
+                    <option value="hire_oldest" selected="@(Model.Sort == "hire_oldest")">Oldest hire</option>
+                </select>
+            </div>
+            <div class="col-lg-1 col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i></button>
+            </div>
+            @if (hasFilters)
+            {
+                <div class="col-12">
+                    <a asp-action="Index" class="text-decoration-none small"><i class="bi bi-x-circle"></i> Clear filters</a>
+                </div>
+            }
+        </form>
     </div>
 </div>
 
-<div class="card-premium overflow-hidden">
-    <div class="card-body p-0">
-        @if (Model?.Employees == null || !Model.Employees.Any())
-        {
-            <div class="text-center py-5 opacity-50">
-                <i class="bi bi-people-fill display-2 mb-3"></i>
-                <p class="fs-5 fw-bold mb-0">No records found</p>
+<div class="sh-card">
+    @if (Model.Employees == null || !Model.Employees.Any())
+    {
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-people"></i></div>
+                <div class="sh-empty-title">No employees match</div>
+                <p class="sh-empty-text">Try adjusting your filters or add someone new to the directory.</p>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-action="Create" class="btn btn-premium btn-premium-primary mt-3">Add First Employee</a>
+                    <a asp-action="Create" class="btn btn-primary mt-2"><i class="bi bi-person-plus"></i> Add employee</a>
                 }
             </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table-modern mb-0">
-                    <thead>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sh-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Hire date</th>
+                        <th>Onboarding</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var employee in Model.Employees)
+                    {
                         <tr>
-                            <th>Employee</th>
-                            <th>Contact</th>
-                            <th>Salary</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var employee in Model.Employees)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        @if (!string.IsNullOrEmpty(employee.ImageUrl))
-                                        {
-                                            <img src="@employee.ImageUrl" class="rounded-circle shadow-sm" style="width: 48px; height: 48px; object-fit: cover;" alt="" />
-                                        }
-                                        else
-                                        {
-                                            <div class="avatar-sm bg-primary-light bg-opacity-10 text-primary-light rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 48px; height: 48px;">
-                                                @employee.FirstName[0]@employee.LastName[0]
-                                            </div>
-                                        }
-                                        <div>
-                                            <div class="fw-bold text-dark">@employee.FirstName @employee.LastName</div>
-                                            <div class="text-muted small opacity-75">@employee.DepartmentName</div>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(employee.ImageUrl))
+                                    {
+                                        <img src="@employee.ImageUrl" class="sh-avatar sh-avatar-md" alt="" />
+                                    }
+                                    else
+                                    {
+                                        <div class="sh-avatar sh-avatar-md sh-avatar-primary">
+                                            @(employee.FirstName.Length > 0 ? employee.FirstName[0].ToString() : "")@(employee.LastName.Length > 0 ? employee.LastName[0].ToString() : "")
                                         </div>
+                                    }
+                                    <div>
+                                        <div style="font-weight:600;">@employee.FirstName @employee.LastName</div>
+                                        <div class="text-muted small">@(employee.Salary > 0 ? employee.Salary.ToString("C0") : "—")</div>
                                     </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-medium text-dark">@employee.Email</span>
-                                        <span class="small text-muted opacity-50">Email</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark fw-bold border-0 px-3 py-2">
-                                        @(employee.Salary != null ? employee.Salary.ToString("C") : "Unspecified")
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a asp-action="Details" asp-route-id="@employee.Id" class="btn btn-sm btn-light border-0 p-2 text-info" title="View">
-                                            <i class="bi bi-eye-fill fs-5"></i>
-                                        </a>
-                                        @if (User.IsInRole("Admin"))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@employee.Id" class="btn btn-sm btn-light border-0 p-2 text-primary" title="Edit">
-                                                <i class="bi bi-pencil-square fs-5"></i>
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@employee.Id" class="btn btn-sm btn-light border-0 p-2 text-danger" title="Delete">
-                                                <i class="bi bi-trash3-fill fs-5"></i>
-                                            </a>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
+                                </div>
+                            </td>
+                            <td>@employee.Email</td>
+                            <td>@(string.IsNullOrWhiteSpace(employee.DepartmentName) ? "—" : employee.DepartmentName)</td>
+                            <td>@employee.HireDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (employee.IsOnboardingComplete)
+                                {
+                                    <span class="sh-badge sh-badge-success"><i class="bi bi-check2-circle"></i> Complete</span>
+                                }
+                                else
+                                {
+                                    <span class="sh-badge sh-badge-warning"><i class="bi bi-hourglass-split"></i> In progress</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a asp-action="Details" asp-route-id="@employee.Id" class="sh-icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@employee.Id" class="sh-icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@employee.Id" class="sh-icon-btn sh-icon-btn-danger" title="Delete"><i class="bi bi-trash3"></i></a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @await Html.PartialAsync("_Pagination", new Presentation.Models.PaginationModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.FilteredCount,
+            FirstItemNumber = Model.FirstItemNumber,
+            LastItemNumber = Model.LastItemNumber,
+            RouteValues = new Dictionary<string, string?>
+            {
+                ["search"] = Model.Search,
+                ["department"] = Model.Department,
+                ["onboarding"] = Model.Onboarding,
+                ["sort"] = Model.Sort
+            }
+        })
+    }
 </div>

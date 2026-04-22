@@ -1,23 +1,20 @@
 @{
-    ViewData["Title"] = "Access Denied";
+    ViewData["Title"] = "Access denied";
+    Layout = "_AuthLayout";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm mt-5 text-center p-5">
-            <div class="mb-4">
-                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
-                    <i class="bi bi-shield-slash-fill display-3"></i>
-                </div>
-            </div>
-            <h2 class="fw-bold text-dark mb-3">Access Denied!</h2>
-            <p class="text-muted mb-4 fs-5">You do not have the necessary permissions to access this resource. If you believe this is an error, please contact your system administrator.</p>
-            
-            <div class="d-grid gap-2 col-md-8 mx-auto">
-                <a asp-action="Index" asp-controller="Home" class="btn btn-primary py-2 rounded-pill shadow-sm">
-                    Back to Dashboard
-                </a>
-            </div>
-        </div>
+<div class="auth-form text-center">
+    <div class="sh-empty-icon mx-auto mb-3" style="background: var(--sh-danger-50); color: var(--sh-danger); width: 64px; height: 64px; font-size: 28px;">
+        <i class="bi bi-shield-exclamation"></i>
+    </div>
+    <h1 class="mb-2" style="font-size: 24px;">Access denied</h1>
+    <p class="lead mb-4">
+        You don't have permission to view this page. If you believe this is a mistake, please contact your HR administrator.
+    </p>
+    <div class="d-grid gap-2">
+        <a asp-action="Index" asp-controller="Home" class="btn btn-primary btn-lg">
+            <i class="bi bi-house-door"></i> Back to dashboard
+        </a>
+        <a asp-action="Logout" asp-controller="Account" class="btn btn-outline-secondary">Sign out</a>
     </div>
 </div>

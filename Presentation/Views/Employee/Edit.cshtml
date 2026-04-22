@@ -1,132 +1,135 @@
-﻿@model Presentation.Models.UpdateEmployeeViewModel
-
+@model Presentation.Models.UpdateEmployeeViewModel
 @{
-    ViewData["Title"] = "Update Employee Info";
+    ViewData["Title"] = "Edit employee";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white p-4">
-                <h4 class="mb-0 fw-bold">@ViewData["Title"]</h4>
-                <p class="mb-0 small opacity-75">Modify details for @Model.FirstName @Model.LastName</p>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Edit employee</h1>
+        <p class="sh-page-subtitle">Modify details for @Model.FirstName @Model.LastName.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to profile
+        </a>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data" class="sh-card" style="max-width: 960px;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+    <div class="sh-card-header">
+        <div>
+            <h2 class="sh-card-title">Personal details</h2>
+            <div class="sh-card-subtitle">Update identity and contact information.</div>
+        </div>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label">First name</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="invalid-feedback d-block"></span>
             </div>
-            <div class="card-body p-4">
-                <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="ImageUrl" />
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label">Last name</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="PhoneNumber" class="form-label">Phone number</label>
+                <input asp-for="PhoneNumber" class="form-control" placeholder="+1 555 123 4567" />
+                <span asp-validation-for="PhoneNumber" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Gender" class="form-label">Gender</label>
+                <select asp-for="Gender" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+                <span asp-validation-for="Gender" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label fw-medium"></label>
-                            <input asp-for="FirstName" class="form-control" />
-                            <span asp-validation-for="FirstName" class="text-danger small"></span>
-                        </div>
+        <hr class="my-4" style="border-color: var(--sh-border);">
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label fw-medium"></label>
-                            <input asp-for="LastName" class="form-control" />
-                            <span asp-validation-for="LastName" class="text-danger small"></span>
-                        </div>
+        <h3 class="sh-section-title"><i class="bi bi-briefcase"></i> Employment</h3>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="HireDate" class="form-label">Hire date</label>
+                <input asp-for="HireDate" class="form-control" type="date" value="@Model.HireDate.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="HireDate" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Salary" class="form-label">Salary</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input asp-for="Salary" class="form-control" />
+                </div>
+                <span asp-validation-for="Salary" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DepartmentId" class="form-label">Department</label>
+                <select asp-for="DepartmentId" class="form-select" asp-items="Model.Departments"></select>
+                <span asp-validation-for="DepartmentId" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Photo" class="form-label">Change profile photo</label>
+                <div class="d-flex align-items-center gap-3">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" class="sh-avatar sh-avatar-md" alt="Current photo" />
+                    }
+                    <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
+                </div>
+                <div class="form-text">Optional. PNG or JPG, max 2MB.</div>
+                <span asp-validation-for="Photo" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
 
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Email" class="form-label fw-medium"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
-                        </div>
+        <hr class="my-4" style="border-color: var(--sh-border);">
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="PhoneNumber" class="form-label fw-medium"></label>
-                            <input asp-for="PhoneNumber" class="form-control" placeholder="Phone number" />
-                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Gender" class="form-label fw-medium"></label>
-                            <select asp-for="Gender" class="form-select">
-                                <option value="">-- Select --</option>
-                                <option value="Female">Female</option>
-                                <option value="Male">Male</option>
-                                <option value="Other">Other</option>
-                                <option value="Prefer not to say">Prefer not to say</option>
-                            </select>
-                            <span asp-validation-for="Gender" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="HireDate" class="form-label fw-medium"></label>
-                            <input asp-for="HireDate" class="form-control" type="date" value="@Model.HireDate.ToString("yyyy-MM-dd")" />
-                            <span asp-validation-for="HireDate" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Salary" class="form-label fw-medium"></label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input asp-for="Salary" class="form-control" />
-                            </div>
-                            <span asp-validation-for="Salary" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="DepartmentId" class="form-label fw-medium">Department</label>
-                            <select asp-for="DepartmentId" class="form-select" asp-items="Model.Departments"></select>
-                            <span asp-validation-for="DepartmentId" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-12 mb-4">
-                            <label asp-for="Photo" class="form-label fw-medium">Change Profile Picture</label>
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                                {
-                                    <img src="@Model.ImageUrl" class="rounded shadow-sm" style="width: 60px; height: 60px; object-fit: cover;" />
-                                }
-                                <input asp-for="Photo" type="file" class="form-control" />
-                            </div>
-                            <div class="form-text">Optional: JPG, PNG or GIF (Max 2MB)</div>
-                            <span asp-validation-for="Photo" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-12">
-                            <hr class="my-4">
-                            <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-geo-alt me-2"></i>Address Details</h5>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Street" class="form-label fw-medium"></label>
-                            <input asp-for="Street" class="form-control" placeholder="Street Address" />
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="City" class="form-label fw-medium"></label>
-                            <input asp-for="City" class="form-control" placeholder="City" />
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="State" class="form-label fw-medium"></label>
-                            <select asp-for="State" class="form-select" asp-items="Model.States">
-                                <option value="">-- Select State --</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="Country" class="form-label fw-medium"></label>
-                            <input asp-for="Country" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 mt-2">
-                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
-                            <i class="bi bi-save me-2"></i>Save Changes
-                        </button>
-                        <a asp-action="Index" class="btn btn-light px-4 rounded-pill">Cancel</a>
-                    </div>
-                </form>
+        <h3 class="sh-section-title"><i class="bi bi-geo-alt"></i> Address</h3>
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="Street" class="form-label">Street</label>
+                <input asp-for="Street" class="form-control" placeholder="Street address" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" placeholder="City" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="State" class="form-label">State</label>
+                <select asp-for="State" class="form-select" asp-items="Model.States">
+                    <option value="">-- Select state --</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Country" class="form-label">Country</label>
+                <input asp-for="Country" class="form-control" />
             </div>
         </div>
     </div>
-</div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2-circle"></i> Save changes
+        </button>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

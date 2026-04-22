@@ -1,213 +1,212 @@
-﻿<!DOCTYPE html>
+@{
+    var isAdmin = User.IsInRole("Admin");
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString() ?? string.Empty;
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString() ?? string.Empty;
+    bool IsActive(string c) => string.Equals(currentController, c, StringComparison.OrdinalIgnoreCase);
+    bool IsActiveAny(params string[] cs) => cs.Any(c => string.Equals(currentController, c, StringComparison.OrdinalIgnoreCase));
+
+    var userDisplay = User.Identity?.Name ?? "User";
+    var emailLabel = userDisplay;
+    var atIndex = userDisplay.IndexOf('@');
+    var shortName = atIndex > 0 ? userDisplay.Substring(0, atIndex) : userDisplay;
+    var avatarInitial = char.ToUpperInvariant(shortName.FirstOrDefault() == '\0' ? 'U' : shortName.FirstOrDefault());
+    var roleLabel = isAdmin ? "Administrator" : "Team member";
+    var pageTitle = ViewData["Title"] as string;
+    var headerTitle = string.IsNullOrWhiteSpace(pageTitle) ? currentController : pageTitle;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StaffHub Professional</title>
+    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " · StaffHub")</title>
     <link rel="icon" type="image/png" href="~/favicon.png">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('staffhub.theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-bs-theme', t);
+            } catch (e) { /* noop */ }
+        })();
+    </script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
 </head>
-<body>
-    <div class="app-shell">
+<body class="app-body">
+    <div class="admin-shell">
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
-        <aside class="sidebar" id="mainSidebar">
-            <div class="sidebar-header border-0 pb-0 mb-4">
-                <div class="sidebar-brand-wrapper">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-primary-light rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-                            <i class="bi bi-layers-half text-white fs-4"></i>
-                        </div>
-                        <div>
-                            <h1 class="sidebar-brand-title fs-4 mb-0" style="letter-spacing: -0.5px;">StaffHub<span class="text-primary-light">.</span></h1>
-                            <span class="sidebar-brand-subtitle opacity-50 small fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Enterprise v2.0</span>
-                        </div>
-                    </div>
+
+        <aside class="admin-sidebar" id="mainSidebar">
+            <div class="admin-sidebar-brand">
+                <span class="sh-brand-badge"><i class="bi bi-people-fill"></i></span>
+                <div class="admin-brand-copy">
+                    <span class="admin-brand-title">StaffHub</span>
+                    <span class="admin-brand-sub">HR Operations</span>
                 </div>
-                <button class="btn btn-close-sidebar d-lg-none" type="button" id="closeSidebar">
+                <button class="admin-sidebar-close d-lg-none" type="button" id="closeSidebar" aria-label="Close sidebar">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
 
-            <div class="sidebar-nav-container custom-scrollbar px-3" id="sidebarNav">
-                <div class="text-uppercase small fw-800 text-muted mb-3 mt-4 px-3" style="font-size: 0.65rem; letter-spacing: 1.5px; opacity: 0.4;">Menu</div>
-                <ul class="nav flex-column gap-1">
-                    @if (User.Identity!.IsAuthenticated)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-grid-1x2-fill"></i>Dashboard
-                            </a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employee" ? "active" : "")" asp-controller="Employee" asp-action="Index">
-                                    <i class="bi bi-people-fill"></i>Employees
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Department" ? "active" : "")" asp-controller="Department" asp-action="Index">
-                                    <i class="bi bi-diagram-3-fill"></i>Departments
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "MyProfile" ? "active" : "")" asp-controller="Employee" asp-action="MyProfile">
-                                    <i class="bi bi-person-badge-fill"></i>My Profile
-                                </a>
-                            </li>
-                        }
-                        
-                        <div class="text-uppercase small fw-800 text-muted mb-3 mt-4 px-3" style="font-size: 0.65rem; letter-spacing: 1.5px; opacity: 0.4;">Other</div>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Leave" ? "active" : "")" asp-controller="Leave" asp-action="Index">
-                                <i class="bi bi-calendar-event-fill"></i>Leave Requests
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Attendance" ? "active" : "")" asp-controller="Attendance" asp-action="Index">
-                                <i class="bi bi-stopwatch-fill"></i>Attendance
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Announcement" ? "active" : "")" asp-controller="Announcement" asp-action="Index">
-                                <i class="bi bi-megaphone-fill"></i>Announcements
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </div>
-            
-            <div class="sidebar-footer p-3 border-top mt-auto bg-primary bg-opacity-10">
-                @if (User.Identity!.IsAuthenticated)
-                {
-                    <div class="d-grid gap-2">
-                        <a class="btn btn-sm btn-light border-0 text-start px-3 py-2 fw-bold small text-muted hover-translate-x" asp-controller="Account" asp-action="EditProfile">
-                            <i class="bi bi-gear-fill me-2"></i>Profile Settings
-                        </a>
-                        <a class="btn btn-sm btn-light border-0 text-start px-3 py-2 fw-bold small text-muted hover-translate-x" asp-controller="Account" asp-action="ForgotPassword">
-                            <i class="bi bi-shield-lock-fill me-2"></i>Reset Password
-                        </a>
-                        <a class="btn btn-sm btn-light border-0 text-start px-3 py-2 fw-bold small text-danger hover-translate-x" asp-controller="Account" asp-action="Logout">
-                            <i class="bi bi-power me-2"></i>Logout
-                        </a>
-                    </div>
-                }
-                else
-                {
-                    <a class="btn btn-premium btn-premium-primary w-100" asp-controller="Account" asp-action="Login">
-                        <i class="bi bi-box-arrow-in-right"></i> Login
+            <nav class="admin-sidebar-scroll" aria-label="Primary navigation">
+                <div class="admin-nav-section-title">Main</div>
+                <div class="admin-nav-group">
+                    <a class="admin-nav-item @(IsActive("Home") ? "active" : "")" asp-controller="Home" asp-action="Index">
+                        <span class="admin-nav-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
                     </a>
-                }
-            </div>
+                </div>
+
+                <div class="admin-nav-section-title">Workforce</div>
+                <div class="admin-nav-group">
+                    @if (isAdmin)
+                    {
+                        <a class="admin-nav-item @(IsActive("Employee") ? "active" : "")" asp-controller="Employee" asp-action="Index">
+                            <span class="admin-nav-icon"><i class="bi bi-people"></i></span>
+                            <span>Employees</span>
+                        </a>
+                        <a class="admin-nav-item @(IsActive("Department") ? "active" : "")" asp-controller="Department" asp-action="Index">
+                            <span class="admin-nav-icon"><i class="bi bi-building"></i></span>
+                            <span>Departments</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="admin-nav-item @(IsActive("Employee") ? "active" : "")" asp-controller="Employee" asp-action="MyProfile">
+                            <span class="admin-nav-icon"><i class="bi bi-person-badge"></i></span>
+                            <span>My profile</span>
+                        </a>
+                    }
+                </div>
+
+                <div class="admin-nav-section-title">HR</div>
+                <div class="admin-nav-group">
+                    <a class="admin-nav-item @(IsActive("Leave") && currentAction != "AdminDashboard" ? "active" : "")" asp-controller="Leave" asp-action="Index">
+                        <span class="admin-nav-icon"><i class="bi bi-calendar2-check"></i></span>
+                        <span>@(isAdmin ? "My leave" : "Leave")</span>
+                    </a>
+                    @if (isAdmin)
+                    {
+                        <a class="admin-nav-item @(IsActive("Leave") && currentAction == "AdminDashboard" ? "active" : "")" asp-controller="Leave" asp-action="AdminDashboard">
+                            <span class="admin-nav-icon"><i class="bi bi-clipboard2-check"></i></span>
+                            <span>Leave queue</span>
+                        </a>
+                    }
+                    <a class="admin-nav-item @(IsActive("HrTicket") && currentAction != "AdminDashboard" ? "active" : "")" asp-controller="HrTicket" asp-action="Index">
+                        <span class="admin-nav-icon"><i class="bi bi-ticket-detailed"></i></span>
+                        <span>@(isAdmin ? "My tickets" : "HR tickets")</span>
+                    </a>
+                    @if (isAdmin)
+                    {
+                        <a class="admin-nav-item @(IsActive("HrTicket") && currentAction == "AdminDashboard" ? "active" : "")" asp-controller="HrTicket" asp-action="AdminDashboard">
+                            <span class="admin-nav-icon"><i class="bi bi-headset"></i></span>
+                            <span>Ticket queue</span>
+                        </a>
+                    }
+                    <a class="admin-nav-item @(IsActive("Announcement") ? "active" : "")" asp-controller="Announcement" asp-action="Index">
+                        <span class="admin-nav-icon"><i class="bi bi-megaphone"></i></span>
+                        <span>Announcements</span>
+                    </a>
+                    <a class="admin-nav-item @(IsActive("Attendance") ? "active" : "")" asp-controller="Attendance" asp-action="Index">
+                        <span class="admin-nav-icon"><i class="bi bi-clock-history"></i></span>
+                        <span>Attendance</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav-section-title">Account</div>
+                <div class="admin-nav-group">
+                    <a class="admin-nav-item @(IsActive("Account") && currentAction == "EditProfile" ? "active" : "")" asp-controller="Account" asp-action="EditProfile">
+                        <span class="admin-nav-icon"><i class="bi bi-person-gear"></i></span>
+                        <span>Account settings</span>
+                    </a>
+                    @if (!isAdmin)
+                    {
+                        <a class="admin-nav-item @(IsActive("Onboarding") ? "active" : "")" asp-controller="Onboarding" asp-action="Index">
+                            <span class="admin-nav-icon"><i class="bi bi-clipboard-check"></i></span>
+                            <span>Onboarding</span>
+                        </a>
+                    }
+                    <a class="admin-nav-item" asp-controller="Account" asp-action="Logout">
+                        <span class="admin-nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span>Sign out</span>
+                    </a>
+                </div>
+            </nav>
         </aside>
 
-        <div class="app-content">
-            <header class="top-header">
-                <div class="container-fluid d-flex align-items-center justify-content-between px-4 h-100">
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-toggle-sidebar d-lg-none me-4 bg-light p-2 rounded-3 border" type="button" id="toggleSidebar">
-                            <i class="bi bi-list fs-5"></i>
+        <div class="admin-main">
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-menu-toggle d-lg-none" type="button" id="toggleSidebar" aria-label="Open sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-topbar-title">@headerTitle</div>
+                </div>
+
+                <div class="admin-topbar-right">
+                    <button type="button" class="sh-icon-btn" data-sh-theme-toggle aria-pressed="false" aria-label="Toggle theme">
+                        <i class="bi bi-moon-stars"></i>
+                    </button>
+
+                    <div class="dropdown">
+                        <button type="button" class="sh-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
                         </button>
-                        <div class="d-none d-md-block">
-                            <h5 class="m-0 welcome-text opacity-50 small text-uppercase ls-wide fw-bold">Page</h5>
-                            <h4 class="m-0 fw-800" style="color: var(--primary-color);">@ViewData["Title"]</h4>
+                        <div class="dropdown-menu dropdown-menu-end" style="min-width:280px;">
+                            <div class="dropdown-header">Notifications</div>
+                            <div class="px-2 py-3 text-center text-muted small">
+                                You're all caught up.
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="top-header-right d-flex align-items-center gap-4">
-                        <div class="d-none d-sm-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill border">
-                            <i class="bi bi-calendar3 text-primary-light small"></i>
-                            <span class="small fw-bold text-muted">@DateTime.Now.ToString("dd'xx' MMMM, yyyy").Replace("xx", GetDaySuffix(DateTime.Now.Day))</span>
-                        </div>
-                        
-                        <div class="d-flex align-items-center gap-3 ps-3 border-start">
-                            <div class="d-none d-md-block text-end">
-                                <div class="small fw-800 text-dark">@User.Identity?.Name</div>
-                                <div class="badge bg-success bg-opacity-10 text-success border-0 small p-0" style="font-size: 0.65rem;">Online</div>
-                            </div>
-                            <div class="avatar-md bg-white border border-2 border-primary border-opacity-25 p-1 rounded-circle shadow-sm overflow-hidden" style="width: 42px; height: 42px;">
-                                <div class="w-100 h-100 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center text-primary-light fw-bold">
-                                    @User.Identity?.Name?[0]
-                                </div>
-                            </div>
+
+                    <div class="dropdown">
+                        <button type="button" class="admin-userbox" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+                            <span class="admin-user-avatar">@avatarInitial</span>
+                            <span class="admin-user-meta d-none d-md-flex flex-column text-start">
+                                <span class="admin-user-name">@shortName</span>
+                                <span class="admin-user-role">@roleLabel</span>
+                            </span>
+                            <i class="bi bi-chevron-down d-none d-md-inline text-muted small"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <div class="dropdown-header">@emailLabel</div>
+                            <a class="dropdown-item" asp-controller="Account" asp-action="EditProfile">
+                                <i class="bi bi-person"></i><span>Profile settings</span>
+                            </a>
+                            @if (!isAdmin)
+                            {
+                                <a class="dropdown-item" asp-controller="Onboarding" asp-action="Index">
+                                    <i class="bi bi-clipboard-check"></i><span>Onboarding</span>
+                                </a>
+                            }
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                                <i class="bi bi-box-arrow-right"></i><span>Sign out</span>
+                            </a>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main role="main" class="content-main">
-                <div class="container pb-5">
+            <main class="admin-content">
+                <div class="admin-page-wrap">
                     @await Html.PartialAsync("_FlashMessage")
                     @RenderBody()
                 </div>
             </main>
-
-            <footer class="footer bg-white border-top py-4 mt-auto">
-                <div class="container">
-                    <div class="row align-items-center g-4">
-                        <div class="col-md-6 text-center text-md-start">
-                            <div class="text-muted small opacity-75">&copy; @DateTime.Now.Year StaffHub. All rights reserved.</div>
-                        </div>
-                        <div class="col-md-6 text-center text-md-end">
-                            <div class="d-flex gap-4 justify-content-center justify-content-md-end opacity-50">
-                                <a href="#" class="text-muted small text-decoration-none hover-text-primary">About</a>
-                                <a href="#" class="text-muted small text-decoration-none hover-text-primary">Privacy</a>
-                                <a href="#" class="text-muted small text-decoration-none hover-text-primary">Terms</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     </div>
-
-    @functions {
-        public string GetDaySuffix(int day) {
-            switch (day % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
-            }
-        }
-    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        $(document).ready(function () {
-            const sidebar = $('#mainSidebar');
-            const overlay = $('#sidebarOverlay');
-            const toggle = $('#toggleSidebar');
-            const close = $('#closeSidebar');
-
-            function toggleSidebar() {
-                sidebar.toggleClass('show');
-                overlay.toggleClass('show');
-                $('body').toggleClass('overflow-hidden');
-            }
-
-            toggle.on('click', toggleSidebar);
-            close.on('click', toggleSidebar);
-            overlay.on('click', toggleSidebar);
-
-            $('.sidebar .nav-link').on('click', function() {
-                if ($(window).width() < 992) {
-                    toggleSidebar();
-                }
-            });
-        });
-    </script>
     @await Component.InvokeAsync("Notyf")
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -1,30 +1,29 @@
-# Base runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
+EXPOSE 8080
 
-# Render provides PORT env var, default to 5000 if not set
-ENV ASPNETCORE_URLS=http://+:${PORT:-5000}
-EXPOSE 5000
+ENV ASPNETCORE_HTTP_PORTS=8080
 
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
 COPY ["Presentation/Presentation.csproj", "Presentation/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Data/Data.csproj", "Data/"]
-RUN dotnet restore "./Presentation/Presentation.csproj"
+RUN dotnet restore "Presentation/Presentation.csproj"
+
 COPY . .
 WORKDIR "/src/Presentation"
-RUN dotnet build "./Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/build /p:KillLockedPresentationProcessBeforeBuild=false
 
-# Publish stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:KillLockedPresentationProcessBeforeBuild=false
 
-# Final runtime stage
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Presentation.dll"]
+COPY ["Presentation/start.sh", "./start.sh"]
+RUN chmod +x ./start.sh
+ENTRYPOINT ["./start.sh"]

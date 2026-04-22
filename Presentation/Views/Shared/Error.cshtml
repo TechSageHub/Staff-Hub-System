@@ -1,25 +1,31 @@
-﻿@model ErrorViewModel
+@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Something went wrong";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="sh-card" style="max-width: 560px; margin: 60px auto;">
+    <div class="sh-card-body text-center" style="padding: 40px 28px;">
+        <div class="sh-empty-icon" style="background: var(--sh-danger-50); color: var(--sh-danger); width:64px; height:64px; font-size:28px;">
+            <i class="bi bi-exclamation-octagon"></i>
+        </div>
+        <h1 class="sh-page-title mb-2" style="font-size:22px;">We hit a snag</h1>
+        <p class="text-muted mb-4">An unexpected error interrupted your request. Our team has been notified.</p>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+        @if (Model.ShowRequestId)
+        {
+            <div class="sh-badge sh-badge-neutral mb-4">
+                <span>Request ID</span>
+                <code style="color:inherit;">@Model.RequestId</code>
+            </div>
+        }
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door"></i> Back to dashboard
+            </a>
+            <a class="btn btn-outline-secondary" href="javascript:history.back()">
+                <i class="bi bi-arrow-left"></i> Go back
+            </a>
+        </div>
+    </div>
+</div>

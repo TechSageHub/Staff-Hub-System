@@ -1,0 +1,623 @@
+@using Application.Dtos
+@{
+    int totalEmployees = (int)(ViewBag.TotalEmployees ?? 0);
+    int activeEmployees = (int)(ViewBag.ActiveEmployees ?? 0);
+    int incompleteOnboarding = (int)(ViewBag.IncompleteOnboarding ?? 0);
+    int onLeaveToday = (int)(ViewBag.OnLeaveToday ?? 0);
+    int pendingLeavesCount = (int)(ViewBag.PendingLeavesCount ?? 0);
+    int totalAnnouncements = (int)(ViewBag.TotalAnnouncements ?? 0);
+    int growth = (int)(ViewBag.Growth ?? 0);
+    decimal totalSalaryBudget = (decimal)(ViewBag.TotalSalaryBudget ?? 0m);
+
+    var monthlyHeadcount = (int[])(ViewBag.MonthlyHeadcount ?? new int[12]);
+    var weeklyAttendance = (int[])(ViewBag.WeeklyAttendance ?? new int[7]);
+    var deptNames = (List<string>)(ViewBag.DeptNames ?? new List<string>());
+    var deptCounts = (List<int>)(ViewBag.DeptCounts ?? new List<int>());
+
+    int maleCount = (int)(ViewBag.MaleCount ?? 0);
+    int femaleCount = (int)(ViewBag.FemaleCount ?? 0);
+    int otherGenderCount = (int)(ViewBag.OtherGenderCount ?? 0);
+
+    var recentLeaves = (List<LeaveRequestDto>)(ViewBag.RecentLeaves ?? new List<LeaveRequestDto>());
+    var recentEmployees = (List<EmployeeDto>)(ViewBag.RecentEmployees ?? new List<EmployeeDto>());
+    var incompleteProfileStats = ViewBag.IncompleteProfileStats as IEnumerable<dynamic>;
+
+    string Money(decimal v) => v.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+    string FormatDate(DateTime d) => d.ToLocalTime().ToString("MMM dd, yyyy");
+}
+
+<div class="admin-dashboard-page">
+    <div class="sh-page-header">
+        <div>
+            <h1 class="sh-page-title">Good to see you, @(User.Identity?.Name?.Split('@').FirstOrDefault() ?? "Admin")</h1>
+            <p class="sh-page-subtitle">A quick pulse on your organization, right now.</p>
+        </div>
+        <div class="sh-page-actions">
+            <a class="btn btn-outline-secondary" asp-controller="Employee" asp-action="BulkUpload">
+                <i class="bi bi-upload"></i> Bulk import
+            </a>
+            <a class="btn btn-primary" asp-controller="Employee" asp-action="Create">
+                <i class="bi bi-person-plus"></i> New employee
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-stat-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon"><i class="bi bi-people"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@totalEmployees</div>
+                <div class="admin-stat-label">Total employees</div>
+                <div class="sh-stat-delta @(growth >= 0 ? "up" : "down")">
+                    <i class="bi @(growth >= 0 ? "bi-arrow-up-short" : "bi-arrow-down-short")"></i>
+                    @Math.Abs(growth)% vs last month
+                </div>
+            </div>
+        </div>
+        <div class="admin-stat-card success">
+            <div class="admin-stat-icon"><i class="bi bi-person-check"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@activeEmployees</div>
+                <div class="admin-stat-label">Active accounts</div>
+                <div class="text-muted small mt-1">@(totalEmployees - activeEmployees) pending activation</div>
+            </div>
+        </div>
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@pendingLeavesCount</div>
+                <div class="admin-stat-label">Leave requests waiting</div>
+                <a class="small fw-semibold" asp-controller="Leave" asp-action="AdminDashboard">Review queue <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+        <div class="admin-stat-card info">
+            <div class="admin-stat-icon"><i class="bi bi-calendar2-week"></i></div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-value">@onLeaveToday</div>
+                <div class="admin-stat-label">On leave today</div>
+                <div class="text-muted small mt-1">@incompleteOnboarding onboarding in progress</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-chart-grid">
+        <div class="admin-chart-card">
+            <div class="admin-chart-title">
+                <i class="bi bi-graph-up-arrow" style="color:var(--sh-primary-600);"></i>
+                Headcount progression &middot; @DateTime.Now.Year
+            </div>
+            <div id="adminRevenueChart" class="admin-chart-host"></div>
+        </div>
+        <div class="admin-chart-card">
+            <div class="admin-chart-title">
+                <i class="bi bi-calendar2-check" style="color:var(--sh-accent);"></i>
+                Attendance this week
+            </div>
+            <div id="adminSalesChart" class="admin-chart-host"></div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-3">
+        <div class="col-lg-7">
+            <div class="sh-card h-100">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Department distribution</h2>
+                        <div class="sh-card-subtitle">Headcount across every active department.</div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Department" asp-action="Index">Manage</a>
+                </div>
+                <div class="sh-card-body">
+                    @if (!deptNames.Any())
+                    {
+                        <div class="sh-empty">
+                            <div class="sh-empty-icon"><i class="bi bi-building"></i></div>
+                            <div class="sh-empty-title">No departments yet</div>
+                            <p class="sh-empty-text">Create your first department to start tracking headcount.</p>
+                            <a class="btn btn-primary btn-sm" asp-controller="Department" asp-action="Create">Create department</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="adminDeptChart" style="height: 320px;"></div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="sh-card h-100">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Workforce composition</h2>
+                        <div class="sh-card-subtitle">Gender distribution at a glance.</div>
+                    </div>
+                </div>
+                <div class="sh-card-body">
+                    @if (totalEmployees == 0)
+                    {
+                        <div class="sh-empty">
+                            <div class="sh-empty-icon"><i class="bi bi-people"></i></div>
+                            <div class="sh-empty-title">No data yet</div>
+                            <p class="sh-empty-text">Add employees to see composition here.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="adminGenderChart" style="height: 320px;"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-summary-grid">
+        <div class="admin-summary-card">
+            <div class="admin-summary-top"><span>Total payroll</span></div>
+            <div class="admin-summary-value">@Money(totalSalaryBudget)</div>
+            <div class="admin-summary-bar"><span style="width:@(totalEmployees > 0 ? 80 : 0)%"></span></div>
+        </div>
+        <div class="admin-summary-card">
+            <div class="admin-summary-top"><span>Announcements</span></div>
+            <div class="admin-summary-value">@totalAnnouncements</div>
+            <div class="admin-summary-bar"><span style="width:@Math.Min(totalAnnouncements * 8, 100)%"></span></div>
+        </div>
+        <div class="admin-summary-card">
+            <div class="admin-summary-top"><span>Onboarding in progress</span></div>
+            <div class="admin-summary-value">@incompleteOnboarding</div>
+            <div class="admin-summary-bar"><span style="width:@(totalEmployees == 0 ? 0 : (int)((double)incompleteOnboarding / totalEmployees * 100))%"></span></div>
+        </div>
+        <div class="admin-summary-card">
+            <div class="admin-summary-top"><span>Out of office</span></div>
+            <div class="admin-summary-value">@onLeaveToday</div>
+            <div class="admin-summary-bar"><span style="width:@(totalEmployees == 0 ? 0 : (int)((double)onLeaveToday / totalEmployees * 100))%"></span></div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Pending leave requests</h2>
+                        <div class="sh-card-subtitle">Awaiting admin review.</div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Leave" asp-action="AdminDashboard">Full queue</a>
+                </div>
+                <div class="sh-card-body p-0">
+                    @if (!recentLeaves.Any())
+                    {
+                        <div class="sh-empty">
+                            <div class="sh-empty-icon"><i class="bi bi-calendar2-check"></i></div>
+                            <div class="sh-empty-title">Nothing pending</div>
+                            <p class="sh-empty-text">All caught up &mdash; no leave requests awaiting action.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="sh-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Type</th>
+                                    <th>Dates</th>
+                                    <th>Days</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var l in recentLeaves.Take(6))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="sh-table-avatar">
+                                                <span class="sh-avatar sh-avatar-primary">@((l.EmployeeName ?? "?").Trim().FirstOrDefault())</span>
+                                                <div>
+                                                    <div class="sh-table-name">@l.EmployeeName</div>
+                                                    <div class="sh-table-sub">@l.DepartmentName</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@l.LeaveType</td>
+                                        <td>@FormatDate(l.StartDate) &rarr; @FormatDate(l.EndDate)</td>
+                                        <td>@l.DurationInDays</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Leave" asp-action="AdminDashboard">Review</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Onboarding watch-list</h2>
+                        <div class="sh-card-subtitle">Employees still completing their profile.</div>
+                    </div>
+                </div>
+                <div class="sh-card-body">
+                    @if (incompleteProfileStats == null || !incompleteProfileStats.Any())
+                    {
+                        <div class="sh-empty">
+                            <div class="sh-empty-icon"><i class="bi bi-clipboard-check"></i></div>
+                            <div class="sh-empty-title">Everyone's onboarded</div>
+                            <p class="sh-empty-text">Nobody has outstanding onboarding steps.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var item in incompleteProfileStats)
+                        {
+                            int pct = (int)item.Completion;
+                            string tone = pct < 40 ? "var(--sh-danger)" : pct < 80 ? "var(--sh-warning)" : "var(--sh-success)";
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <a asp-controller="Employee" asp-action="Details" asp-route-id="@item.Id" class="fw-semibold">@item.Name</a>
+                                    <span class="small" style="color:@tone; font-weight:600;">@pct%</span>
+                                </div>
+                                <div class="admin-summary-bar">
+                                    <span style="width:@pct%; background:@tone;"></span>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (recentEmployees.Any())
+    {
+        <div class="sh-card mt-4">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Newest team members</h2>
+                    <div class="sh-card-subtitle">Recent hires across the organization.</div>
+                </div>
+                <a class="btn btn-outline-secondary btn-sm" asp-controller="Employee" asp-action="Index">View all</a>
+            </div>
+            <div class="sh-card-body p-0">
+                <table class="sh-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Hired</th>
+                            <th>Onboarding</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in recentEmployees.Take(6))
+                        {
+                            <tr>
+                                <td>
+                                    <div class="sh-table-avatar">
+                                        @if (!string.IsNullOrEmpty(e.ImageUrl))
+                                        {
+                                            <span class="sh-avatar"><img src="@e.ImageUrl" alt="@e.FirstName" /></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="sh-avatar sh-avatar-primary">@(e.FirstName.FirstOrDefault())@(e.LastName.FirstOrDefault())</span>
+                                        }
+                                        <div>
+                                            <div class="sh-table-name">@e.FirstName @e.LastName</div>
+                                            <div class="sh-table-sub">@e.DepartmentName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="text-muted">@e.Email</span></td>
+                                <td>@(string.IsNullOrWhiteSpace(e.DepartmentName) ? "&mdash;" : e.DepartmentName)</td>
+                                <td>@FormatDate(e.HireDate)</td>
+                                <td>
+                                    @if (e.IsOnboardingComplete)
+                                    {
+                                        <span class="sh-badge sh-badge-success">Complete</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="sh-badge sh-badge-warning">In progress</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Employee" asp-action="Details" asp-route-id="@e.Id">Open</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    (function () {
+        var charts = [];
+        var monthCategories = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var monthlyHeadcount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthlyHeadcount));
+        var weeklyAttendance = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(weeklyAttendance));
+
+        // Sort departments desc by headcount for clearer ranking
+        var _deptPairs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            deptNames.Zip(deptCounts, (n, c) => new { Name = n, Count = c }).ToList()));
+        _deptPairs.sort(function (a, b) { return b.count - a.count; });
+        var deptNames = _deptPairs.map(function (p) { return p.name; });
+        var deptCounts = _deptPairs.map(function (p) { return p.count; });
+
+        var maleCount = @maleCount, femaleCount = @femaleCount, otherGenderCount = @otherGenderCount;
+        var genderSeries = [maleCount, femaleCount, otherGenderCount];
+
+        function chartTheme() {
+            return (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'dark' : 'light';
+        }
+
+        function readToken(name, fallback) {
+            var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            return v || fallback;
+        }
+
+        function currentColors() {
+            var dark = chartTheme() === 'dark';
+            return {
+                primary: readToken('--sh-primary',     dark ? '#3b82f6' : '#1e3a8a'),
+                primary600: readToken('--sh-primary-600', dark ? '#60a5fa' : '#1d4ed8'),
+                accent:  readToken('--sh-accent',      dark ? '#38bdf8' : '#0ea5e9'),
+                success: readToken('--sh-success',     '#10b981'),
+                warning: readToken('--sh-warning',     '#f59e0b'),
+                danger:  readToken('--sh-danger',      '#ef4444'),
+                info:    readToken('--sh-info',        '#0ea5e9'),
+                text:    dark ? '#e2e8f0' : '#0f172a',
+                muted:   dark ? '#94a3b8' : '#64748b',
+                grid:    dark ? '#1f2a44' : '#e5e9f0',
+                surface: dark ? '#111a2e' : '#ffffff'
+            };
+        }
+
+        // Rotating palette for per-category coloring (department bars)
+        function palette(c) {
+            return [c.primary600, c.accent, c.success, c.warning, c.danger, c.info, c.primary, '#8b5cf6', '#ec4899', '#14b8a6'];
+        }
+
+        function last7Labels() {
+            var labels = [];
+            var d = new Date();
+            for (var i = 6; i >= 0; i--) {
+                var x = new Date(d);
+                x.setDate(d.getDate() - i);
+                labels.push(x.toLocaleDateString(undefined, { weekday: 'short' }));
+            }
+            return labels;
+        }
+
+        // -------- Headcount progression: smooth spline area w/ markers + YoY avg line ----
+        function buildHeadcountOpts() {
+            var c = currentColors();
+            var nonZero = monthlyHeadcount.filter(function (n) { return n > 0; });
+            var avg = nonZero.length ? Math.round(nonZero.reduce(function (a, b) { return a + b; }, 0) / nonZero.length) : 0;
+            return {
+                chart: {
+                    type: 'area', height: 320, toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif', background: 'transparent',
+                    dropShadow: { enabled: true, top: 3, left: 0, blur: 6, opacity: 0.08, color: c.primary }
+                },
+                theme: { mode: chartTheme() },
+                series: [{ name: 'Headcount', data: monthlyHeadcount }],
+                colors: [c.primary],
+                stroke: { curve: 'smooth', width: 3 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: chartTheme(),
+                        shadeIntensity: 1,
+                        type: 'vertical',
+                        colorStops: [
+                            { offset: 0,   color: c.primary, opacity: 0.55 },
+                            { offset: 55,  color: c.accent,  opacity: 0.22 },
+                            { offset: 100, color: c.accent,  opacity: 0 }
+                        ]
+                    }
+                },
+                markers: { size: 4, strokeColors: c.surface, strokeWidth: 2, colors: [c.primary], hover: { size: 7 } },
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: monthCategories,
+                    labels: { style: { colors: c.muted, fontSize: '11px', fontWeight: 600 } },
+                    axisBorder: { show: false }, axisTicks: { show: false }
+                },
+                yaxis: { labels: { style: { colors: c.muted, fontSize: '11px' }, formatter: function (v) { return Math.round(v); } } },
+                grid: { borderColor: c.grid, strokeDashArray: 4, padding: { left: 8, right: 8 } },
+                legend: { show: false },
+                tooltip: {
+                    theme: chartTheme(),
+                    y: { formatter: function (v) { return v + ' employees'; } }
+                },
+                annotations: avg > 0 ? {
+                    yaxis: [{
+                        y: avg,
+                        borderColor: c.accent,
+                        strokeDashArray: 4,
+                        label: {
+                            borderColor: c.accent,
+                            style: { color: '#fff', background: c.accent, fontSize: '10px', fontWeight: 600 },
+                            text: 'Avg ' + avg
+                        }
+                    }]
+                } : {}
+            };
+        }
+
+        // -------- Weekly attendance: gradient bars w/ rounded top ---------------------
+        function buildAttendanceOpts() {
+            var c = currentColors();
+            return {
+                chart: {
+                    type: 'bar', height: 320, toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif', background: 'transparent'
+                },
+                theme: { mode: chartTheme() },
+                series: [{ name: 'Clock-ins', data: weeklyAttendance }],
+                colors: [c.accent],
+                plotOptions: { bar: { columnWidth: '48%', borderRadius: 8, borderRadiusApplication: 'end' } },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: chartTheme(), type: 'vertical', shadeIntensity: 0.15,
+                        gradientToColors: [c.primary600], opacityFrom: 1, opacityTo: 0.85, stops: [0, 100]
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    offsetY: -20,
+                    style: { fontSize: '11px', fontWeight: 600, colors: [c.muted] }
+                },
+                xaxis: {
+                    categories: last7Labels(),
+                    labels: { style: { colors: c.muted, fontSize: '11px', fontWeight: 600 } },
+                    axisBorder: { show: false }, axisTicks: { show: false }
+                },
+                yaxis: { labels: { style: { colors: c.muted, fontSize: '11px' }, formatter: function (v) { return Math.round(v); } } },
+                grid: { borderColor: c.grid, strokeDashArray: 4 },
+                legend: { show: false },
+                tooltip: { theme: chartTheme(), y: { formatter: function (v) { return v + ' clock-ins'; } } }
+            };
+        }
+
+        // -------- Department distribution: per-bar colors, sorted, with data labels ---
+        function buildDeptOpts() {
+            var c = currentColors();
+            var p = palette(c);
+            return {
+                chart: {
+                    type: 'bar', height: Math.max(320, deptNames.length * 48), toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif', background: 'transparent'
+                },
+                theme: { mode: chartTheme() },
+                series: [{ name: 'Employees', data: deptCounts.map(function (v, i) {
+                    return { x: deptNames[i], y: v, fillColor: p[i % p.length] };
+                }) }],
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        distributed: true,
+                        borderRadius: 8,
+                        borderRadiusApplication: 'end',
+                        barHeight: '70%',
+                        dataLabels: { position: 'center' }
+                    }
+                },
+                colors: p,
+                dataLabels: {
+                    enabled: true,
+                    textAnchor: 'middle',
+                    style: { fontSize: '12px', fontWeight: 700, colors: ['#fff'] },
+                    formatter: function (v) { return v > 0 ? v : ''; }
+                },
+                xaxis: {
+                    labels: { style: { colors: c.muted, fontSize: '11px' }, formatter: function (v) { return Math.round(v); } },
+                    axisBorder: { show: false }, axisTicks: { show: false }
+                },
+                yaxis: { labels: { style: { colors: c.text, fontSize: '12px', fontWeight: 600 } } },
+                grid: { borderColor: c.grid, strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+                legend: { show: false },
+                tooltip: { theme: chartTheme(), y: { formatter: function (v) { return v + ' employees'; } } }
+            };
+        }
+
+        // -------- Gender breakdown: radialBar stack (Male / Female / Other) ----------
+        function buildGenderOpts() {
+            var c = currentColors();
+            var total = (genderSeries[0] + genderSeries[1] + genderSeries[2]) || 1;
+            var pct = genderSeries.map(function (n) { return Math.round((n / total) * 100); });
+            return {
+                chart: { type: 'radialBar', height: 300, background: 'transparent', fontFamily: 'Inter, sans-serif' },
+                theme: { mode: chartTheme() },
+                series: pct,
+                labels: ['Male', 'Female', 'Other'],
+                colors: [c.primary600, c.accent, c.warning],
+                stroke: { lineCap: 'round' },
+                plotOptions: {
+                    radialBar: {
+                        hollow: { size: '44%', background: 'transparent' },
+                        track: { background: c.grid, strokeWidth: '100%', margin: 6 },
+                        dataLabels: {
+                            name: { fontSize: '12px', color: c.muted, fontWeight: 600, offsetY: -4 },
+                            value: { fontSize: '18px', color: c.text, fontWeight: 700, formatter: function (v) { return v + '%'; } },
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                color: c.muted,
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                formatter: function () { return total + ' staff'; }
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: 'bottom',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    labels: { colors: c.text },
+                    markers: { width: 10, height: 10, radius: 10 },
+                    itemMargin: { horizontal: 10 },
+                    formatter: function (seriesName, opts) {
+                        var idx = opts.seriesIndex;
+                        return seriesName + ' · ' + genderSeries[idx];
+                    }
+                },
+                tooltip: {
+                    theme: chartTheme(),
+                    y: { formatter: function (v, opts) { return genderSeries[opts.seriesIndex] + ' (' + v + '%)'; } }
+                }
+            };
+        }
+
+        function renderCharts() {
+            if (!window.ApexCharts) { setTimeout(renderCharts, 100); return; }
+
+            var revenue = document.querySelector('#adminRevenueChart');
+            if (revenue && revenue.dataset.ready !== 'true') {
+                revenue.dataset.ready = 'true';
+                var c1 = new ApexCharts(revenue, buildHeadcountOpts()); c1.render(); charts.push({ c: c1, build: buildHeadcountOpts });
+            }
+
+            var sales = document.querySelector('#adminSalesChart');
+            if (sales && sales.dataset.ready !== 'true') {
+                sales.dataset.ready = 'true';
+                var c2 = new ApexCharts(sales, buildAttendanceOpts()); c2.render(); charts.push({ c: c2, build: buildAttendanceOpts });
+            }
+
+            var dept = document.querySelector('#adminDeptChart');
+            if (dept && deptNames.length && dept.dataset.ready !== 'true') {
+                dept.dataset.ready = 'true';
+                var c3 = new ApexCharts(dept, buildDeptOpts()); c3.render(); charts.push({ c: c3, build: buildDeptOpts });
+            }
+
+            var gender = document.querySelector('#adminGenderChart');
+            if (gender && gender.dataset.ready !== 'true') {
+                gender.dataset.ready = 'true';
+                var c4 = new ApexCharts(gender, buildGenderOpts()); c4.render(); charts.push({ c: c4, build: buildGenderOpts });
+            }
+        }
+
+        document.addEventListener('sh:theme-change', function () {
+            charts.forEach(function (entry) {
+                try { entry.c.updateOptions(entry.build(), false, false); } catch (e) { /* ignore */ }
+            });
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderCharts);
+        } else {
+            renderCharts();
+        }
+    })();
+</script>

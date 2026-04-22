@@ -1,203 +1,176 @@
-﻿@model Presentation.Models.EmployeeViewModel
-
+@model Presentation.Models.EmployeeViewModel
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}".Trim();
     var firstInitial = !string.IsNullOrWhiteSpace(Model.FirstName) ? Model.FirstName[0].ToString() : "";
     var lastInitial = !string.IsNullOrWhiteSpace(Model.LastName) ? Model.LastName[0].ToString() : "";
     var initials = $"{firstInitial}{lastInitial}";
-    var departmentLabel = string.IsNullOrWhiteSpace(Model.DepartmentName) ? "UNASSIGNED" : Model.DepartmentName.ToUpper();
+    var departmentLabel = string.IsNullOrWhiteSpace(Model.DepartmentName) ? "Unassigned" : Model.DepartmentName;
 }
 
-<div class="mb-5 mt-2">
+<div class="sh-page-header">
+    <div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Index" class="btn btn-link btn-sm px-0 mb-2" style="text-decoration:none;"><i class="bi bi-arrow-left"></i> Back to employees</a>
+        }
+        else
+        {
+            <a asp-controller="Home" asp-action="Index" class="btn btn-link btn-sm px-0 mb-2" style="text-decoration:none;"><i class="bi bi-arrow-left"></i> Back to dashboard</a>
+        }
+        <h1 class="sh-page-title">@Model.FirstName @Model.LastName</h1>
+        <p class="sh-page-subtitle">@departmentLabel &middot; Joined @Model.HireDate.ToString("MMMM dd, yyyy")</p>
+    </div>
     @if (User.IsInRole("Admin"))
     {
-        <a asp-action="Index" class="btn btn-sm btn-light border-0 px-3 text-muted fw-bold">
-            <i class="bi bi-arrow-left me-2"></i> BACK TO LIST
-        </a>
-    }
-    else
-    {
-        <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-light border-0 px-3 text-muted fw-bold">
-            <i class="bi bi-arrow-left me-2"></i> BACK TO DASHBOARD
-        </a>
+        <div class="sh-page-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                <i class="bi bi-trash3"></i> Delete
+            </a>
+        </div>
     }
 </div>
 
 <div class="row g-4">
     <div class="col-lg-4">
-        <div class="card-premium text-center p-5 mb-4 border-top border-4 border-primary">
-            <div class="position-relative d-inline-block mb-4">
-                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        <div class="sh-card mb-4">
+            <div class="sh-card-body text-center">
+                <div class="position-relative d-inline-block mb-3">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="Profile" class="sh-avatar sh-avatar-xl" />
+                    }
+                    else
+                    {
+                        <div class="sh-avatar sh-avatar-xl sh-avatar-primary">@initials</div>
+                    }
+                </div>
+                <h2 class="mb-1" style="font-size:18px;">@Model.FirstName @Model.LastName</h2>
+                <div class="sh-badge sh-badge-primary mb-3"><i class="bi bi-building"></i> @departmentLabel</div>
+                @if (!string.IsNullOrEmpty(Model.ImageUrl) && User.IsInRole("Admin"))
                 {
-                    <img src="@Model.ImageUrl" alt="Profile" class="rounded-circle shadow-lg border border-5 border-white" style="width: 160px; height: 160px; object-fit: cover;" />
-                }
-                else
-                {
-                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto text-primary-light fw-bold shadow-sm" style="width: 160px; height: 160px; font-size: 3.5rem;">
-                        @initials
-                    </div>
-                }
-                <div class="position-absolute bottom-0 end-0 bg-success border border-3 border-white rounded-circle" style="width: 25px; height: 25px;"></div>
-            </div>
-            
-            <h2 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h2>
-            <div class="badge bg-primary bg-opacity-10 text-primary-light px-3 py-2 rounded-pill fw-bold mb-4 ls-wide">@departmentLabel</div>
-            
-            <div class="d-flex justify-content-center gap-2 mt-2">
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-premium btn-premium-primary w-100">
-                        <i class="bi bi-pencil-square"></i> Edit Profile
-                    </a>
-                }
-                @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                {
-                    <form asp-action="DeleteImage" asp-route-employeeId="@Model.Id" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-light border p-3 rounded-3 text-danger" title="Delete Image">
-                            <i class="bi bi-trash3"></i>
+                    <form asp-action="DeleteImage" asp-route-employeeId="@Model.Id" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remove profile photo?')">
+                            <i class="bi bi-trash3"></i> Remove photo
                         </button>
                     </form>
                 }
             </div>
         </div>
 
-        <div class="card-premium p-4">
-            <h6 class="text-muted small text-uppercase ls-wide fw-bold mb-4">About</h6>
-            
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-light p-3 rounded-4 text-primary me-3">
-                    <i class="bi bi-envelope-at fs-5"></i>
-                </div>
-                <div>
-                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Email</div>
-                    <div class="fw-bold text-dark">@Model.Email</div>
-                </div>
+        <div class="sh-card">
+            <div class="sh-card-header">
+                <h2 class="sh-card-title">Contact</h2>
             </div>
-            
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-light p-3 rounded-4 text-primary me-3">
-                    <i class="bi bi-telephone-plus fs-5"></i>
+            <div class="sh-card-body">
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-envelope"></i> Email</div>
+                    <div class="sh-detail-value">@Model.Email</div>
                 </div>
-                <div>
-                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Phone Number</div>
-                    <div class="fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.PhoneNumber) ? Model.PhoneNumber : "Unspecified")</div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-telephone"></i> Phone</div>
+                    <div class="sh-detail-value">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "—" : Model.PhoneNumber)</div>
                 </div>
-            </div>
-
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-light p-3 rounded-4 text-primary me-3">
-                    <i class="bi bi-person-badge fs-5"></i>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-person-badge"></i> Gender</div>
+                    <div class="sh-detail-value">@(string.IsNullOrWhiteSpace(Model.Gender) ? "—" : Model.Gender)</div>
                 </div>
-                <div>
-                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Gender</div>
-                    <div class="fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.Gender) ? Model.Gender : "Unspecified")</div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-calendar-check"></i> Hire date</div>
+                    <div class="sh-detail-value">@Model.HireDate.ToString("MMM dd, yyyy")</div>
                 </div>
-            </div>
-
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-light p-3 rounded-4 text-primary me-3">
-                    <i class="bi bi-calendar-check fs-5"></i>
-                </div>
-                <div>
-                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Hire Date</div>
-                    <div class="fw-bold text-dark">@Model.HireDate.ToString("MMMM dd, yyyy")</div>
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center">
-                <div class="bg-light p-3 rounded-4 text-success me-3">
-                    <i class="bi bi-cash-stack fs-5"></i>
-                </div>
-                <div>
-                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Salary</div>
-                    <div class="fw-bold text-dark fs-5">@Model.Salary.ToString("C")</div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-cash-stack"></i> Salary</div>
+                    <div class="sh-detail-value">@Model.Salary.ToString("C")</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col-lg-8">
-        <div class="card-premium p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
                 <div>
-                    <h5 class="fw-bold mb-1">Address</h5>
-                    <p class="text-muted small mb-0">Home address</p>
+                    <h2 class="sh-card-title">Address</h2>
+                    <div class="sh-card-subtitle">Home address on file</div>
                 </div>
                 @if (Model.Address == null)
                 {
-                    <a asp-controller="Address" asp-action="Add" asp-route-employeeId="@Model.Id" class="btn btn-premium btn-light border shadow-sm btn-sm">
-                        <i class="bi bi-geo-alt-fill me-1"></i> Add Address
+                    <a asp-controller="Address" asp-action="Add" asp-route-employeeId="@Model.Id" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-geo-alt"></i> Add address
                     </a>
                 }
                 else
                 {
                     <div class="d-flex gap-2">
-                        <a asp-controller="Address" asp-action="Update" asp-route-employeeId="@Model.Id" class="btn btn-sm btn-light border px-3 fw-bold shadow-sm">
-                            Edit
-                        </a>
+                        <a asp-controller="Address" asp-action="Update" asp-route-employeeId="@Model.Id" class="btn btn-outline-secondary btn-sm">Edit</a>
                         <form asp-controller="Address" asp-action="Delete" asp-route-employeeId="@Model.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-light border px-3 text-danger fw-bold shadow-sm" onclick="return confirm('Delete address?')">Delete</button>
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete address?')">Delete</button>
                         </form>
                     </div>
                 }
             </div>
+            <div class="sh-card-body">
+                @if (Model.Address != null)
+                {
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Street</div>
+                                <div class="sh-info-tile-value">@(string.IsNullOrWhiteSpace(Model.Address.Street) ? "—" : Model.Address.Street)</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">City</div>
+                                <div class="sh-info-tile-value">@(string.IsNullOrWhiteSpace(Model.Address.City) ? "—" : Model.Address.City)</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">State</div>
+                                <div class="sh-info-tile-value">@(string.IsNullOrWhiteSpace(Model.Address.State) ? "—" : Model.Address.State)</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Country</div>
+                                <div class="sh-info-tile-value">@(string.IsNullOrWhiteSpace(Model.Address.Country) ? "—" : Model.Address.Country)</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="sh-empty">
+                        <div class="sh-empty-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div class="sh-empty-title">No address on file</div>
+                        <p class="sh-empty-text">Add an address to keep records complete.</p>
+                    </div>
+                }
+            </div>
+        </div>
 
-            @if (Model.Address != null)
-            {
-                <div class="row g-4">
-                    <div class="col-sm-6">
-                        <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                            <h6 class="text-muted small text-uppercase fw-bold mb-2">Street Address</h6>
-                            <div class="fw-bold text-dark">@Model.Address.Street</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                            <h6 class="text-muted small text-uppercase fw-bold mb-2">City</h6>
-                            <div class="fw-bold text-dark">@Model.Address.City</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                            <h6 class="text-muted small text-uppercase fw-bold mb-2">State</h6>
-                            <div class="fw-bold text-dark">@Model.Address.State</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                            <h6 class="text-muted small text-uppercase fw-bold mb-2">Country</h6>
-                            <div class="fw-bold text-dark">@Model.Address.Country</div>
-                        </div>
-                    </div>
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Qualifications</h2>
+                    <div class="sh-card-subtitle">Education and certifications</div>
                 </div>
-            }
-            else
-            {
-                <div class="text-center py-5 bg-light bg-opacity-30 rounded-4 border border-dashed">
-                    <div class="bg-white p-4 rounded-circle shadow-sm d-inline-block mb-3">
-                        <i class="bi bi-geo-alt text-muted fs-1"></i>
-                    </div>
-                    <p class="mt-3 fw-bold text-muted">No address.</p>
-                    <p class="small text-muted opacity-75">Add an address to keep our records updated.</p>
-                </div>
-            }
-
-            <div class="mt-5 pt-4 border-top">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                        <i class="bi bi-mortarboard-fill fs-5"></i>
-                    </div>
-                    <h5 class="fw-bold mb-0">Qualifications</h5>
-                </div>
-
+            </div>
+            <div class="sh-card-body p-0">
                 @if (Model.Qualifications.Count == 0)
                 {
-                    <div class="text-muted small">No qualifications provided.</div>
+                    <div class="sh-card-body"><div class="text-muted small">No qualifications provided.</div></div>
                 }
                 else
                 {
                     <div class="table-responsive">
-                        <table class="table table-sm align-middle">
+                        <table class="sh-table mb-0">
                             <thead>
                                 <tr>
                                     <th>Title</th>
@@ -221,124 +194,125 @@
                     </div>
                 }
             </div>
+        </div>
 
-            <div class="mt-5 pt-4 border-top">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                        <i class="bi bi-people-fill fs-5"></i>
-                    </div>
-                    <h5 class="fw-bold mb-0">Next of Kin</h5>
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Next of kin</h2>
                 </div>
-
+            </div>
+            <div class="sh-card-body">
                 @if (Model.NextOfKin == null)
                 {
                     <div class="text-muted small">No next of kin details provided.</div>
                 }
                 else
                 {
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-sm-6">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Full Name</h6>
-                                <div class="fw-bold text-dark">@Model.NextOfKin.FullName</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Full name</div>
+                                <div class="sh-info-tile-value">@Model.NextOfKin.FullName</div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Relationship</h6>
-                                <div class="fw-bold text-dark">@Model.NextOfKin.Relationship</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Relationship</div>
+                                <div class="sh-info-tile-value">@Model.NextOfKin.Relationship</div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Phone Number</h6>
-                                <div class="fw-bold text-dark">@Model.NextOfKin.PhoneNumber</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Phone</div>
+                                <div class="sh-info-tile-value">@Model.NextOfKin.PhoneNumber</div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Address</h6>
-                                <div class="fw-bold text-dark">@Model.NextOfKin.Address</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Address</div>
+                                <div class="sh-info-tile-value">@Model.NextOfKin.Address</div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
+        </div>
 
-            <div class="mt-5 pt-4 border-top">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                        <i class="bi bi-clipboard-check-fill fs-5"></i>
-                    </div>
-                    <h5 class="fw-bold mb-0">HR Information</h5>
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">HR information</h2>
                 </div>
-
+            </div>
+            <div class="sh-card-body">
                 @if (Model.HrInfo == null)
                 {
                     <div class="text-muted small">No HR information provided.</div>
                 }
                 else
                 {
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-sm-4">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Date of Birth</h6>
-                                <div class="fw-bold text-dark">@Model.HrInfo.DateOfBirth.ToString("MMMM dd, yyyy")</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Date of birth</div>
+                                <div class="sh-info-tile-value">@Model.HrInfo.DateOfBirth.ToString("MMM dd, yyyy")</div>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Marital Status</h6>
-                                <div class="fw-bold text-dark">@Model.HrInfo.MaritalStatus</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Marital status</div>
+                                <div class="sh-info-tile-value">@Model.HrInfo.MaritalStatus</div>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">National ID</h6>
-                                <div class="fw-bold text-dark">@Model.HrInfo.NationalId</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">National ID</div>
+                                <div class="sh-info-tile-value">@Model.HrInfo.NationalId</div>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Blood Group</h6>
-                                <div class="fw-bold text-dark">@Model.HrInfo.BloodGroup</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Blood group</div>
+                                <div class="sh-info-tile-value">@Model.HrInfo.BloodGroup</div>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="p-4 bg-light bg-opacity-50 rounded-4 border">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-2">Genotype</h6>
-                                <div class="fw-bold text-dark">@Model.HrInfo.Genotype</div>
+                            <div class="sh-info-tile">
+                                <div class="sh-info-tile-label">Genotype</div>
+                                <div class="sh-info-tile-value">@Model.HrInfo.Genotype</div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
+        </div>
 
-            @if (User.IsInRole("Admin"))
-            {
-                <div class="mt-5 pt-4 border-top">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                            <i class="bi bi-shield-lock-fill fs-5"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0">Documents</h5>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Documents</h2>
+                        <div class="sh-card-subtitle">Employee files and credentials</div>
                     </div>
-
+                </div>
+                <div class="sh-card-body p-0">
                     @if (Model.Documents.Count == 0)
                     {
-                        <div class="text-muted small">No documents uploaded yet.</div>
+                        <div class="sh-card-body"><div class="text-muted small">No documents uploaded yet.</div></div>
                     }
                     else
                     {
-                        <div class="table-responsive mb-4">
-                            <table class="table table-sm align-middle">
+                        <div class="table-responsive">
+                            <table class="sh-table mb-0">
                                 <thead>
                                     <tr>
                                         <th>Type</th>
                                         <th>File</th>
                                         <th>Uploaded</th>
                                         <th>Expiry</th>
-                                        <th>Link</th>
+                                        <th class="text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -349,9 +323,9 @@
                                             <td>@doc.FileName</td>
                                             <td>@doc.UploadedDate.ToString("MMM dd, yyyy")</td>
                                             <td>@(doc.ExpiryDate?.ToString("MMM dd, yyyy") ?? "—")</td>
-                                            <td>
-                                                <a href="@doc.FileUrl" class="btn btn-sm btn-light border" target="_blank" rel="noopener">
-                                                    View
+                                            <td class="text-end">
+                                                <a href="@doc.FileUrl" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener">
+                                                    <i class="bi bi-box-arrow-up-right"></i> View
                                                 </a>
                                             </td>
                                         </tr>
@@ -360,17 +334,9 @@
                             </table>
                         </div>
                     }
-
-                    <div class="alert bg-primary bg-opacity-5 border-0 rounded-4 p-4 d-flex gap-3">
-                        <i class="bi bi-info-circle-fill text-primary-light fs-4"></i>
-                        <div class="small text-muted">
-                            <strong class="text-dark d-block mb-1">Privacy Policy</strong>
-                            All files are stored securely. Only authorized staff can see them.
-                        </div>
-                    </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </div>
 

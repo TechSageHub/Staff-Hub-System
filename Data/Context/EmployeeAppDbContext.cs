@@ -20,6 +20,8 @@ public class EmployeeAppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<AttendanceLog> AttendanceLogs { get; set; }
+    public DbSet<HrTicket> HrTickets { get; set; }
+    public DbSet<HrTicketComment> HrTicketComments { get; set; }
     public DbSet<PerformanceAppraisal> PerformanceAppraisals { get; set; }
     public DbSet<OnboardingModule> OnboardingModules { get; set; } = default!;
     public DbSet<EmployeeOnboardingProgress> EmployeeOnboardingProgress { get; set; } = default!;

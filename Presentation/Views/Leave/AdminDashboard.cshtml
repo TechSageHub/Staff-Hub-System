@@ -1,114 +1,193 @@
-@model List<Application.Dtos.LeaveRequestDto>
+@model Application.Dtos.Paging.PagedResult<Application.Dtos.LeaveRequestDto>
 @{
-    ViewData["Title"] = "Leave Requests";
+    ViewData["Title"] = "Leave queue";
     var selectedStatus = (ViewBag.SelectedStatus as string ?? "all").ToLowerInvariant();
+    var search = ViewBag.Search as string;
+
+    string PillClass(string key) => selectedStatus == key ? "sh-filter-pill active" : "sh-filter-pill";
 }
 
-<div class="container-fluid py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Leave Requests</h2>
-            <p class="text-muted mb-0">View leave requests and filter by status.</p>
-        </div>
-        <div class="filter-container">
-            <div class="btn-group filter-group" role="group" aria-label="Leave status filter">
-                <a class="btn @(selectedStatus == "all" ? "btn-primary" : "btn-outline-primary")" asp-action="AdminDashboard" asp-route-status="all">All</a>
-                <a class="btn @(selectedStatus == "pending" ? "btn-primary" : "btn-outline-primary")" asp-action="AdminDashboard" asp-route-status="pending">Pending</a>
-                <a class="btn @(selectedStatus == "approved" ? "btn-primary" : "btn-outline-primary")" asp-action="AdminDashboard" asp-route-status="approved">Approved</a>
-                <a class="btn @(selectedStatus == "rejected" ? "btn-primary" : "btn-outline-primary")" asp-action="AdminDashboard" asp-route-status="rejected">Rejected</a>
-                <a class="btn @(selectedStatus == "cancelled" ? "btn-primary" : "btn-outline-primary")" asp-action="AdminDashboard" asp-route-status="cancelled">Cancelled</a>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Leave queue</h1>
+        <p class="sh-page-subtitle">Review, approve, or reject leave requests from your team.</p>
+    </div>
+</div>
+
+<div class="sh-card mb-3">
+    <div class="sh-card-body">
+        <form method="get" asp-action="AdminDashboard" class="row g-3 align-items-end">
+            <div class="col-lg-6 col-md-8">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" value="@search" placeholder="Employee name or leave type" />
+                </div>
+            </div>
+            <input type="hidden" name="status" value="@selectedStatus" />
+            <div class="col-lg-2 col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sh-filter-pills mb-4">
+    <a class="@PillClass("all")" asp-action="AdminDashboard" asp-route-status="all" asp-route-search="@search">All</a>
+    <a class="@PillClass("pending")" asp-action="AdminDashboard" asp-route-status="pending" asp-route-search="@search">Pending</a>
+    <a class="@PillClass("approved")" asp-action="AdminDashboard" asp-route-status="approved" asp-route-search="@search">Approved</a>
+    <a class="@PillClass("rejected")" asp-action="AdminDashboard" asp-route-status="rejected" asp-route-search="@search">Rejected</a>
+    <a class="@PillClass("cancelled")" asp-action="AdminDashboard" asp-route-status="cancelled" asp-route-search="@search">Cancelled</a>
+</div>
+
+@if (!Model.Items.Any())
+{
+    <div class="sh-card">
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-inbox"></i></div>
+                <div class="sh-empty-title">Nothing to review</div>
+                <p class="sh-empty-text">There are no leave requests matching this filter.</p>
             </div>
         </div>
     </div>
-
-    @if (!Model.Any())
-    {
-        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
-            <div class="bg-light text-muted d-inline-block p-4 rounded-circle mb-3 mx-auto">
-                <i class="bi bi-inbox fs-1"></i>
-            </div>
-            <h4 class="fw-bold">No results</h4>
-            <p class="text-muted mb-0">There are no leave requests for the selected filter.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var leave in Model)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-3">
-                                    @leave.EmployeeName[0]
+}
+else
+{
+    <div class="sh-card">
+        <div class="table-responsive">
+            <table class="sh-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Type</th>
+                        <th>Dates</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var leave in Model.Items)
+                    {
+                        var rowId = leave.Id.ToString("N");
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="sh-avatar sh-avatar-primary">@(leave.EmployeeName.Length > 0 ? leave.EmployeeName[0].ToString() : "?")</div>
+                                    <div>
+                                        <div style="font-weight:600;">@leave.EmployeeName</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(leave.DepartmentName) ? "—" : leave.DepartmentName)</div>
+                                    </div>
                                 </div>
-                                <div class="overflow-hidden">
-                                    <h6 class="fw-bold mb-0 text-truncate">@leave.EmployeeName</h6>
-                                    <span class="badge bg-light text-dark border small fw-normal">@leave.LeaveType</span>
-                                </div>
-                            </div>
-
-                            <div class="d-flex align-items-center justify-content-between mb-3">
+                            </td>
+                            <td>@leave.LeaveType</td>
+                            <td>@leave.StartDate.ToString("MMM dd") – @leave.EndDate.ToString("MMM dd, yyyy")</td>
+                            <td>@leave.DurationInDays</td>
+                            <td>
                                 @switch (leave.Status)
                                 {
                                     case "Approved":
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Approved</span>
+                                        <span class="sh-badge sh-badge-success">Approved</span>
                                         break;
                                     case "Rejected":
-                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Rejected</span>
+                                        <span class="sh-badge sh-badge-danger">Rejected</span>
                                         break;
                                     case "Pending":
-                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Pending</span>
+                                        <span class="sh-badge sh-badge-warning">Pending</span>
+                                        break;
+                                    case "Cancelled":
+                                        <span class="sh-badge sh-badge-neutral">Cancelled</span>
                                         break;
                                     default:
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">@leave.Status</span>
+                                        <span class="sh-badge sh-badge-neutral">@leave.Status</span>
                                         break;
                                 }
-                                <span class="text-muted small">@leave.DateRequested.ToString("MMM dd, yyyy")</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Period</div>
-                                <div class="fw-medium">@leave.StartDate.ToString("MMM dd") - @leave.EndDate.ToString("MMM dd, yyyy")</div>
-                                <div class="small text-muted">@leave.DurationInDays Days Requested</div>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(leave.Reason))
-                            {
-                                <div class="mb-4">
-                                    <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Staff Reason</div>
-                                    <div class="bg-light p-2 rounded small">"@leave.Reason"</div>
-                                </div>
-                            }
-
-                            @if (leave.Status == "Pending")
-                            {
-                                <form asp-action="Process" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="LeaveId" value="@leave.Id" />
-                                    <div class="mb-3">
-                                        <input type="text" name="AdminComment" class="form-control form-control-sm" placeholder="Add optional comment..." />
+                            </td>
+                            <td class="text-muted small">@leave.DateRequested.ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                @if (leave.Status == "Pending")
+                                {
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#review-@rowId">
+                                        <i class="bi bi-chat-square-text"></i> Review
+                                    </button>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(leave.AdminComment))
+                                {
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#review-@rowId">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                        </tr>
+                        @if (leave.Status == "Pending" || !string.IsNullOrWhiteSpace(leave.AdminComment) || !string.IsNullOrWhiteSpace(leave.Reason))
+                        {
+                            <tr class="sh-subrow">
+                                <td colspan="7" class="p-0" style="background: var(--sh-surface-2);">
+                                    <div class="collapse" id="review-@rowId">
+                                        <div class="p-4">
+                                            @if (!string.IsNullOrWhiteSpace(leave.Reason))
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="sh-info-tile-label">Staff reason</div>
+                                                    <div class="small">@leave.Reason</div>
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(leave.AdminComment))
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="sh-info-tile-label">Admin comment</div>
+                                                    <div class="small">@leave.AdminComment</div>
+                                                </div>
+                                            }
+                                            @if (leave.Status == "Pending")
+                                            {
+                                                <form asp-action="Process" method="post" class="row g-2 align-items-end">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="LeaveId" value="@leave.Id" />
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small">Comment <span class="text-muted">(optional)</span></label>
+                                                        <input type="text" name="AdminComment" class="form-control form-control-sm" placeholder="Optional comment for the employee" />
+                                                    </div>
+                                                    <div class="col-md-6 d-flex gap-2 justify-content-md-end">
+                                                        <button type="submit" name="Status" value="Approved" class="btn btn-success btn-sm">
+                                                            <i class="bi bi-check2"></i> Approve
+                                                        </button>
+                                                        <button type="submit" name="Status" value="Rejected" class="btn btn-outline-danger btn-sm">
+                                                            <i class="bi bi-x-lg"></i> Reject
+                                                        </button>
+                                                        <button type="submit" name="Status" value="Cancelled" class="btn btn-outline-secondary btn-sm">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            }
+                                        </div>
                                     </div>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button type="submit" name="Status" value="Approved" class="btn btn-success flex-grow-1 rounded-pill">Approve</button>
-                                        <button type="submit" name="Status" value="Rejected" class="btn btn-outline-danger flex-grow-1 rounded-pill">Reject</button>
-                                        <button type="submit" name="Status" value="Cancelled" class="btn btn-outline-secondary flex-grow-1 rounded-pill">Cancel</button>
-                                    </div>
-                                </form>
-                            }
-
-                            @if (!string.IsNullOrWhiteSpace(leave.AdminComment))
-                            {
-                                <div class="mt-3">
-                                    <div class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Admin Comment</div>
-                                    <div class="bg-light p-2 rounded small">@leave.AdminComment</div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
-    }
-</div>
+        @await Html.PartialAsync("_Pagination", new Presentation.Models.PaginationModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.TotalCount,
+            FirstItemNumber = Model.FirstItemNumber,
+            LastItemNumber = Model.LastItemNumber,
+            RouteValues = new Dictionary<string, string?>
+            {
+                ["status"] = selectedStatus,
+                ["search"] = search
+            }
+        })
+    </div>
+}

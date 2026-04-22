@@ -1,66 +1,70 @@
 @model Application.Dtos.CreateLeaveRequestDto
 @{
-    ViewData["Title"] = "Request Leave";
+    ViewData["Title"] = "Request leave";
+    var remainingDays = ViewBag.RemainingDays as int? ?? 0;
 }
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-0 py-4 text-center">
-                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-3 rounded-circle mb-3">
-                        <i class="bi bi-calendar-plus fs-1"></i>
-                    </div>
-                    <h3 class="fw-bold mb-0">Book Time Off</h3>
-                    <p class="text-muted">Enter your leave details below.</p>
-                </div>
-                <div class="card-body p-4 pt-0">
-                    <form asp-action="Create" method="post">
-                        <input type="hidden" asp-for="EmployeeId" />
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Leave Type</label>
-                            <select asp-for="LeaveType" class="form-select form-select-lg" required>
-                                <option value="Annual">Annual Leave</option>
-                                <option value="Sick">Sick Leave</option>
-                                <option value="Maternity/Paternity">Maternity/Paternity</option>
-                                <option value="Study">Study Leave</option>
-                                <option value="Compassionate">Compassionate</option>
-                            </select>
-                            <span asp-validation-for="LeaveType" class="text-danger small"></span>
-                        </div>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Request leave</h1>
+        <p class="sh-page-subtitle">You have <strong>@remainingDays</strong> working day@(remainingDays == 1 ? "" : "s") remaining this year.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
 
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small text-uppercase">Start Date</label>
-                                <input asp-for="StartDate" type="date" class="form-control form-control-lg" required />
-                                <span asp-validation-for="StartDate" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small text-uppercase">End Date</label>
-                                <input asp-for="EndDate" type="date" class="form-control form-control-lg" required />
-                                <span asp-validation-for="EndDate" class="text-danger small"></span>
-                            </div>
-                        </div>
+<form asp-action="Create" method="post" class="sh-card" style="max-width: 680px;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="EmployeeId" />
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Reason (Optional)</label>
-                            <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Briefly describe why you need this leave..."></textarea>
-                            <span asp-validation-for="Reason" class="text-danger small"></span>
-                        </div>
+    <div class="sh-card-header">
+        <div>
+            <h2 class="sh-card-title">Leave details</h2>
+            <div class="sh-card-subtitle">HR will review your request.</div>
+        </div>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
-                                Submit Request
-                            </button>
-                            <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancel</a>
-                        </div>
-                    </form>
-                </div>
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="LeaveType" class="form-label">Leave type</label>
+                <select asp-for="LeaveType" class="form-select" required>
+                    <option value="Annual">Annual Leave</option>
+                    <option value="Sick">Sick Leave</option>
+                    <option value="Maternity/Paternity">Maternity / Paternity</option>
+                    <option value="Study">Study Leave</option>
+                    <option value="Compassionate">Compassionate</option>
+                </select>
+                <span asp-validation-for="LeaveType" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="StartDate" class="form-label">Start date</label>
+                <input asp-for="StartDate" type="date" class="form-control" required />
+                <span asp-validation-for="StartDate" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EndDate" class="form-label">End date</label>
+                <input asp-for="EndDate" type="date" class="form-control" required />
+                <span asp-validation-for="EndDate" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Reason" class="form-label">Reason <span class="text-muted small">(optional)</span></label>
+                <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Briefly describe why you need this leave..."></textarea>
+                <span asp-validation-for="Reason" class="invalid-feedback d-block"></span>
             </div>
         </div>
     </div>
-</div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send"></i> Submit request
+        </button>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

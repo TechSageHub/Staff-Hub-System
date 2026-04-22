@@ -1,0 +1,171 @@
+@model Application.Dtos.HrTicketDto
+@{
+    ViewData["Title"] = Model.Subject;
+    var isAdmin = User.IsInRole("Admin");
+
+    string PriorityBadge(string p) => p switch
+    {
+        "Low" => "sh-badge sh-badge-neutral",
+        "Medium" => "sh-badge sh-badge-info",
+        "High" => "sh-badge sh-badge-warning",
+        "Urgent" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-neutral"
+    };
+    string StatusBadge(string s) => s switch
+    {
+        "Resolved" => "sh-badge sh-badge-success",
+        "InProgress" => "sh-badge sh-badge-info",
+        "Rejected" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-warning"
+    };
+}
+
+<div class="sh-page-header">
+    <div>
+        <a asp-action="@(isAdmin ? "AdminDashboard" : "Index")" class="btn btn-link btn-sm px-0 mb-2" style="text-decoration:none;"><i class="bi bi-arrow-left"></i> Back to tickets</a>
+        <h1 class="sh-page-title">@Model.Subject</h1>
+        <p class="sh-page-subtitle">Opened by @Model.EmployeeName · @Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Request</h2>
+                    <div class="sh-card-subtitle">@Model.EmployeeEmail</div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="sh-badge sh-badge-neutral">@Model.Category</span>
+                    <span class="@PriorityBadge(Model.Priority)">@Model.Priority</span>
+                    <span class="@StatusBadge(Model.Status)">@Model.Status</span>
+                </div>
+            </div>
+            <div class="sh-card-body">
+                <p class="mb-0" style="white-space:pre-wrap;">@Model.Description</p>
+            </div>
+        </div>
+
+        <div class="sh-card">
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Conversation</h2>
+                    <div class="sh-card-subtitle">@((Model.Comments?.Count ?? 0)) comment@((Model.Comments?.Count ?? 0) == 1 ? "" : "s")</div>
+                </div>
+            </div>
+            <div class="sh-card-body">
+                @if (Model.Comments == null || !Model.Comments.Any())
+                {
+                    <div class="text-muted small mb-4">No comments yet. Be the first to add context.</div>
+                }
+                else
+                {
+                    <div class="sh-thread mb-4">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="sh-thread-item @(comment.IsAdminComment ? "sh-thread-item--admin" : "")">
+                                <div class="sh-thread-head">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="sh-avatar sh-avatar-primary" style="width:28px; height:28px; font-size:11px;">@(comment.CommenterName.Length > 0 ? comment.CommenterName[0].ToString() : "?")</div>
+                                        <div>
+                                            <div style="font-weight:600; font-size:13px;">@comment.CommenterName</div>
+                                            @if (comment.IsAdminComment)
+                                            {
+                                                <span class="sh-badge sh-badge-primary" style="font-size:10px;">HR</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small">@comment.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy · h:mm tt")</span>
+                                </div>
+                                <div class="sh-thread-body">@comment.Message</div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <form asp-action="AddComment" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="HrTicketId" value="@Model.Id" />
+                    <label class="form-label">Add comment</label>
+                    <textarea name="Message" class="form-control mb-3" rows="4" maxlength="2000" placeholder="Type your comment..." required></textarea>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-chat-dots"></i> Post comment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sh-card mb-4">
+            <div class="sh-card-header">
+                <h2 class="sh-card-title">Ticket info</h2>
+            </div>
+            <div class="sh-card-body">
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-person"></i> Employee</div>
+                    <div class="sh-detail-value">@Model.EmployeeName</div>
+                </div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-tag"></i> Category</div>
+                    <div class="sh-detail-value">@Model.Category</div>
+                </div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-flag"></i> Priority</div>
+                    <div class="sh-detail-value">@Model.Priority</div>
+                </div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-clock"></i> Created</div>
+                    <div class="sh-detail-value">@Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy · h:mm tt")</div>
+                </div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-arrow-clockwise"></i> Updated</div>
+                    <div class="sh-detail-value">@(Model.UpdatedAt == null ? "—" : Model.UpdatedAt.Value.ToLocalTime().ToString("MMM dd, yyyy · h:mm tt"))</div>
+                </div>
+                <div class="sh-detail-row">
+                    <div class="sh-detail-label"><i class="bi bi-check2-circle"></i> Resolved</div>
+                    <div class="sh-detail-value">@(Model.ResolvedAt == null ? "—" : Model.ResolvedAt.Value.ToLocalTime().ToString("MMM dd, yyyy · h:mm tt"))</div>
+                </div>
+            </div>
+        </div>
+
+        @if (isAdmin)
+        {
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div>
+                        <h2 class="sh-card-title">Update status</h2>
+                        <div class="sh-card-subtitle">Admin controls</div>
+                    </div>
+                </div>
+                <form asp-action="UpdateStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <div class="sh-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="Status">
+                                <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+                                <option value="InProgress" selected="@(Model.Status == "InProgress")">In progress</option>
+                                <option value="Resolved" selected="@(Model.Status == "Resolved")">Resolved</option>
+                                <option value="Rejected" selected="@(Model.Status == "Rejected")">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Admin note <span class="text-muted small">(optional)</span></label>
+                            <textarea class="form-control" name="AdminComment" rows="3" maxlength="800" placeholder="Visible only to admins">@Model.AdminComment</textarea>
+                        </div>
+                    </div>
+                    <div class="sh-card-footer d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle"></i> Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+</div>

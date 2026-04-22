@@ -1,119 +1,57 @@
-﻿@model RegisterViewModel
+@model RegisterViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Create account";
     Layout = "_AuthLayout";
 }
 
-<div class="container">
-    <div class="row g-0 align-items-center justify-content-center min-vh-75">
-        <div class="col-lg-10 overflow-hidden rounded-4 shadow-premium bg-white">
-            <div class="row g-0">
-                <div class="col-lg-5 p-5 p-md-5 d-flex flex-column justify-content-center border-end">
-                    <div class="auth-header mb-5">
-                        <h2 class="fw-800 mb-2">Create Account</h2>
-                        <p class="text-muted opacity-75">Create an account to get started.</p>
-                    </div>
+<div class="auth-form">
+    <span class="auth-form-eyebrow"><i class="bi bi-rocket-takeoff"></i> Get started</span>
+    <h1>Create your StaffHub account</h1>
+    <p class="lead">Set up access in seconds &mdash; we'll guide you through onboarding after you confirm your email.</p>
 
-                    <form asp-action="Register" method="post">
-                        <div class="mb-4">
-                            <label asp-for="Email" class="form-label fw-bold small text-muted text-uppercase ls-wide mb-2">Email</label>
-                            <div class="position-relative">
-                                <input asp-for="Email" class="form-input-premium w-100 ps-5" placeholder="email@example.com" />
-                                <i class="bi bi-envelope-at position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                            </div>
-                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
-                        </div>
+    <form asp-action="Register" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
 
-                        <div class="mb-4">
-                            <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase ls-wide mb-2">Password</label>
-                            <div class="position-relative">
-                                <input asp-for="Password" type="password" class="form-input-premium w-100 ps-5 pe-5" id="registerPassword" placeholder="••••••••" />
-                                <i class="bi bi-key position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                                <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2 text-muted border-0 bg-transparent" onclick="togglePassword('registerPassword', 'registerPasswordIcon')" tabindex="-1">
-                                    <i class="bi bi-eye" id="registerPasswordIcon"></i>
-                                </button>
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
-                        </div>
-
-                        <div class="mb-5">
-                            <label asp-for="ConfirmPassword" class="form-label fw-bold small text-muted text-uppercase ls-wide mb-2">Confirm Password</label>
-                            <div class="position-relative">
-                                <input asp-for="ConfirmPassword" type="password" class="form-input-premium w-100 ps-5 pe-5" id="confirmPassword" placeholder="••••••••" />
-                                <i class="bi bi-shield-check position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                                <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2 text-muted border-0 bg-transparent" onclick="togglePassword('confirmPassword', 'confirmPasswordIcon')" tabindex="-1">
-                                    <i class="bi bi-eye" id="confirmPasswordIcon"></i>
-                                </button>
-                            </div>
-                            <span asp-validation-for="ConfirmPassword" class="text-danger small mt-1 d-block"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-premium btn-premium-primary w-100 py-3 mb-4">
-                            Register <i class="bi bi-person-plus ms-2"></i>
-                        </button>
-
-                        <div class="text-center pt-2">
-                            <p class="text-muted small mb-0">
-                                Already have an account? <a asp-action="Login" class="text-primary-light fw-bold text-decoration-none">Login</a>
-                            </p>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="col-lg-7 d-none d-lg-block position-relative bg-light overflow-hidden">
-                    <div class="auth-visual-content p-5 h-100 d-flex flex-column justify-content-between position-relative z-1">
-                        <div>
-                            <div class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill fw-bold ls-wide mb-4">GET STARTED</div>
-                            <h1 class="display-4 fw-800 mt-2 mb-3">Manage your <br><span class="text-primary-light">Team effectively.</span></h1>
-                            <p class="fs-5 text-dark opacity-75 max-w-400">Use powerful tools to manage your staff and organization. Everything you need in one place.</p>
-                        </div>
-
-                        <div class="mt-auto">
-                            <div class="row g-4">
-                                <div class="col-6">
-                                    <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
-                                        <div class="bg-warning bg-opacity-10 p-2 rounded-3 text-warning d-inline-block mb-3">
-                                            <i class="bi bi-lightning-charge fs-4"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-1 text-dark">Fast & Secure</h6>
-                                        <p class="small text-muted mb-0 lh-sm">Manage everything in real-time.</p>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary d-inline-block mb-3">
-                                            <i class="bi bi-cloud-check fs-4"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-1 text-dark">Simple Setup</h6>
-                                        <p class="small text-muted mb-0 lh-sm">Everything you need in one place.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="sh-form-group">
+            <label asp-for="Email" class="form-label">Work email</label>
+            <input asp-for="Email" class="form-control" placeholder="you@company.com" autocomplete="email" />
+            <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
         </div>
-    </div>
+
+        <div class="sh-form-group">
+            <label asp-for="Password" class="form-label">Password</label>
+            <div class="sh-input-wrap">
+                <input asp-for="Password" type="password" id="registerPassword" class="form-control" placeholder="At least 8 characters" autocomplete="new-password" />
+                <button type="button" class="sh-input-action" data-sh-toggle-password="#registerPassword" tabindex="-1" aria-label="Show password">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <div class="form-text">Must include uppercase, lowercase, a digit, and a symbol.</div>
+            <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="sh-form-group">
+            <label asp-for="ConfirmPassword" class="form-label">Confirm password</label>
+            <div class="sh-input-wrap">
+                <input asp-for="ConfirmPassword" type="password" id="confirmPassword" class="form-control" placeholder="Repeat password" autocomplete="new-password" />
+                <button type="button" class="sh-input-action" data-sh-toggle-password="#confirmPassword" tabindex="-1" aria-label="Show password">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="invalid-feedback d-block"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 btn-lg mt-2">
+            <span>Create account</span> <i class="bi bi-person-plus"></i>
+        </button>
+
+        <p class="text-center text-muted small mt-4 mb-0">
+            Already have an account? <a asp-action="Login" class="fw-semibold">Sign in</a>
+        </p>
+    </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function togglePassword(inputId, iconId) {
-            const passwordInput = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            const type = passwordInput.getAttribute('type');
-
-            if (type === 'password') {
-                passwordInput.setAttribute('type', 'text');
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.setAttribute('type', 'password');
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
-        }
-    </script>
 }

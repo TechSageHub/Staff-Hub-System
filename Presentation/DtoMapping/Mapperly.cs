@@ -192,6 +192,7 @@ public static class Mapperly
             PhoneNumber = dto.PhoneNumber,
             DepartmentName = dto.DepartmentName,
             ImageUrl = dto.ImageUrl,
+            IsOnboardingComplete = dto.IsOnboardingComplete,
             Address = dto.Address?.ToViewModel()
         };
     }
@@ -209,6 +210,7 @@ public static class Mapperly
             Gender = vm.Gender,
             PhoneNumber = vm.PhoneNumber,
             ImageUrl = vm.ImageUrl,
+            IsOnboardingComplete = vm.IsOnboardingComplete,
             Address = vm.Address?.ToDto()
         };
     }

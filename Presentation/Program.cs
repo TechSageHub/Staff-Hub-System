@@ -4,13 +4,12 @@ using Application.Services.StateServices;
 using Application.Services.UploadImage;
 using Application.Settings;
 using AspNetCoreHero.ToastNotification;
-using CloudinaryDotNet;
+using Data;
 using Data.Context;
 using Data.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Filters;
 
@@ -31,9 +30,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.User.RequireUniqueEmail = true;
 
-   
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); 
-    options.Lockout.MaxFailedAccessAttempts = 3; 
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.AllowedForNewUsers = true;
 
 }).AddEntityFrameworkStores<EmployeeAppDbContext>()
@@ -60,7 +58,7 @@ builder.Services.AddNotyf(config =>
 }
 );
 
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings")); 
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IStateService, StateService>();
@@ -69,16 +67,13 @@ builder.Services.AddScoped<OnboardingCompletionFilter>();
 
 builder.Services.AddHttpContextAccessor();
 
-
-builder.Services.AddSingleton(provider =>
-{
-    var config = provider.GetRequiredService<IOptions<CloudinarySettings>>().Value;
-    Account account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
-    return new Cloudinary(account);
-});
-
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EmployeeAppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -1,42 +1,46 @@
-﻿@model CreateDepartmentViewModel
+@model CreateDepartmentViewModel
 @{
-    ViewData["Title"] = "Create Department";
+    ViewData["Title"] = "New department";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white p-4">
-                <h4 class="mb-0 fw-bold">@ViewData["Title"]</h4>
-                <p class="mb-0 small opacity-75">Define a new organizational unit</p>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-                    
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label fw-medium">Department Name</label>
-                        <input asp-for="Name" class="form-control" placeholder="e.g. Engineering, HR" />
-                        <span asp-validation-for="Name" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Description" class="form-label fw-medium"></label>
-                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Briefly describe the department's role"></textarea>
-                        <span asp-validation-for="Description" class="text-danger small"></span>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
-                            <i class="bi bi-check-circle me-2"></i>Create Department
-                        </button>
-                        <a asp-action="Index" class="btn btn-light px-4 rounded-pill">Cancel</a>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">New department</h1>
+        <p class="sh-page-subtitle">Define a new organizational unit.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 </div>
+
+<form asp-action="Create" method="post" class="sh-card" style="max-width: 640px;">
+    @Html.AntiForgeryToken()
+    <div class="sh-card-header">
+        <h2 class="sh-card-title">Department details</h2>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" placeholder="e.g. Engineering, HR" />
+            <span asp-validation-for="Name" class="invalid-feedback d-block"></span>
+        </div>
+        <div class="mb-0">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Briefly describe the department's role"></textarea>
+            <span asp-validation-for="Description" class="invalid-feedback d-block"></span>
+        </div>
+    </div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2-circle"></i> Create department
+        </button>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

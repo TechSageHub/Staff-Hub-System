@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: employee-app-reloaded
+    runtime: docker
+    dockerfilePath: ./Presentation/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: CloudinarySettings__CloudName
+        sync: false
+      - key: CloudinarySettings__ApiKey
+        sync: false
+      - key: CloudinarySettings__ApiSecret
+        sync: false
+      - key: MailSettings__FromEmail
+        sync: false
+      - key: MailSettings__Password
+        sync: false
+      - key: MailSettings__SmtpHost
+        value: smtp.gmail.com
+      - key: MailSettings__SmtpPort
+        value: "587"

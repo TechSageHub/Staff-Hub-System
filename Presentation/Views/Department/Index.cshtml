@@ -1,87 +1,78 @@
-﻿@model DepartmentsViewModel
+@model DepartmentsViewModel
 @{
     ViewData["Title"] = "Departments";
 }
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5 mt-2">
+<div class="sh-page-header">
     <div>
-        <h5 class="text-muted small text-uppercase ls-wide fw-bold mb-1">Organization</h5>
-        <h2 class="fw-bold mb-0">Department List</h2>
+        <h1 class="sh-page-title">Departments</h1>
+        <p class="sh-page-subtitle">Organizational units across the company.</p>
     </div>
     @if (User.IsInRole("Admin"))
     {
-        <a asp-action="Create" class="btn btn-premium btn-premium-primary">
-            <i class="bi bi-plus-square-fill"></i> Add Department
-        </a>
+        <div class="sh-page-actions">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> New department
+            </a>
+        </div>
     }
 </div>
 
-<div class="card-premium overflow-hidden">
-    <div class="card-body p-0">
-        @if (!Model.Departments.Any())
-        {
-            <div class="text-center py-5 opacity-50">
-                <i class="bi bi-building-fill display-2 mb-3"></i>
-                <p class="fs-5 fw-bold mb-0">No Departments Found</p>
-                <p class="small mb-4">There are no departments in the system yet.</p>
+@if (!Model.Departments.Any())
+{
+    <div class="sh-card">
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-building"></i></div>
+                <div class="sh-empty-title">No departments yet</div>
+                <p class="sh-empty-text">Create a department to organize your workforce.</p>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-action="Create" class="btn btn-premium btn-premium-primary">Add First Department</a>
+                    <a asp-action="Create" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> Add department</a>
                 }
             </div>
-        }
-        else
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var item in Model.Departments)
         {
-            <div class="table-responsive">
-                <table class="table-modern mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Department Name</th>
-                            <th>Employees</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Departments)
+            <div class="col-md-6 col-xl-4">
+                <div class="sh-card h-100">
+                    <div class="sh-card-body">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="sh-brand-badge" style="width:44px; height:44px; font-size:18px;">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <h3 style="font-size:16px; font-weight:600; margin:0 0 2px;">@item.Name</h3>
+                                <div class="text-muted small">@item.EmployeeCount employee@(item.EmployeeCount == 1 ? "" : "s")</div>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
                         {
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded text-primary">
-                                            <i class="bi bi-diagram-3-fill"></i>
-                                        </div>
-                                        <div class="fw-bold text-dark fs-6">@item.Name</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-primary-light fw-bold border-0 px-3 py-2">
-                                        @item.EmployeeCount Employees
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border-0 p-2 text-info" title="View">
-                                            <i class="bi bi-eye-fill fs-5"></i>
-                                        </a>
-                                        @if (User.IsInRole("Admin"))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border-0 p-2 text-primary" title="Edit">
-                                                <i class="bi bi-pencil-square fs-5"></i>
-                                            </a>
-                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this department?');">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-light border-0 p-2 text-danger" title="Delete">
-                                                    <i class="bi bi-trash3-fill fs-5"></i>
-                                                </button>
-                                            </form>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
+                            <p class="text-muted small mb-3" style="min-height:42px;">@item.Description</p>
                         }
-                    </tbody>
-                </table>
+                        else
+                        {
+                            <p class="text-muted small mb-3" style="min-height:42px; font-style:italic;">No description.</p>
+                        }
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="sh-icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="sh-icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this department?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="sh-icon-btn sh-icon-btn-danger" title="Delete"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         }
     </div>
-</div>
+}

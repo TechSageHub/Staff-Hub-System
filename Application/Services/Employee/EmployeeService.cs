@@ -1,9 +1,8 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Application.ContractMapping;
 using Application.Dtos;
+using Application.Dtos.Paging;
 using Application.Services.UploadImage;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Data.Context;
 using Data.Model;
 using Microsoft.AspNetCore.Http;
@@ -16,16 +15,14 @@ namespace Application.Services.Employee;
 public class EmployeeService : IEmployeeService
 {
     private readonly EmployeeAppDbContext _context;
-    private readonly Cloudinary _cloudinary;
     private readonly IImageService _ImageService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IEmailService _emailService;
 
-    public EmployeeService(EmployeeAppDbContext context, Cloudinary cloudinary, IImageService ImageService, IHttpContextAccessor httpContextAccessor, UserManager<IdentityUser> userManager, IEmailService emailService)
+    public EmployeeService(EmployeeAppDbContext context, IImageService ImageService, IHttpContextAccessor httpContextAccessor, UserManager<IdentityUser> userManager, IEmailService emailService)
     {
         _context = context;
-        _cloudinary = cloudinary;
         _ImageService = ImageService;
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
@@ -118,7 +115,7 @@ public class EmployeeService : IEmployeeService
             }
 
             var employee = dto.ToModel();
-            employee.UserId = user.Id;
+            employee.UserId = user!.Id;
 
             if (dto.Photo != null && dto.Photo.Length > 0)
             {
@@ -247,6 +244,85 @@ public class EmployeeService : IEmployeeService
         var employees = await query.ToListAsync();
 
         return employees.EmployeesDto();
+    }
+
+    public async Task<PagedResult<EmployeeDto>> GetEmployeesPagedAsync(EmployeeQuery q, string? userId = null)
+    {
+        var query = _context.Employees.Include(e => e.Department).AsQueryable();
+        var user = _httpContextAccessor.HttpContext?.User;
+        var isAdmin = user?.IsInRole("Admin") ?? false;
+
+        if (!isAdmin && !string.IsNullOrEmpty(userId))
+        {
+            query = query.Where(e => e.UserId == userId);
+        }
+        else if (isAdmin)
+        {
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminIds = admins.Select(a => a.Id).ToHashSet(StringComparer.Ordinal);
+            query = query.Where(e => e.UserId == null || !adminIds.Contains(e.UserId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(q.Search))
+        {
+            var term = q.Search.Trim();
+            // EF.Functions.Like is provider-agnostic and case-insensitive on most providers.
+            var pattern = $"%{term}%";
+            query = query.Where(e =>
+                EF.Functions.Like(e.FirstName, pattern) ||
+                EF.Functions.Like(e.LastName, pattern) ||
+                EF.Functions.Like(e.Email, pattern) ||
+                (e.Department != null && EF.Functions.Like(e.Department.Name, pattern)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(q.Department))
+        {
+            var dept = q.Department.Trim();
+            query = query.Where(e => e.Department != null && e.Department.Name == dept);
+        }
+
+        if (!string.IsNullOrWhiteSpace(q.Onboarding))
+        {
+            if (string.Equals(q.Onboarding, "complete", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(e => e.IsOnboardingComplete);
+            }
+            else if (string.Equals(q.Onboarding, "incomplete", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(e => !e.IsOnboardingComplete);
+            }
+        }
+
+        query = (q.Sort ?? "name_asc").ToLowerInvariant() switch
+        {
+            "name_desc"   => query.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName),
+            "salary_asc"  => query.OrderBy(e => e.Salary),
+            "salary_desc" => query.OrderByDescending(e => e.Salary),
+            "hire_newest" => query.OrderByDescending(e => e.HireDate),
+            "hire_oldest" => query.OrderBy(e => e.HireDate),
+            _             => query.OrderBy(e => e.LastName).ThenBy(e => e.FirstName)
+        };
+
+        var total = await query.CountAsync();
+        var page = await query.Skip(q.Skip).Take(q.PageSize).ToListAsync();
+
+        return new PagedResult<EmployeeDto>
+        {
+            Items = page.Select(e => e.ToDto()).ToList(),
+            Page = q.Page,
+            PageSize = q.PageSize,
+            TotalCount = total
+        };
+    }
+
+    public async Task<IReadOnlyList<string>> GetDepartmentNamesAsync()
+    {
+        return await _context.Departments
+            .Where(d => d.Name != null && d.Name != "Unassigned")
+            .OrderBy(d => d.Name)
+            .Select(d => d.Name!)
+            .Distinct()
+            .ToListAsync();
     }
 
     public async Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId, string? userId = null)
@@ -454,7 +530,7 @@ public class EmployeeService : IEmployeeService
         var employee = await _context.Employees
             .Include(e => e.Department)
             .FirstOrDefaultAsync(e => e.UserId == userId);
-            
+
         return employee?.ToDto();
     }
 }

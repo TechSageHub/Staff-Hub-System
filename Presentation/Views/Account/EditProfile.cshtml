@@ -1,114 +1,124 @@
 @model Presentation.Models.EditProfileViewModel
 @{
-    ViewData["Title"] = "Edit Profile";
+    ViewData["Title"] = "Account settings";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-primary py-3">
-                <h4 class="card-title text-white mb-0"><i class="bi bi-person-gear me-2"></i>Edit My Profile</h4>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
-                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-                    <input type="hidden" asp-for="EmployeeId" />
-                    <input type="hidden" asp-for="ImageUrl" />
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Account settings</h1>
+        <p class="sh-page-subtitle">Keep your contact and HR details up to date.</p>
+    </div>
+</div>
 
-                    <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                            {
-                                <img src="@Model.ImageUrl" id="profileImagePreview" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;" />
-                            }
-                            else
-                            {
-                                <div id="profileImagePreviewPlaceholder" class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow" style="width: 120px; height: 120px;">
-                                    <i class="bi bi-person text-secondary fs-1"></i>
-                                </div>
-                            }
-                            <label for="Photo" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle p-2" title="Change Photo">
-                                <i class="bi bi-camera"></i>
-                            </label>
-                            <input asp-for="Photo" type="file" class="d-none" onchange="previewImage(this)" />
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="sh-card">
+            <div class="sh-card-body text-center">
+                <div class="position-relative d-inline-block mb-3">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" id="profileImagePreview" class="sh-avatar sh-avatar-xl" style="display:inline-flex;" alt="Profile photo" />
+                    }
+                    else
+                    {
+                        <div id="profileImagePreviewPlaceholder" class="sh-avatar sh-avatar-xl sh-avatar-primary">
+                            <i class="bi bi-person"></i>
                         </div>
-                        <div class="mt-2 small text-muted">Upload a profile picture</div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label fw-medium"></label>
-                            <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
-                            <span asp-validation-for="FirstName" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label fw-medium"></label>
-                            <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
-                            <span asp-validation-for="LastName" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Email" class="form-label fw-medium"></label>
-                            <input asp-for="Email" class="form-control" readonly />
-                            <div class="form-text">Login email cannot be changed here.</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="PhoneNumber" class="form-label fw-medium"></label>
-                            <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
-                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Gender" class="form-label fw-medium"></label>
-                            <select asp-for="Gender" class="form-select">
-                                <option value="">-- Select --</option>
-                                <option value="Female">Female</option>
-                                <option value="Male">Male</option>
-                                <option value="Other">Other</option>
-                                <option value="Prefer not to say">Prefer not to say</option>
-                            </select>
-                            <span asp-validation-for="Gender" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-geo-alt me-2"></i>Address Details</h5>
-                    <div class="row g-3">
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Street" class="form-label fw-medium"></label>
-                            <input asp-for="Street" class="form-control" placeholder="Street Address" />
-                            <span asp-validation-for="Street" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="City" class="form-label fw-medium"></label>
-                            <input asp-for="City" class="form-control" placeholder="City" />
-                            <span asp-validation-for="City" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="State" class="form-label fw-medium"></label>
-                            <input asp-for="State" class="form-control" placeholder="State" />
-                            <span asp-validation-for="State" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="Country" class="form-label fw-medium"></label>
-                            <input asp-for="Country" class="form-control" />
-                            <span asp-validation-for="Country" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
-                            <i class="bi bi-check-circle me-2"></i>Save Changes
-                        </button>
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-light px-4 rounded-pill">
-                            Cancel
-                        </a>
-                    </div>
-                </form>
+                    }
+                </div>
+                <h2 class="mb-1" style="font-size:16px;">@(string.IsNullOrEmpty(Model.FirstName) ? "Your name" : $"{Model.FirstName} {Model.LastName}")</h2>
+                <div class="text-muted small mb-3">@Model.Email</div>
+                <label for="Photo" class="btn btn-outline-secondary btn-sm" style="cursor:pointer;">
+                    <i class="bi bi-camera"></i> Change photo
+                </label>
+                <p class="form-text mt-2 mb-0">PNG, JPG up to 5MB.</p>
             </div>
         </div>
+    </div>
+    <div class="col-lg-8">
+        <form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="sh-card">
+            @Html.AntiForgeryToken()
+            <div class="sh-card-header">
+                <div>
+                    <h2 class="sh-card-title">Personal details</h2>
+                    <div class="sh-card-subtitle">This information is visible to your HR administrators.</div>
+                </div>
+            </div>
+            <div class="sh-card-body">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+                <input type="hidden" asp-for="EmployeeId" />
+                <input type="hidden" asp-for="ImageUrl" />
+                <input asp-for="Photo" type="file" id="Photo" class="d-none" onchange="previewImage(this)" accept="image/*" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label">First name</label>
+                        <input asp-for="FirstName" class="form-control" placeholder="First name" />
+                        <span asp-validation-for="FirstName" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label">Last name</label>
+                        <input asp-for="LastName" class="form-control" placeholder="Last name" />
+                        <span asp-validation-for="LastName" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" readonly />
+                        <div class="form-text">Login email cannot be changed here.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label">Phone number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="+1 555 123 4567" />
+                        <span asp-validation-for="PhoneNumber" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Gender" class="form-label">Gender</label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="invalid-feedback d-block"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: var(--sh-border);">
+
+                <h3 class="mb-3" style="font-size:14px; font-weight:600; color:var(--sh-text-muted); text-transform:uppercase; letter-spacing:0.6px;">
+                    <i class="bi bi-geo-alt"></i> Address
+                </h3>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Street" class="form-label">Street</label>
+                        <input asp-for="Street" class="form-control" placeholder="Street address" />
+                        <span asp-validation-for="Street" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="City" class="form-label">City</label>
+                        <input asp-for="City" class="form-control" placeholder="City" />
+                        <span asp-validation-for="City" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="State" class="form-label">State</label>
+                        <input asp-for="State" class="form-control" placeholder="State" />
+                        <span asp-validation-for="State" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Country" class="form-label">Country</label>
+                        <input asp-for="Country" class="form-control" placeholder="Country" />
+                        <span asp-validation-for="Country" class="invalid-feedback d-block"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="sh-card-footer d-flex gap-2 justify-content-end">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2-circle"></i> Save changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -116,28 +126,24 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    var preview = document.getElementById('profileImagePreview');
-                    var placeholder = document.getElementById('profileImagePreviewPlaceholder');
-                    
-                    if (preview) {
-                        preview.src = e.target.result;
-                    } else if (placeholder) {
-                        // Create preview if it doesn't exist
-                        var img = document.createElement('img');
-                        img.id = 'profileImagePreview';
-                        img.src = e.target.result;
-                        img.className = 'rounded-circle shadow';
-                        img.style.width = '120px';
-                        img.style.height = '120px';
-                        img.style.objectFit = 'cover';
-                        placeholder.parentNode.replaceChild(img, placeholder);
-                    }
+            if (!input.files || !input.files[0]) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('profileImagePreview');
+                var placeholder = document.getElementById('profileImagePreviewPlaceholder');
+                if (preview) {
+                    preview.src = e.target.result;
+                } else if (placeholder) {
+                    var img = document.createElement('img');
+                    img.id = 'profileImagePreview';
+                    img.src = e.target.result;
+                    img.className = 'sh-avatar sh-avatar-xl';
+                    img.style.display = 'inline-flex';
+                    img.alt = 'Profile photo';
+                    placeholder.parentNode.replaceChild(img, placeholder);
                 }
-                reader.readAsDataURL(input.files[0]);
-            }
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     </script>
 }

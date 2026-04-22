@@ -1,124 +1,53 @@
-﻿@model LoginViewModel
+@model LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
     Layout = "_AuthLayout";
 }
 
-<div class="container">
-    <div class="row g-0 align-items-center justify-content-center min-vh-75">
-        <div class="col-lg-10 overflow-hidden rounded-4 shadow-premium bg-white">
-            <div class="row g-0">
-                <div class="col-lg-5 p-5 p-md-5 d-flex flex-column justify-content-center border-end">
-                    <div class="auth-header mb-5">
-                        <h2 class="fw-800 mb-2">Welcome Back</h2>
-                        <p class="text-muted opacity-75">Log in to your account.</p>
-                    </div>
+<div class="auth-form">
+    <span class="auth-form-eyebrow"><i class="bi bi-shield-lock"></i> Welcome back</span>
+    <h1>Sign in to StaffHub</h1>
+    <p class="lead">Access your workspace &mdash; employee records, leave, attendance, tickets and more.</p>
 
-                    <form asp-action="Login" method="post" class="needs-validation">
-                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-                        <div class="mb-4">
-                            <label asp-for="Email" class="form-label fw-bold small text-muted text-uppercase ls-wide mb-2">Email</label>
-                            <div class="position-relative">
-                                <input asp-for="Email" class="form-input-premium w-100 ps-5" placeholder="email@example.com" />
-                                <i class="bi bi-shield-lock position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                            </div>
-                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
-                        </div>
+    <form asp-action="Login" method="post" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
 
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase ls-wide mb-0">Password</label>
-                                <a asp-action="ForgotPassword" class="text-primary-light small fw-bold text-decoration-none">Forgot Password?</a>
-                            </div>
-                            <div class="position-relative">
-                                <input asp-for="Password" type="password" class="form-input-premium w-100 ps-5 pe-5" id="passwordInput" placeholder="••••••••" />
-                                <i class="bi bi-key position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                                <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2 text-muted border-0 bg-transparent" onclick="togglePassword()" tabindex="-1">
-                                    <i class="bi bi-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
-                        </div>
-
-                        <div class="mb-5">
-                            <div class="form-check p-0 d-flex align-items-center gap-2">
-                                <input asp-for="RememberMe" class="form-check-input ms-0 mt-0" style="width: 1.25rem; height: 1.25rem; cursor: pointer;" />
-                                <label asp-for="RememberMe" class="form-check-label small text-dark fw-bold" style="cursor: pointer;">Remember Me</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-premium btn-premium-primary w-100 py-3 mb-4">
-                            Login <i class="bi bi-chevron-right ms-2"></i>
-                        </button>
-
-                        <div class="text-center pt-2">
-                            <p class="text-muted small mb-0">
-                                New user? <a asp-action="Register" class="text-primary-light fw-bold text-decoration-none">Register</a>
-                            </p>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="col-lg-7 d-none d-lg-block position-relative bg-light overflow-hidden">
-                    <div class="auth-visual-content p-5 h-100 d-flex flex-column justify-content-between position-relative z-1">
-                        <div>
-                            <div class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill fw-bold ls-wide mb-4">SYSTEM READY</div>
-                            <h1 class="display-4 fw-800 mt-2 mb-3">Manage your <br><span class="text-primary-light">Team easily.</span></h1>
-                            <p class="fs-5 text-dark opacity-75 max-w-400">Everything you need to manage staff in one place. Track attendance and leave with precision.</p>
-                        </div>
-
-                        <div class="mt-auto">
-                            <div class="row g-4">
-                                <div class="col-6">
-                                    <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
-                                        <div class="bg-info bg-opacity-10 p-2 rounded-3 text-info d-inline-block mb-3">
-                                            <i class="bi bi-graph-up-arrow fs-4"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-1 text-dark">Insights</h6>
-                                        <p class="small text-muted mb-0 lh-sm">Track how the team is doing.</p>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
-                                        <div class="bg-success bg-opacity-10 p-2 rounded-3 text-success d-inline-block mb-3">
-                                            <i class="bi bi-shield-check fs-4"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-1 text-dark">Security</h6>
-                                        <p class="small text-muted mb-0 lh-sm">Your data is safe with us.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Decorative elements -->
-                    <div class="position-absolute top-0 end-0 p-5 opacity-10">
-                        <i class="bi bi-stack display-1"></i>
-                    </div>
-                    <div class="position-absolute bottom-0 start-0 w-100 h-50 bg-gradient-to-t from-white to-transparent opacity-50"></div>
-                </div>
-            </div>
+        <div class="sh-form-group">
+            <label asp-for="Email" class="form-label">Work email</label>
+            <input asp-for="Email" class="form-control" placeholder="you@company.com" autocomplete="username" />
+            <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
         </div>
-    </div>
+
+        <div class="sh-form-group">
+            <div class="d-flex align-items-center justify-content-between">
+                <label asp-for="Password" class="form-label mb-0">Password</label>
+                <a asp-action="ForgotPassword" class="small fw-semibold">Forgot password?</a>
+            </div>
+            <div class="sh-input-wrap mt-1">
+                <input asp-for="Password" type="password" id="loginPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
+                <button type="button" class="sh-input-action" data-sh-toggle-password="#loginPassword" tabindex="-1" aria-label="Show password">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="RememberMe" class="form-check-input" />
+            <label asp-for="RememberMe" class="form-check-label">Keep me signed in for 10 days</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 btn-lg">
+            <span>Sign in</span> <i class="bi bi-arrow-right"></i>
+        </button>
+
+        <p class="text-center text-muted small mt-4 mb-0">
+            New to StaffHub? <a asp-action="Register" class="fw-semibold">Create an account</a>
+        </p>
+    </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('passwordInput');
-            const icon = document.getElementById('toggleIcon');
-            const type = passwordInput.getAttribute('type');
-
-            if (type === 'password') {
-                passwordInput.setAttribute('type', 'text');
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.setAttribute('type', 'password');
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
-        }
-    </script>
 }

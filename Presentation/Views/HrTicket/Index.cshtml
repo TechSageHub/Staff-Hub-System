@@ -1,0 +1,83 @@
+@model List<Application.Dtos.HrTicketDto>
+@{
+    ViewData["Title"] = "HR tickets";
+
+    string PriorityBadge(string p) => p switch
+    {
+        "Low" => "sh-badge sh-badge-neutral",
+        "Medium" => "sh-badge sh-badge-info",
+        "High" => "sh-badge sh-badge-warning",
+        "Urgent" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-neutral"
+    };
+    string StatusBadge(string s) => s switch
+    {
+        "Resolved" => "sh-badge sh-badge-success",
+        "InProgress" => "sh-badge sh-badge-info",
+        "Rejected" => "sh-badge sh-badge-danger",
+        _ => "sh-badge sh-badge-warning"
+    };
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">HR tickets</h1>
+        <p class="sh-page-subtitle">Submit and track support requests with the HR team.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-ticket-detailed"></i> New ticket
+        </a>
+    </div>
+</div>
+
+<div class="sh-card">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-life-preserver"></i></div>
+                <div class="sh-empty-title">No tickets yet</div>
+                <p class="sh-empty-text">Open a ticket when you need help from HR.</p>
+                <a asp-action="Create" class="btn btn-primary mt-2"><i class="bi bi-ticket-detailed"></i> Create ticket</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sh-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div style="font-weight:600;">@ticket.Subject</div>
+                                <div class="text-muted small text-truncate" style="max-width:360px;">@ticket.Description</div>
+                            </td>
+                            <td>@ticket.Category</td>
+                            <td><span class="@PriorityBadge(ticket.Priority)">@ticket.Priority</span></td>
+                            <td><span class="@StatusBadge(ticket.Status)">@ticket.Status</span></td>
+                            <td class="text-muted small">@ticket.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-arrow-right"></i> Open
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

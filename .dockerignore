@@ -1,0 +1,14 @@
+.git
+.github
+.vs
+.dotnet
+**/bin
+**/obj
+**/out
+**/TestResults
+build-diag.log
+run-log.txt
+Dockerfile.txt
+README.md.bak
+.env
+compose.env

@@ -1,55 +1,52 @@
 @model Application.Dtos.CreateAnnouncementDto
 @{
-    ViewData["Title"] = "Post Announcement";
+    ViewData["Title"] = "Post announcement";
 }
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-0 py-4 text-center">
-                    <div class="bg-primary bg-opacity-10 text-primary d-inline-block p-3 rounded-circle mb-3">
-                        <i class="bi bi-megaphone fs-1"></i>
-                    </div>
-                    <h3 class="fw-bold mb-0">Post Announcement</h3>
-                    <p class="text-muted">Share important updates with your team.</p>
-                </div>
-                <div class="card-body p-4 pt-0">
-                    <form asp-action="Create" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Title</label>
-                            <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g., Holiday Schedule Update" required />
-                            <span asp-validation-for="Title" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Message</label>
-                            <textarea asp-for="Content" class="form-control" rows="5" placeholder="Write your announcement here..." required></textarea>
-                            <span asp-validation-for="Content" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <div class="form-check form-switch">
-                                <input asp-for="IsPinned" class="form-check-input" type="checkbox" />
-                                <label class="form-check-label fw-medium">
-                                    Pin this announcement to the top
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
-                                <i class="bi bi-send me-2"></i>Post Announcement
-                            </button>
-                            <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Post announcement</h1>
+        <p class="sh-page-subtitle">Share an important update with the team.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 </div>
+
+<form asp-action="Create" method="post" class="sh-card" style="max-width: 720px;">
+    @Html.AntiForgeryToken()
+    <div class="sh-card-header">
+        <h2 class="sh-card-title">Announcement details</h2>
+    </div>
+    <div class="sh-card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title</label>
+            <input asp-for="Title" class="form-control" placeholder="e.g. Holiday schedule update" required />
+            <span asp-validation-for="Title" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">Message</label>
+            <textarea asp-for="Content" class="form-control" rows="6" placeholder="Write your announcement here..." required></textarea>
+            <span asp-validation-for="Content" class="invalid-feedback d-block"></span>
+        </div>
+
+        <div class="form-check form-switch">
+            <input asp-for="IsPinned" class="form-check-input" type="checkbox" />
+            <label class="form-check-label" asp-for="IsPinned">Pin this announcement to the top</label>
+        </div>
+    </div>
+    <div class="sh-card-footer d-flex gap-2 justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send"></i> Post announcement
+        </button>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

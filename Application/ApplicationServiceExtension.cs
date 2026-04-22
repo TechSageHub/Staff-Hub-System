@@ -6,6 +6,7 @@ using Application.Services.Leave;
 using Application.Services.Announcement;
 using Application.Services.Attendance;
 using Application.Services.Document;
+using Application.Services.HrTicket;
 using Application.Services.Onboarding;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,6 +24,7 @@ public static class ApplicationServiceExtension
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IOnboardingService, OnboardingService>();
+        services.AddScoped<IHrTicketService, HrTicketService>();
 
         return services;
     }

@@ -1,4 +1,5 @@
 ﻿using Application.Dtos;
+using Application.Dtos.Paging;
 using Application.Services.Department;
 using Application.Services.Employee;
 using Application.Services.Address;
@@ -33,7 +34,7 @@ public class EmployeeController : BaseController
 
     
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? search, string? department, string? onboarding, string sort = "name_asc", int page = 1, int pageSize = 20)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!User.IsInRole("Admin"))
@@ -47,8 +48,51 @@ public class EmployeeController : BaseController
             return RedirectToAction(nameof(Details), new { id = self.Id });
         }
 
-        var employees = await _employeeService.GetAllEmployeesAsync(userId);
-        var viewModel = employees.ToViewModel();
+        var query = new EmployeeQuery
+        {
+            Search = search,
+            Department = department,
+            Onboarding = onboarding,
+            Sort = sort,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var paged = await _employeeService.GetEmployeesPagedAsync(query, userId);
+        var departmentNames = await _employeeService.GetDepartmentNamesAsync();
+
+        // Compute unfiltered total for the "X of Y" chip.
+        var totalUnfiltered = await _employeeService.GetEmployeesPagedAsync(
+            new EmployeeQuery { Page = 1, PageSize = 1 }, userId);
+
+        var viewModel = new EmployeesViewModel
+        {
+            Employees = paged.Items.Select(e => new EmployeeViewModel
+            {
+                Id = e.Id,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Email = e.Email,
+                HireDate = e.HireDate,
+                Salary = e.Salary,
+                Gender = e.Gender,
+                PhoneNumber = e.PhoneNumber,
+                DepartmentId = e.DepartmentId,
+                DepartmentName = e.DepartmentName,
+                ImageUrl = e.ImageUrl,
+                IsOnboardingComplete = e.IsOnboardingComplete
+            }).ToList(),
+            Departments = departmentNames.ToList(),
+            Search = search,
+            Department = department,
+            Onboarding = onboarding,
+            Sort = sort,
+            Page = paged.Page,
+            PageSize = paged.PageSize,
+            FilteredCount = paged.TotalCount,
+            TotalCount = totalUnfiltered.TotalCount
+        };
+
         return View(viewModel);
     }
 

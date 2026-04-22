@@ -1,4 +1,5 @@
 using Application.Dtos;
+using Application.Dtos.Paging;
 using Application.Services.Employee;
 using Application.Services.Leave;
 using AspNetCoreHero.ToastNotification.Abstractions;
@@ -32,6 +33,7 @@ public class LeaveController(
 
         var history = await _leaveService.GetEmployeeLeaveHistoryAsync(employee.Id);
         ViewBag.RemainingDays = await _leaveService.GetRemainingLeaveDaysAsync(employee.Id);
+        ViewBag.ActiveLeave = await _leaveService.GetActiveLeaveStatusAsync(employee.Id);
         
         return View(history);
     }
@@ -44,6 +46,7 @@ public class LeaveController(
         
         if (employee == null) return RedirectToAction("Index", "Home");
 
+        ViewBag.RemainingDays = await _leaveService.GetRemainingLeaveDaysAsync(employee.Id);
         return View(new CreateLeaveRequestDto { EmployeeId = employee.Id, StartDate = DateTime.Today.AddDays(7), EndDate = DateTime.Today.AddDays(14) });
     }
 
@@ -75,18 +78,63 @@ public class LeaveController(
             return View(dto);
         }
 
-        await _leaveService.RequestLeaveAsync(dto);
-        _notyf.Success("Leave request submitted successfully!");
+        var remaining = await _leaveService.GetRemainingLeaveDaysAsync(employee.Id);
+        var requestedDays = CountWorkingDays(dto.StartDate, dto.EndDate);
+        if (requestedDays > remaining)
+        {
+            ModelState.AddModelError("", $"Requested leave exceeds your remaining annual leave balance ({remaining} days).");
+            return View(dto);
+        }
+
+        try
+        {
+            await _leaveService.RequestLeaveAsync(dto);
+            _notyf.Success("Leave request submitted successfully!");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _notyf.Error(ex.Message);
+            return View(dto);
+        }
         
         return RedirectToAction(nameof(Index));
     }
 
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AdminDashboard(string? status)
+    private static int CountWorkingDays(DateTime startDate, DateTime endDate)
     {
-        var requests = await _leaveService.GetAllLeaveRequestsAsync(status);
+        var start = startDate.Date;
+        var end = endDate.Date;
+        if (end < start) return 0;
+
+        var count = 0;
+        for (var date = start; date <= end; date = date.AddDays(1))
+        {
+            if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            {
+                continue;
+            }
+
+            count++;
+        }
+
+        return count;
+    }
+
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminDashboard(string? status, string? search, int page = 1, int pageSize = 20)
+    {
+        var query = new LeaveQuery
+        {
+            Status = status,
+            Search = search,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var paged = await _leaveService.GetAllLeaveRequestsPagedAsync(query);
         ViewBag.SelectedStatus = string.IsNullOrWhiteSpace(status) ? "all" : status;
-        return View(requests);
+        ViewBag.Search = search;
+        return View(paged);
     }
 
     [HttpPost]
