@@ -31,9 +31,10 @@ public class HomeController : Controller
         _attendanceService = attendanceService;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
-        if (User.Identity!.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var announcements = await _announcementService.GetRecentAnnouncementsAsync(3);
@@ -129,6 +130,12 @@ public class HomeController : Controller
                     ViewBag.TodayAttendance = await _attendanceService.GetTodayAttendanceAsync(employee.Id);
                 }
             }
+        }
+        else
+        {
+            ViewData["LayoutMode"] = "Lander";
+            var landingAnnouncements = await _announcementService.GetAllAnnouncementsAsync();
+            ViewBag.LandingAnnouncementCount = landingAnnouncements.Count;
         }
 
         return View();

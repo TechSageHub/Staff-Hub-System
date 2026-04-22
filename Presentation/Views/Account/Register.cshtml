@@ -1,13 +1,25 @@
 @model RegisterViewModel
 @{
     ViewData["Title"] = "Create account";
+    ViewData["AuthMode"] = "Register";
     Layout = "_AuthLayout";
 }
 
-<div class="auth-form">
-    <span class="auth-form-eyebrow"><i class="bi bi-rocket-takeoff"></i> Get started</span>
+<div class="auth-form auth-form-register">
+    <span class="auth-form-eyebrow"><i class="bi bi-rocket-takeoff"></i> Build your workspace</span>
     <h1>Create your StaffHub account</h1>
-    <p class="lead">Set up access in seconds &mdash; we'll guide you through onboarding after you confirm your email.</p>
+    <p class="lead">Start with your work email, secure the workspace, and we will guide your team into onboarding right after sign-up.</p>
+
+    <div class="register-signal-row">
+        <div class="register-signal-card">
+            <strong>Role-aware access</strong>
+            <span>Admins and employees see the right actions from day one.</span>
+        </div>
+        <div class="register-signal-card">
+            <strong>Faster setup</strong>
+            <span>Move from account creation to first workflow without extra tools.</span>
+        </div>
+    </div>
 
     <form asp-action="Register" method="post">
         @Html.AntiForgeryToken()
@@ -27,7 +39,10 @@
                     <i class="bi bi-eye"></i>
                 </button>
             </div>
-            <div class="form-text">Must include uppercase, lowercase, a digit, and a symbol.</div>
+            <div class="register-password-note">
+                <span><i class="bi bi-check2-circle"></i> Uppercase and lowercase</span>
+                <span><i class="bi bi-check2-circle"></i> One digit and one symbol</span>
+            </div>
             <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
         </div>
 
@@ -43,7 +58,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary w-100 btn-lg mt-2">
-            <span>Create account</span> <i class="bi bi-person-plus"></i>
+            <span>Create workspace account</span> <i class="bi bi-person-plus"></i>
         </button>
 
         <p class="text-center text-muted small mt-4 mb-0">

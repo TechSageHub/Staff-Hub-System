@@ -1,51 +1,68 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "Sign in";
+    ViewData["AuthMode"] = "Login";
     Layout = "_AuthLayout";
 }
 
-<div class="auth-form">
-    <span class="auth-form-eyebrow"><i class="bi bi-shield-lock"></i> Welcome back</span>
-    <h1>Sign in to StaffHub</h1>
-    <p class="lead">Access your workspace &mdash; employee records, leave, attendance, tickets and more.</p>
+<div class="auth-form auth-form-login">
+    <div class="auth-login-intro">
+        <span class="auth-form-eyebrow"><i class="bi bi-shield-lock"></i> StaffHub workspace access</span>
+        <h1>Sign in to continue your HR operations day.</h1>
+        <p class="lead">Pick up approvals, attendance reviews, employee updates, and internal requests from the same workspace your team already uses.</p>
+    </div>
 
-    <form asp-action="Login" method="post" class="needs-validation" novalidate>
-        @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
-
-        <div class="sh-form-group">
-            <label asp-for="Email" class="form-label">Work email</label>
-            <input asp-for="Email" class="form-control" placeholder="you@company.com" autocomplete="username" />
-            <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
-        </div>
-
-        <div class="sh-form-group">
-            <div class="d-flex align-items-center justify-content-between">
-                <label asp-for="Password" class="form-label mb-0">Password</label>
-                <a asp-action="ForgotPassword" class="small fw-semibold">Forgot password?</a>
+    <div class="auth-login-frame">
+        <div class="auth-login-frame-head">
+            <div>
+                <div class="auth-login-frame-title">Secure sign in</div>
+                <div class="auth-login-frame-copy">Use your work credentials to enter the workspace.</div>
             </div>
-            <div class="sh-input-wrap mt-1">
-                <input asp-for="Password" type="password" id="loginPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
-                <button type="button" class="sh-input-action" data-sh-toggle-password="#loginPassword" tabindex="-1" aria-label="Show password">
-                    <i class="bi bi-eye"></i>
-                </button>
+            <span class="auth-login-chip"><i class="bi bi-shield-check"></i> Protected</span>
+        </div>
+
+        <form asp-action="Login" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
+
+            <div class="sh-form-group">
+                <label asp-for="Email" class="form-label">Work email</label>
+                <input asp-for="Email" class="form-control" placeholder="you@company.com" autocomplete="username" />
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
             </div>
-            <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
-        </div>
 
-        <div class="form-check mb-4">
-            <input asp-for="RememberMe" class="form-check-input" />
-            <label asp-for="RememberMe" class="form-check-label">Keep me signed in for 10 days</label>
-        </div>
+            <div class="sh-form-group">
+                <div class="d-flex align-items-center justify-content-between">
+                    <label asp-for="Password" class="form-label mb-0">Password</label>
+                    <a asp-action="ForgotPassword" class="small fw-semibold">Forgot password?</a>
+                </div>
+                <div class="sh-input-wrap mt-1">
+                    <input asp-for="Password" type="password" id="loginPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
+                    <button type="button" class="sh-input-action" data-sh-toggle-password="#loginPassword" tabindex="-1" aria-label="Show password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+            </div>
 
-        <button type="submit" class="btn btn-primary w-100 btn-lg">
-            <span>Sign in</span> <i class="bi bi-arrow-right"></i>
-        </button>
+            <div class="auth-login-row">
+                <div class="form-check mb-0">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Keep me signed in for 10 days</label>
+                </div>
+                <div class="auth-login-meta">SSO-ready workspace</div>
+            </div>
 
-        <p class="text-center text-muted small mt-4 mb-0">
-            New to StaffHub? <a asp-action="Register" class="fw-semibold">Create an account</a>
-        </p>
-    </form>
+            <button type="submit" class="btn btn-primary w-100 btn-lg auth-login-submit">
+                <span>Enter workspace</span> <i class="bi bi-arrow-right"></i>
+            </button>
+
+            <div class="auth-login-bottom">
+                <span>New to StaffHub?</span>
+                <a asp-action="Register" class="fw-semibold">Create an account</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

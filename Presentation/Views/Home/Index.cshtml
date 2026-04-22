@@ -1,21 +1,204 @@
 @using Application.Dtos
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = User.Identity?.IsAuthenticated == true ? "Dashboard" : "Modern HR, Built for Growing Teams";
+
     var myEmployee = ViewBag.MyEmployee as EmployeeDto;
-    int? leaveBalance = ViewBag.LeaveBalance as int?;
+    int leaveBalance = ViewBag.LeaveBalance as int? ?? 0;
     var todayAttendance = ViewBag.TodayAttendance as AttendanceLogDto;
     var announcements = ViewBag.Announcements as List<AnnouncementDto> ?? new List<AnnouncementDto>();
+    var landingAnnouncementCount = (int)(ViewBag.LandingAnnouncementCount ?? 0);
 
     string DisplayName()
     {
-        if (myEmployee != null) return $"{myEmployee.FirstName} {myEmployee.LastName}".Trim();
+        if (myEmployee != null)
+        {
+            return $"{myEmployee.FirstName} {myEmployee.LastName}".Trim();
+        }
+
         var name = User.Identity?.Name ?? "there";
         var at = name.IndexOf('@');
         return at > 0 ? name.Substring(0, at) : name;
     }
 }
 
-@if (User.Identity!.IsAuthenticated && User.IsInRole("Admin"))
+@if (!(User.Identity?.IsAuthenticated ?? false))
+{
+    <section class="sh-lander-hero">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <div class="sh-lander-eyebrow">StaffHub Enterprise HR</div>
+                    <h1 class="sh-lander-title">Run your people operations from one polished workspace.</h1>
+                    <p class="sh-lander-copy">
+                        Centralize onboarding, attendance, leave, announcements, and HR support in a platform designed for teams that want structure without the usual admin drag.
+                    </p>
+                    <div class="sh-lander-actions">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">
+                            Start free trial
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary btn-lg">
+                            Sign in
+                        </a>
+                    </div>
+                    <div class="sh-lander-proof">
+                        <div class="sh-proof-chip">
+                            <strong>20+</strong>
+                            <span>leave rules automated</span>
+                        </div>
+                        <div class="sh-proof-chip">
+                            <strong>@landingAnnouncementCount</strong>
+                            <span>company updates published</span>
+                        </div>
+                        <div class="sh-proof-chip">
+                            <strong>24/7</strong>
+                            <span>HR visibility</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="sh-lander-preview">
+                        <div class="sh-preview-card sh-preview-card-main">
+                            <div class="sh-preview-header">
+                                <span class="sh-preview-dot"></span>
+                                <span class="sh-preview-dot"></span>
+                                <span class="sh-preview-dot"></span>
+                            </div>
+                            <div class="sh-preview-body">
+                                <div class="sh-preview-panel">
+                                    <div class="sh-preview-label">Workforce Pulse</div>
+                                    <div class="sh-preview-number">1,248</div>
+                                    <div class="sh-preview-trend positive">+14% active employees</div>
+                                </div>
+                                <div class="sh-preview-grid">
+                                    <div class="sh-preview-metric">
+                                        <span>Pending leave</span>
+                                        <strong>18</strong>
+                                    </div>
+                                    <div class="sh-preview-metric">
+                                        <span>Open tickets</span>
+                                        <strong>07</strong>
+                                    </div>
+                                    <div class="sh-preview-metric">
+                                        <span>Clocked in</span>
+                                        <strong>92%</strong>
+                                    </div>
+                                    <div class="sh-preview-metric">
+                                        <span>Onboarding</span>
+                                        <strong>31</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sh-preview-card sh-preview-card-float">
+                            <div class="small text-uppercase text-muted fw-semibold mb-2">Approval Queue</div>
+                            <div class="sh-preview-line"></div>
+                            <div class="sh-preview-line short"></div>
+                            <div class="sh-preview-badge">Live review</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sh-lander-section" id="features">
+        <div class="container">
+            <div class="sh-lander-section-head">
+                <div class="sh-lander-eyebrow">Why teams switch</div>
+                <h2>Everything HR needs, without scattered spreadsheets and approvals.</h2>
+                <p>StaffHub gives operators, managers, and employees one place to work through everyday HR processes with clarity.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-3">
+                    <article class="sh-feature-card">
+                        <div class="sh-feature-icon"><i class="bi bi-person-workspace"></i></div>
+                        <h3>Employee records</h3>
+                        <p>Organize profiles, departments, onboarding progress, and contact details in one clean directory.</p>
+                    </article>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <article class="sh-feature-card">
+                        <div class="sh-feature-icon"><i class="bi bi-calendar2-week"></i></div>
+                        <h3>Leave control</h3>
+                        <p>Handle requests, balances, approvals, and current leave visibility with fewer manual follow-ups.</p>
+                    </article>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <article class="sh-feature-card">
+                        <div class="sh-feature-icon"><i class="bi bi-clock-history"></i></div>
+                        <h3>Attendance tracking</h3>
+                        <p>See clock-in activity, work history, and team trends without hopping between systems.</p>
+                    </article>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <article class="sh-feature-card">
+                        <div class="sh-feature-icon"><i class="bi bi-headset"></i></div>
+                        <h3>HR support desk</h3>
+                        <p>Receive employee questions and HR tickets in a workflow that is easy to triage and update.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sh-lander-section sh-lander-section-alt" id="solutions">
+        <div class="container">
+            <div class="row g-4 align-items-stretch">
+                <div class="col-lg-7">
+                    <div class="sh-story-card">
+                        <div class="sh-lander-eyebrow">Operations visibility</div>
+                        <h2>Designed for fast decisions across HR, leadership, and line managers.</h2>
+                        <p>
+                            Monitor workforce activity, open approvals, onboarding progress, and internal updates from a dashboard that feels executive-ready, not improvised.
+                        </p>
+                        <ul class="sh-check-list">
+                            <li>Spot onboarding gaps before they become delays</li>
+                            <li>Review attendance and leave in one workflow</li>
+                            <li>Share company updates without extra tooling</li>
+                            <li>Respond to HR tickets with an auditable timeline</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="sh-side-stack">
+                        <div class="sh-side-card">
+                            <div class="sh-side-label">Built for</div>
+                            <strong>Growing teams</strong>
+                            <span>Start simple and scale your HR processes cleanly.</span>
+                        </div>
+                        <div class="sh-side-card">
+                            <div class="sh-side-label">Ideal for</div>
+                            <strong>Admin-led operations</strong>
+                            <span>Clear approval queues, dashboards, and employee self-service.</span>
+                        </div>
+                        <div class="sh-side-card">
+                            <div class="sh-side-label">Outcome</div>
+                            <strong>Less manual overhead</strong>
+                            <span>Fewer status chases, better tracking, stronger visibility.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sh-lander-section" id="about">
+        <div class="container">
+            <div class="sh-cta-panel">
+                <div>
+                    <div class="sh-lander-eyebrow">Ready to modernize HR?</div>
+                    <h2>Give your team a sharper way to manage people operations.</h2>
+                    <p>Start with attendance, leave, onboarding, and support workflows in one branded system.</p>
+                </div>
+                <div class="sh-cta-actions">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Create account</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary btn-lg">Access workspace</a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+else if (User.IsInRole("Admin"))
 {
     <partial name="_AdminDashboard" />
 }
@@ -23,8 +206,8 @@ else
 {
     <div class="sh-page-header">
         <div>
-            <h1 class="sh-page-title">Hi @DisplayName() &#128075;</h1>
-            <p class="sh-page-subtitle">Here's what's happening across your workspace today.</p>
+            <h1 class="sh-page-title">Hi @DisplayName()</h1>
+            <p class="sh-page-subtitle">Here's what matters for your workday right now.</p>
         </div>
         <div class="sh-page-actions">
             <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="EditProfile">
@@ -40,7 +223,7 @@ else
         <div class="admin-stat-card success">
             <div class="admin-stat-icon"><i class="bi bi-calendar2-heart"></i></div>
             <div class="admin-stat-content">
-                <div class="admin-stat-value">@(leaveBalance?.ToString() ?? "—")</div>
+                <div class="admin-stat-value">@leaveBalance</div>
                 <div class="admin-stat-label">Days of leave remaining</div>
             </div>
         </div>
@@ -50,7 +233,7 @@ else
                 @if (todayAttendance == null)
                 {
                     <div class="admin-stat-value">Not clocked in</div>
-                    <div class="admin-stat-label">Head to attendance when you start your day</div>
+                    <div class="admin-stat-label">Start your day from Attendance</div>
                 }
                 else if (todayAttendance.IsActive)
                 {
@@ -70,7 +253,7 @@ else
                 @if (myEmployee?.IsOnboardingComplete == true)
                 {
                     <div class="admin-stat-value">Complete</div>
-                    <div class="admin-stat-label">Your profile is fully onboarded</div>
+                    <div class="admin-stat-label">Your onboarding is fully complete</div>
                 }
                 else
                 {
@@ -82,7 +265,7 @@ else
         <div class="admin-stat-card">
             <div class="admin-stat-icon"><i class="bi bi-building"></i></div>
             <div class="admin-stat-content">
-                <div class="admin-stat-value">@(string.IsNullOrWhiteSpace(myEmployee?.DepartmentName) ? "—" : myEmployee!.DepartmentName)</div>
+                <div class="admin-stat-value">@(string.IsNullOrWhiteSpace(myEmployee?.DepartmentName) ? "-" : myEmployee!.DepartmentName)</div>
                 <div class="admin-stat-label">Your department</div>
             </div>
         </div>
@@ -94,7 +277,7 @@ else
                 <div class="sh-card-header">
                     <div>
                         <h2 class="sh-card-title">Announcements</h2>
-                        <div class="sh-card-subtitle">The latest from your HR team.</div>
+                        <div class="sh-card-subtitle">The latest updates from your HR team.</div>
                     </div>
                     <a class="btn btn-outline-secondary btn-sm" asp-controller="Announcement" asp-action="Index">View all</a>
                 </div>
@@ -121,7 +304,7 @@ else
                                 </div>
                                 <h3 style="font-size:15px; font-weight:600; margin:0 0 4px;">@a.Title</h3>
                                 <p class="text-muted small mb-1" style="white-space:pre-wrap;">@a.Content</p>
-                                <div class="text-muted" style="font-size:11px;">&mdash; @a.AuthorName</div>
+                                <div class="text-muted" style="font-size:11px;">- @a.AuthorName</div>
                             </div>
                         }
                     }
@@ -155,3 +338,4 @@ else
         </div>
     </div>
 }
+

@@ -13,13 +13,16 @@
     var roleLabel = isAdmin ? "Administrator" : "Team member";
     var pageTitle = ViewData["Title"] as string;
     var headerTitle = string.IsNullOrWhiteSpace(pageTitle) ? currentController : pageTitle;
+    var isAuth = User.Identity?.IsAuthenticated ?? false;
+    var layoutMode = ViewData["LayoutMode"] as string ?? string.Empty;
+    var isLanderMode = string.Equals(layoutMode, "Lander", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " · StaffHub")</title>
+    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " - StaffHub")</title>
     <link rel="icon" type="image/png" href="~/favicon.png">
     <script>
         (function () {
@@ -39,10 +42,12 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
 </head>
 <body class="app-body">
-    <div class="admin-shell">
+    <div class="admin-shell @(isLanderMode ? "lander-mode" : "")">
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <aside class="admin-sidebar" id="mainSidebar">
+        @if (!isLanderMode && isAuth)
+        {
+            <aside class="admin-sidebar" id="mainSidebar">
             <div class="admin-sidebar-brand">
                 <span class="sh-brand-badge"><i class="bi bi-people-fill"></i></span>
                 <div class="admin-brand-copy">
@@ -139,59 +144,83 @@
                 </div>
             </nav>
         </aside>
+        }
 
         <div class="admin-main">
-            <header class="admin-topbar">
+            <header class="@(isLanderMode ? "lander-nav" : "admin-topbar")">
                 <div class="admin-topbar-left">
-                    <button class="admin-menu-toggle d-lg-none" type="button" id="toggleSidebar" aria-label="Open sidebar">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    <div class="admin-topbar-title">@headerTitle</div>
+                    @if (!isLanderMode && isAuth)
+                    {
+                        <button class="admin-menu-toggle d-lg-none" type="button" id="toggleSidebar" aria-label="Open sidebar">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <a class="lander-nav-brand" href="/">
+                            <span class="sh-brand-badge"><i class="bi bi-people-fill"></i></span>
+                            <span>StaffHub</span>
+                        </a>
+                    }
+                    <div class="admin-topbar-title @((!isLanderMode && isAuth) ? "" : "d-none d-md-block")">@headerTitle</div>
                 </div>
 
                 <div class="admin-topbar-right">
-                    <button type="button" class="sh-icon-btn" data-sh-theme-toggle aria-pressed="false" aria-label="Toggle theme">
-                        <i class="bi bi-moon-stars"></i>
-                    </button>
-
-                    <div class="dropdown">
-                        <button type="button" class="sh-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                            <i class="bi bi-bell"></i>
+                    @if (isLanderMode)
+                    {
+                        <nav class="lander-nav-links d-none d-lg-flex">
+                            <a href="#features">Features</a>
+                            <a href="#solutions">Solutions</a>
+                            <a href="#about">About</a>
+                        </nav>
+                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Login">Sign in</a>
+                        <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Get started</a>
+                    }
+                    else
+                    {
+                        <button type="button" class="sh-icon-btn" data-sh-theme-toggle aria-pressed="false" aria-label="Toggle theme">
+                            <i class="bi bi-moon-stars"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end" style="min-width:280px;">
-                            <div class="dropdown-header">Notifications</div>
-                            <div class="px-2 py-3 text-center text-muted small">
-                                You're all caught up.
+
+                        <div class="dropdown">
+                            <button type="button" class="sh-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" style="min-width:280px;">
+                                <div class="dropdown-header">Notifications</div>
+                                <div class="px-2 py-3 text-center text-muted small">
+                                    You're all caught up.
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="dropdown">
-                        <button type="button" class="admin-userbox" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
-                            <span class="admin-user-avatar">@avatarInitial</span>
-                            <span class="admin-user-meta d-none d-md-flex flex-column text-start">
-                                <span class="admin-user-name">@shortName</span>
-                                <span class="admin-user-role">@roleLabel</span>
-                            </span>
-                            <i class="bi bi-chevron-down d-none d-md-inline text-muted small"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <div class="dropdown-header">@emailLabel</div>
-                            <a class="dropdown-item" asp-controller="Account" asp-action="EditProfile">
-                                <i class="bi bi-person"></i><span>Profile settings</span>
-                            </a>
-                            @if (!isAdmin)
-                            {
-                                <a class="dropdown-item" asp-controller="Onboarding" asp-action="Index">
-                                    <i class="bi bi-clipboard-check"></i><span>Onboarding</span>
+                        <div class="dropdown">
+                            <button type="button" class="admin-userbox" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+                                <span class="admin-user-avatar">@avatarInitial</span>
+                                <span class="admin-user-meta d-none d-md-flex flex-column text-start">
+                                    <span class="admin-user-name">@shortName</span>
+                                    <span class="admin-user-role">@roleLabel</span>
+                                </span>
+                                <i class="bi bi-chevron-down d-none d-md-inline text-muted small"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <div class="dropdown-header">@emailLabel</div>
+                                <a class="dropdown-item" asp-controller="Account" asp-action="EditProfile">
+                                    <i class="bi bi-person"></i><span>Profile settings</span>
                                 </a>
-                            }
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
-                                <i class="bi bi-box-arrow-right"></i><span>Sign out</span>
-                            </a>
+                                @if (!isAdmin)
+                                {
+                                    <a class="dropdown-item" asp-controller="Onboarding" asp-action="Index">
+                                        <i class="bi bi-clipboard-check"></i><span>Onboarding</span>
+                                    </a>
+                                }
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                                    <i class="bi bi-box-arrow-right"></i><span>Sign out</span>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </header>
 
@@ -211,3 +240,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+

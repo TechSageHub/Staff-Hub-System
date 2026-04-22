@@ -1,12 +1,15 @@
 @{
     var pageTitle = ViewData["Title"] as string;
+    var authMode = ViewData["AuthMode"] as string ?? string.Empty;
+    var isRegisterMode = string.Equals(authMode, "Register", StringComparison.OrdinalIgnoreCase);
+    var isLoginMode = string.Equals(authMode, "Login", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " · StaffHub")</title>
+    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "StaffHub" : pageTitle + " - StaffHub")</title>
     <link rel="icon" type="image/png" href="~/favicon.png">
     <script>
         (function () {
@@ -43,52 +46,152 @@
         </nav>
 
         <main role="main" class="auth-main">
-            <div class="auth-form-panel">
+            <div class="auth-form-panel @(isRegisterMode ? "auth-form-panel-register" : string.Empty) @(isLoginMode ? "auth-form-panel-login" : string.Empty)">
                 @RenderBody()
             </div>
-            <aside class="auth-visual d-none d-lg-flex">
+            <aside class="auth-visual @(isRegisterMode ? "auth-visual-register" : string.Empty) @(isLoginMode ? "auth-visual-login" : string.Empty) d-none d-lg-flex">
                 <div class="auth-visual-content">
-                    <span class="status-pill mb-4">
-                        <span class="status-dot"></span>
-                        <span>Trusted by people operations teams</span>
-                    </span>
-                    <h2>The HR operating system your team will actually love.</h2>
-                    <p>StaffHub consolidates the day-to-day of people operations &mdash; employee records, leave, attendance, tickets and onboarding &mdash; into one calm, auditable workspace.</p>
+                    @if (isRegisterMode)
+                    {
+                        <span class="status-pill mb-4">
+                            <span class="status-dot"></span>
+                            <span>Launch your HR workspace in minutes</span>
+                        </span>
+                        <h2>Set up once. Run onboarding, leave, attendance, and support from one clean command center.</h2>
+                        <p>StaffHub replaces patchy admin routines with one visible, role-aware workflow so HR teams can move faster without losing control.</p>
 
-                    <div class="auth-feature-list">
-                        <div class="auth-feature">
-                            <span class="auth-feature-icon"><i class="bi bi-shield-check"></i></span>
-                            <div>
-                                <div class="auth-feature-title">Role-aware by design</div>
-                                <p class="auth-feature-desc">Administrators and employees see the information and actions that are relevant to them &mdash; nothing more.</p>
+                        <div class="auth-preview-board">
+                            <div class="auth-preview-hero">
+                                <div class="auth-preview-label">Workspace pulse</div>
+                                <div class="auth-preview-value">1,248</div>
+                                <div class="auth-preview-sub">employees visible across teams</div>
+                            </div>
+                            <div class="auth-preview-grid">
+                                <div class="auth-preview-tile">
+                                    <span>Pending leave</span>
+                                    <strong>18</strong>
+                                </div>
+                                <div class="auth-preview-tile">
+                                    <span>Open tickets</span>
+                                    <strong>07</strong>
+                                </div>
+                                <div class="auth-preview-tile">
+                                    <span>Clocked in</span>
+                                    <strong>92%</strong>
+                                </div>
+                                <div class="auth-preview-tile">
+                                    <span>Onboarding</span>
+                                    <strong>31</strong>
+                                </div>
                             </div>
                         </div>
-                        <div class="auth-feature">
-                            <span class="auth-feature-icon"><i class="bi bi-bar-chart"></i></span>
-                            <div>
-                                <div class="auth-feature-title">Live HR analytics</div>
-                                <p class="auth-feature-desc">Headcount, onboarding progress, attendance and leave balances are always one click away.</p>
-                            </div>
-                        </div>
-                        <div class="auth-feature">
-                            <span class="auth-feature-icon"><i class="bi bi-lightning-charge"></i></span>
-                            <div>
-                                <div class="auth-feature-title">Low-friction workflows</div>
-                                <p class="auth-feature-desc">Bulk employee imports, one-click leave approvals and a ticketed HR helpdesk, all in one place.</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="auth-stat-grid">
-                        <div class="auth-stat-card">
-                            <div class="auth-stat-value">99.9%</div>
-                            <div class="auth-stat-label">Workspace uptime</div>
+                        <div class="auth-mini-proof">
+                            <div class="auth-mini-proof-item">
+                                <div class="auth-mini-proof-value">3 teams</div>
+                                <div class="auth-mini-proof-label">HR, admin, and employees stay aligned.</div>
+                            </div>
+                            <div class="auth-mini-proof-item">
+                                <div class="auth-mini-proof-value">1 workflow</div>
+                                <div class="auth-mini-proof-label">Requests, approvals, and updates stay traceable.</div>
+                            </div>
                         </div>
-                        <div class="auth-stat-card">
-                            <div class="auth-stat-value">SOC 2</div>
-                            <div class="auth-stat-label">Ready controls</div>
+                    }
+                    else if (isLoginMode)
+                    {
+                        <span class="status-pill mb-4">
+                            <span class="status-dot"></span>
+                            <span>Daily operations snapshot</span>
+                        </span>
+                        <h2>One workspace for the things HR teams actually need to act on.</h2>
+                        <p>Instead of generic dashboards, StaffHub brings approvals, attendance exceptions, announcements, and employee support into a single working surface.</p>
+
+                        <div class="auth-ops-board">
+                            <div class="auth-ops-strip">
+                                <div class="auth-ops-strip-label">Today</div>
+                                <div class="auth-ops-strip-value">42 active items</div>
+                            </div>
+
+                            <div class="auth-ops-list">
+                                <article class="auth-ops-item priority">
+                                    <div>
+                                        <div class="auth-ops-item-label">Leave queue</div>
+                                        <strong>8 requests waiting for approval</strong>
+                                    </div>
+                                    <span>2 urgent</span>
+                                </article>
+                                <article class="auth-ops-item">
+                                    <div>
+                                        <div class="auth-ops-item-label">Attendance review</div>
+                                        <strong>3 late clock-ins flagged</strong>
+                                    </div>
+                                    <span>Review</span>
+                                </article>
+                                <article class="auth-ops-item">
+                                    <div>
+                                        <div class="auth-ops-item-label">HR support</div>
+                                        <strong>5 employee tickets updated</strong>
+                                    </div>
+                                    <span>Tracked</span>
+                                </article>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="auth-login-proof-grid">
+                            <div class="auth-login-proof-card">
+                                <div class="auth-login-proof-value">92%</div>
+                                <div class="auth-login-proof-label">attendance captured on time</div>
+                            </div>
+                            <div class="auth-login-proof-card">
+                                <div class="auth-login-proof-value">31</div>
+                                <div class="auth-login-proof-label">onboarding steps in progress</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="status-pill mb-4">
+                            <span class="status-dot"></span>
+                            <span>Trusted by people operations teams</span>
+                        </span>
+                        <h2>The HR operating system your team will actually love.</h2>
+                        <p>StaffHub consolidates the day-to-day of people operations &mdash; employee records, leave, attendance, tickets and onboarding &mdash; into one calm, auditable workspace.</p>
+
+                        <div class="auth-feature-list">
+                            <div class="auth-feature">
+                                <span class="auth-feature-icon"><i class="bi bi-shield-check"></i></span>
+                                <div>
+                                    <div class="auth-feature-title">Role-aware by design</div>
+                                    <p class="auth-feature-desc">Administrators and employees see the information and actions that are relevant to them &mdash; nothing more.</p>
+                                </div>
+                            </div>
+                            <div class="auth-feature">
+                                <span class="auth-feature-icon"><i class="bi bi-bar-chart"></i></span>
+                                <div>
+                                    <div class="auth-feature-title">Live HR analytics</div>
+                                    <p class="auth-feature-desc">Headcount, onboarding progress, attendance and leave balances are always one click away.</p>
+                                </div>
+                            </div>
+                            <div class="auth-feature">
+                                <span class="auth-feature-icon"><i class="bi bi-lightning-charge"></i></span>
+                                <div>
+                                    <div class="auth-feature-title">Low-friction workflows</div>
+                                    <p class="auth-feature-desc">Bulk employee imports, one-click leave approvals and a ticketed HR helpdesk, all in one place.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="auth-stat-grid">
+                            <div class="auth-stat-card">
+                                <div class="auth-stat-value">99.9%</div>
+                                <div class="auth-stat-label">Workspace uptime</div>
+                            </div>
+                            <div class="auth-stat-card">
+                                <div class="auth-stat-value">SOC 2</div>
+                                <div class="auth-stat-label">Ready controls</div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </aside>
         </main>
