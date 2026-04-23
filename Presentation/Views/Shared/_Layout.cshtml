@@ -66,6 +66,13 @@
                         <span class="admin-nav-icon"><i class="bi bi-speedometer2"></i></span>
                         <span>Dashboard</span>
                     </a>
+                    @if (isAdmin)
+                    {
+                        <a class="admin-nav-item @(IsActive("Analytics") ? "active" : "")" asp-controller="Analytics" asp-action="Index">
+                            <span class="admin-nav-icon"><i class="bi bi-graph-up"></i></span>
+                            <span>Analytics</span>
+                        </a>
+                    }
                 </div>
 
                 <div class="admin-nav-section-title">Workforce</div>
