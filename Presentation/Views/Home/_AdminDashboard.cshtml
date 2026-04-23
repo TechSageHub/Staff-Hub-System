@@ -347,9 +347,9 @@
         // Sort departments desc by headcount for clearer ranking
         var _deptPairs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
             deptNames.Zip(deptCounts, (n, c) => new { Name = n, Count = c }).ToList()));
-        _deptPairs.sort(function (a, b) { return b.count - a.count; });
-        var deptNames = _deptPairs.map(function (p) { return p.name; });
-        var deptCounts = _deptPairs.map(function (p) { return p.count; });
+        _deptPairs.sort(function (a, b) { return b.Count - a.Count; });
+        var deptNames = _deptPairs.map(function (p) { return p.Name; });
+        var deptCounts = _deptPairs.map(function (p) { return p.Count; });
 
         var maleCount = @maleCount, femaleCount = @femaleCount, otherGenderCount = @otherGenderCount;
         var genderSeries = [maleCount, femaleCount, otherGenderCount];
