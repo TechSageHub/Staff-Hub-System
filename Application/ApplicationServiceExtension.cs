@@ -1,4 +1,5 @@
-﻿using Application.Services.Authentication;
+﻿using Application.Services.Analytics;
+using Application.Services.Authentication;
 using Application.Services.Department;
 using Application.Services.Email;
 using Application.Services.Employee;
@@ -25,6 +26,7 @@ public static class ApplicationServiceExtension
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IOnboardingService, OnboardingService>();
         services.AddScoped<IHrTicketService, HrTicketService>();
+        services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         return services;
     }
