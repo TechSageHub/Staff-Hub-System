@@ -50,6 +50,7 @@ public class AnalyticsReportDocument(AnalyticsPageDto data, string orgName) : ID
         container.PaddingVertical(10).Column(col =>
         {
             col.Spacing(16);
+            col.Item().Element(c => Section(c, "Executive summary", () => OverviewSection(c)));
             col.Item().Element(c => Section(c, "Leave", () => LeaveSection(c)));
             col.Item().Element(c => Section(c, "Attendance", () => AttendanceSection(c)));
             col.Item().Element(c => Section(c, "HR tickets", () => TicketSection(c)));
@@ -63,6 +64,19 @@ public class AnalyticsReportDocument(AnalyticsPageDto data, string orgName) : ID
         {
             col.Item().PaddingBottom(6).Text(title).FontSize(13).SemiBold().FontColor(Colors.Blue.Darken2);
             body();
+        });
+    }
+
+    private void OverviewSection(IContainer c)
+    {
+        var o = data.Overview;
+        c.Row(row =>
+        {
+            row.RelativeItem().Element(x => Kpi(x, "Headcount", o.Headcount.ToString()));
+            row.RelativeItem().Element(x => Kpi(x, "Attendance rate", $"{o.AttendanceRatePct:0.0}%"));
+            row.RelativeItem().Element(x => Kpi(x, "Pending leave", o.PendingLeaveRequests.ToString()));
+            row.RelativeItem().Element(x => Kpi(x, "Open tickets", o.OpenTickets.ToString()));
+            row.RelativeItem().Element(x => Kpi(x, "Avg resolve (h)", o.AvgResolutionHours.ToString("0.0")));
         });
     }
 

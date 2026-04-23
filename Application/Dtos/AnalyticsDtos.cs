@@ -17,10 +17,20 @@ public class AnalyticsPageDto
 {
     public AnalyticsFilter Filter { get; set; } = new();
     public List<DepartmentDto> Departments { get; set; } = new();
+    public AnalyticsOverviewDto Overview { get; set; } = new();
     public LeaveAnalyticsDto Leave { get; set; } = new();
     public AttendanceAnalyticsDto Attendance { get; set; } = new();
     public TicketAnalyticsDto Tickets { get; set; } = new();
     public WorkforceAnalyticsDto Workforce { get; set; } = new();
+}
+
+public class AnalyticsOverviewDto
+{
+    public int Headcount { get; set; }
+    public double AttendanceRatePct { get; set; }
+    public int PendingLeaveRequests { get; set; }
+    public int OpenTickets { get; set; }
+    public double AvgResolutionHours { get; set; }
 }
 
 public class LeaveAnalyticsDto

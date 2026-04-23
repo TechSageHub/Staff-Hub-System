@@ -1,0 +1,165 @@
+@using Application.Dtos
+@{
+    ViewData["Title"] = "Leave calendar";
+    var isAdmin = (bool)(ViewBag.IsAdmin ?? false);
+    var departments = ViewBag.Departments as List<DepartmentDto> ?? new List<DepartmentDto>();
+    var selectedDept = (Guid?)ViewBag.SelectedDept;
+    var myDeptName = ViewBag.MyDeptName as string;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+<style>
+    .fc .fc-toolbar-title { font-size: 1.15rem; font-weight: 600; }
+    .fc .fc-button-primary { background: var(--sh-primary-600, #1d4ed8); border-color: var(--sh-primary-600, #1d4ed8); }
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:not(:disabled):active { background: var(--sh-primary, #1e3a8a); border-color: var(--sh-primary, #1e3a8a); }
+    .fc-event { border: 0; font-size: 0.82rem; padding: 2px 6px; }
+    .leave-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--bs-body-color); }
+    .leave-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
+</style>
+
+<div class="admin-dashboard-page">
+    <div class="sh-page-header">
+        <div>
+            <h1 class="sh-page-title">Leave calendar</h1>
+            <p class="sh-page-subtitle">
+                @if (isAdmin)
+                {
+                    <span>Company-wide leaves. Filter by department to drill in.</span>
+                }
+                else
+                {
+                    <span>Your department (@myDeptName) — see who's out and plan coverage.</span>
+                }
+            </p>
+        </div>
+        <div class="sh-page-actions">
+            <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-list-ul"></i> My leave</a>
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Request leave</a>
+        </div>
+    </div>
+
+    <div class="sh-card mb-3">
+        <div class="sh-card-body">
+            <div class="row g-3 align-items-center">
+                @if (isAdmin)
+                {
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold mb-1">Department</label>
+                        <select id="deptFilter" class="form-select">
+                            <option value="">All departments</option>
+                            @foreach (var d in departments)
+                            {
+                                if (selectedDept == d.Id)
+                                {
+                                    <option value="@d.Id" selected>@d.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@d.Id">@d.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold mb-1">Statuses</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="form-check"><input class="form-check-input status-toggle" type="checkbox" value="Approved" id="stApproved" checked><label class="form-check-label" for="stApproved"><span class="dot" style="background:#10b981"></span>Approved</label></div>
+                        <div class="form-check"><input class="form-check-input status-toggle" type="checkbox" value="Pending" id="stPending" checked><label class="form-check-label" for="stPending"><span class="dot" style="background:#f59e0b"></span>Pending</label></div>
+                        <div class="form-check"><input class="form-check-input status-toggle" type="checkbox" value="Rejected" id="stRejected"><label class="form-check-label" for="stRejected"><span class="dot" style="background:#ef4444"></span>Rejected</label></div>
+                        <div class="form-check"><input class="form-check-input status-toggle" type="checkbox" value="Cancelled" id="stCancelled"><label class="form-check-label" for="stCancelled"><span class="dot" style="background:#64748b"></span>Cancelled</label></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sh-card">
+        <div class="sh-card-body">
+            <div id="leaveCalendar"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script>
+        (function () {
+            var eventsUrl = '@Url.Action("CalendarEvents", "Leave")';
+            var deptSelect = document.getElementById('deptFilter');
+            var statusBoxes = document.querySelectorAll('.status-toggle');
+            var el = document.getElementById('leaveCalendar');
+
+            function selectedStatuses() {
+                return Array.from(statusBoxes).filter(function (c) { return c.checked; }).map(function (c) { return c.value; }).join(',');
+            }
+
+            var calendar = new FullCalendar.Calendar(el, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                firstDay: 1,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                events: function (info, success, failure) {
+                    var params = new URLSearchParams({
+                        start: info.startStr,
+                        end: info.endStr,
+                        statuses: selectedStatuses()
+                    });
+                    if (deptSelect && deptSelect.value) params.append('dept', deptSelect.value);
+                    fetch(eventsUrl + '?' + params.toString(), { credentials: 'same-origin' })
+                        .then(function (r) { return r.json(); })
+                        .then(success)
+                        .catch(failure);
+                },
+                eventDidMount: function (info) {
+                    var p = info.event.extendedProps;
+                    info.el.setAttribute('title',
+                        p.employee + ' · ' + p.leaveType + ' (' + p.status + ')\n' +
+                        (p.department || '') + '\n' +
+                        p.days + ' working day(s)' +
+                        (p.reason ? '\nReason: ' + p.reason : '')
+                    );
+                },
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault();
+                    var p = info.event.extendedProps;
+                    var body = document.getElementById('leaveDetailBody');
+                    body.innerHTML =
+                        '<div class="mb-2"><strong>' + p.employee + '</strong> — <span class="text-muted">' + (p.department || '') + '</span></div>' +
+                        '<div class="small mb-1"><strong>Type:</strong> ' + p.leaveType + '</div>' +
+                        '<div class="small mb-1"><strong>Status:</strong> ' + p.status + '</div>' +
+                        '<div class="small mb-1"><strong>Working days:</strong> ' + p.days + '</div>' +
+                        '<div class="small mb-1"><strong>From:</strong> ' + info.event.start.toDateString() + '</div>' +
+                        '<div class="small mb-1"><strong>To:</strong> ' + new Date(info.event.end.getTime() - 86400000).toDateString() + '</div>' +
+                        (p.reason ? '<div class="small mt-2"><strong>Reason:</strong><br>' + p.reason + '</div>' : '');
+                    var modal = new bootstrap.Modal(document.getElementById('leaveDetailModal'));
+                    modal.show();
+                }
+            });
+            calendar.render();
+
+            if (deptSelect) deptSelect.addEventListener('change', function () { calendar.refetchEvents(); });
+            statusBoxes.forEach(function (c) { c.addEventListener('change', function () { calendar.refetchEvents(); }); });
+        })();
+    </script>
+}
+
+<div class="modal fade" id="leaveDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Leave details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="leaveDetailBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

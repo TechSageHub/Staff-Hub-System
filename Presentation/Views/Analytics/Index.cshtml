@@ -4,6 +4,8 @@
     var f = Model.Filter;
     string DateIso(DateTime d) => d.ToString("yyyy-MM-dd");
     string Money(decimal v) => v.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+    var today = DateTime.Today;
+    var selectedDepartmentName = Model.Departments.FirstOrDefault(d => d.Id == f.DepartmentId)?.Name;
 }
 
 <div class="admin-dashboard-page">
@@ -62,20 +64,46 @@
                     <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Apply</button>
                 </div>
             </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-from="@DateIso(today.AddDays(-30))" asp-route-to="@DateIso(today)" asp-route-dept="@f.DepartmentId">Last 30 days</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-from="@DateIso(today.AddDays(-90))" asp-route-to="@DateIso(today)" asp-route-dept="@f.DepartmentId">Last 90 days</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-from="@DateIso(today.AddDays(-365))" asp-route-to="@DateIso(today)" asp-route-dept="@f.DepartmentId">Last 12 months</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-from="@DateIso(new DateTime(today.Year, 1, 1))" asp-route-to="@DateIso(today)" asp-route-dept="@f.DepartmentId">Year to date</a>
+            </div>
         </div>
     </form>
 
+    <h2 class="h5 mt-4 mb-3"><i class="bi bi-speedometer2 text-primary"></i> Executive snapshot</h2>
+    <div class="admin-stat-grid">
+        <div class="admin-stat-card"><div class="admin-stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Overview.Headcount</div><div class="admin-stat-label">Headcount</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName">View employees <i class="bi bi-arrow-right"></i></a></div></div>
+        <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-check2-square"></i></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Overview.AttendanceRatePct.ToString("0.0")%</div><div class="admin-stat-label">Attendance rate</div><a class="small fw-semibold" asp-controller="Attendance" asp-action="Admin" asp-route-from="@DateIso(f.From)" asp-route-to="@DateIso(f.To)" asp-route-dept="@f.DepartmentId">View attendance <i class="bi bi-arrow-right"></i></a></div></div>
+        <div class="admin-stat-card warning"><div class="admin-stat-icon"><i class="bi bi-calendar2-x"></i></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Overview.PendingLeaveRequests</div><div class="admin-stat-label">Pending leave requests</div><a class="small fw-semibold" asp-controller="Leave" asp-action="AdminDashboard" asp-route-status="pending">Review queue <i class="bi bi-arrow-right"></i></a></div></div>
+        <div class="admin-stat-card info"><div class="admin-stat-icon"><i class="bi bi-ticket-perforated"></i></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Overview.OpenTickets</div><div class="admin-stat-label">Open tickets</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-status="open" asp-route-dept="@f.DepartmentId">Review tickets <i class="bi bi-arrow-right"></i></a></div></div>
+        <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-stopwatch"></i></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Overview.AvgResolutionHours.ToString("0.0")h</div><div class="admin-stat-label">Avg ticket resolution</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-status="resolved" asp-route-dept="@f.DepartmentId">View resolved <i class="bi bi-arrow-right"></i></a></div></div>
+    </div>
+
     @* ===== Leave ===== *@
-    <h2 class="h5 mt-4 mb-3"><i class="bi bi-calendar2-range text-primary"></i> Leave</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-3">
+        <h2 class="h5 mb-0"><i class="bi bi-calendar2-range text-primary"></i> Leave</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-secondary" asp-controller="Leave" asp-action="Calendar" asp-route-dept="@f.DepartmentId">Open calendar</a>
+            <a class="btn btn-sm btn-outline-secondary" asp-controller="Leave" asp-action="AdminDashboard">Open queue</a>
+        </div>
+    </div>
     <div class="admin-stat-grid">
         <div class="admin-stat-card"><div class="admin-stat-icon"><i class="bi bi-clipboard-data"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.TotalRequests</div><div class="admin-stat-label">Requests</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.TotalRequests</div><div class="admin-stat-label">Requests</div><a class="small fw-semibold" asp-controller="Leave" asp-action="AdminDashboard">See all requests <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.ApprovedCount</div><div class="admin-stat-label">Approved</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.ApprovedCount</div><div class="admin-stat-label">Approved</div><a class="small fw-semibold" asp-controller="Leave" asp-action="AdminDashboard" asp-route-status="approved">View approved <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card warning"><div class="admin-stat-icon"><i class="bi bi-hourglass"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.PendingCount</div><div class="admin-stat-label">Pending</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.PendingCount</div><div class="admin-stat-label">Pending</div><a class="small fw-semibold" asp-controller="Leave" asp-action="AdminDashboard" asp-route-status="pending">Review pending <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card info"><div class="admin-stat-icon"><i class="bi bi-calendar3"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.TotalDaysTaken</div><div class="admin-stat-label">Days taken</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Leave.TotalDaysTaken</div><div class="admin-stat-label">Days taken</div><a class="small fw-semibold" asp-controller="Leave" asp-action="Calendar" asp-route-dept="@f.DepartmentId">See coverage <i class="bi bi-arrow-right"></i></a></div></div>
     </div>
     <div class="admin-chart-grid">
         <div class="admin-chart-card">
@@ -86,19 +114,26 @@
             <div class="admin-chart-title"><i class="bi bi-graph-up" style="color:var(--sh-accent);"></i> Monthly days taken</div>
             <div id="leaveMonthlyChart" class="admin-chart-host"></div>
         </div>
+        <div class="admin-chart-card">
+            <div class="admin-chart-title"><i class="bi bi-trophy" style="color:var(--sh-warning);"></i> Top leave takers</div>
+            <div id="leaveTopChart" class="admin-chart-host"></div>
+        </div>
     </div>
 
     @* ===== Attendance ===== *@
-    <h2 class="h5 mt-4 mb-3"><i class="bi bi-clock text-primary"></i> Attendance</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-3">
+        <h2 class="h5 mb-0"><i class="bi bi-clock text-primary"></i> Attendance</h2>
+        <a class="btn btn-sm btn-outline-secondary" asp-controller="Attendance" asp-action="Admin" asp-route-from="@DateIso(f.From)" asp-route-to="@DateIso(f.To)" asp-route-dept="@f.DepartmentId">Open attendance</a>
+    </div>
     <div class="admin-stat-grid">
         <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-check2-square"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.AttendanceRatePct%</div><div class="admin-stat-label">Attendance rate</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.AttendanceRatePct%</div><div class="admin-stat-label">Attendance rate</div><a class="small fw-semibold" asp-controller="Attendance" asp-action="Admin" asp-route-from="@DateIso(f.From)" asp-route-to="@DateIso(f.To)" asp-route-dept="@f.DepartmentId">View logs <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card"><div class="admin-stat-icon"><i class="bi bi-door-open"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.TotalClockIns</div><div class="admin-stat-label">Clock-ins</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.TotalClockIns</div><div class="admin-stat-label">Clock-ins</div><a class="small fw-semibold" asp-controller="Attendance" asp-action="Admin" asp-route-from="@DateIso(f.From)" asp-route-to="@DateIso(f.To)" asp-route-dept="@f.DepartmentId">View logs <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card info"><div class="admin-stat-icon"><i class="bi bi-people"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.UniqueActiveEmployees</div><div class="admin-stat-label">Active staff</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.UniqueActiveEmployees</div><div class="admin-stat-label">Active staff</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName">View employees <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card warning"><div class="admin-stat-icon"><i class="bi bi-alarm"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.LateClockIns</div><div class="admin-stat-label">Late (after @Model.Attendance.LateThreshold.ToString(@"hh\:mm"))</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Attendance.LateClockIns</div><div class="admin-stat-label">Late (after @Model.Attendance.LateThreshold.ToString(@"hh\:mm"))</div><a class="small fw-semibold" asp-controller="Attendance" asp-action="Admin" asp-route-from="@DateIso(f.From)" asp-route-to="@DateIso(f.To)" asp-route-dept="@f.DepartmentId">Investigate logs <i class="bi bi-arrow-right"></i></a></div></div>
     </div>
     <div class="admin-chart-grid">
         <div class="admin-chart-card">
@@ -112,16 +147,19 @@
     </div>
 
     @* ===== Tickets ===== *@
-    <h2 class="h5 mt-4 mb-3"><i class="bi bi-ticket-perforated text-primary"></i> HR tickets</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-3">
+        <h2 class="h5 mb-0"><i class="bi bi-ticket-perforated text-primary"></i> HR tickets</h2>
+        <a class="btn btn-sm btn-outline-secondary" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-dept="@f.DepartmentId">Open queue</a>
+    </div>
     <div class="admin-stat-grid">
         <div class="admin-stat-card"><div class="admin-stat-icon"><i class="bi bi-inbox"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.TotalTickets</div><div class="admin-stat-label">Total</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.TotalTickets</div><div class="admin-stat-label">Total</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-dept="@f.DepartmentId">See all tickets <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card warning"><div class="admin-stat-icon"><i class="bi bi-exclamation-circle"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.OpenCount</div><div class="admin-stat-label">Open</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.OpenCount</div><div class="admin-stat-label">Open</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-status="open" asp-route-dept="@f.DepartmentId">Review open <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card info"><div class="admin-stat-icon"><i class="bi bi-arrow-repeat"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.InProgressCount</div><div class="admin-stat-label">In progress</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.InProgressCount</div><div class="admin-stat-label">In progress</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-status="inprogress" asp-route-dept="@f.DepartmentId">View in progress <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-check-circle"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.AvgResolutionHours.ToString("0.0")h</div><div class="admin-stat-label">Avg resolution</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Tickets.AvgResolutionHours.ToString("0.0")h</div><div class="admin-stat-label">Avg resolution</div><a class="small fw-semibold" asp-controller="HrTicket" asp-action="AdminDashboard" asp-route-status="resolved" asp-route-dept="@f.DepartmentId">View resolved <i class="bi bi-arrow-right"></i></a></div></div>
     </div>
     <div class="admin-chart-grid">
         <div class="admin-chart-card">
@@ -132,19 +170,26 @@
             <div class="admin-chart-title"><i class="bi bi-flag" style="color:var(--sh-accent);"></i> By priority</div>
             <div id="ticketPriorityChart" class="admin-chart-host"></div>
         </div>
+        <div class="admin-chart-card">
+            <div class="admin-chart-title"><i class="bi bi-graph-up-arrow" style="color:var(--sh-success);"></i> Monthly ticket volume</div>
+            <div id="ticketMonthlyChart" class="admin-chart-host"></div>
+        </div>
     </div>
 
     @* ===== Workforce ===== *@
-    <h2 class="h5 mt-4 mb-3"><i class="bi bi-people-fill text-primary"></i> Workforce demographics</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-3">
+        <h2 class="h5 mb-0"><i class="bi bi-people-fill text-primary"></i> Workforce demographics</h2>
+        <a class="btn btn-sm btn-outline-secondary" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName">Open employee directory</a>
+    </div>
     <div class="admin-stat-grid">
         <div class="admin-stat-card"><div class="admin-stat-icon"><i class="bi bi-person-badge"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Workforce.Headcount</div><div class="admin-stat-label">Headcount</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Model.Workforce.Headcount</div><div class="admin-stat-label">Headcount</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName">View employees <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card success"><div class="admin-stat-icon"><i class="bi bi-cash-stack"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.TotalPayroll)</div><div class="admin-stat-label">Total payroll</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.TotalPayroll)</div><div class="admin-stat-label">Total payroll</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName" asp-route-sort="salary_desc">Review salaries <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card info"><div class="admin-stat-icon"><i class="bi bi-cash"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.AverageSalary)</div><div class="admin-stat-label">Average salary</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.AverageSalary)</div><div class="admin-stat-label">Average salary</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName" asp-route-sort="salary_desc">Review salaries <i class="bi bi-arrow-right"></i></a></div></div>
         <div class="admin-stat-card warning"><div class="admin-stat-icon"><i class="bi bi-graph-down"></i></div>
-            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.MedianSalary)</div><div class="admin-stat-label">Median salary</div></div></div>
+            <div class="admin-stat-content"><div class="admin-stat-value">@Money(Model.Workforce.MedianSalary)</div><div class="admin-stat-label">Median salary</div><a class="small fw-semibold" asp-controller="Employee" asp-action="Index" asp-route-department="@selectedDepartmentName" asp-route-sort="salary_desc">Review salaries <i class="bi bi-arrow-right"></i></a></div></div>
     </div>
     <div class="admin-chart-grid">
         <div class="admin-chart-card">
@@ -178,10 +223,12 @@
     (function () {
         var leaveByType   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Leave.ByType));
         var leaveMonthly  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Leave.MonthlyDaysTaken));
+        var leaveTop      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Leave.TopTakers));
         var attDaily      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Attendance.DailyTrend));
         var attByDept     = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Attendance.ByDepartment));
         var tCategory     = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Tickets.ByCategory));
         var tPriority     = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Tickets.ByPriority));
+        var tMonthly      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Tickets.MonthlyCreated));
         var wfTenure      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Workforce.TenureBuckets));
         var wfSalary      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Workforce.SalaryBuckets));
         var wfHires       = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Workforce.HiresByMonth));
@@ -276,10 +323,12 @@
             if (!window.ApexCharts) { setTimeout(render, 100); return; }
             mount('#leaveByTypeChart', bar(null, leaveByType, true), leaveByType);
             mount('#leaveMonthlyChart', area(leaveMonthly, 'Days'), leaveMonthly);
+            mount('#leaveTopChart', bar(null, leaveTop, true), leaveTop);
             mount('#attDailyChart', area(attDaily, 'Clock-ins'), attDaily);
             mount('#attByDeptChart', bar(null, attByDept, true), attByDept);
             mount('#ticketCategoryChart', donut(tCategory), tCategory);
             mount('#ticketPriorityChart', donut(tPriority), tPriority);
+            mount('#ticketMonthlyChart', area(tMonthly, 'Tickets'), tMonthly);
             mount('#wfTenureChart', bar(null, wfTenure, false), wfTenure);
             mount('#wfSalaryChart', bar(null, wfSalary, false), wfSalary);
             mount('#wfHiresChart', area(wfHires, 'Hires'), wfHires);

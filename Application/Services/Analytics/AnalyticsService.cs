@@ -28,6 +28,14 @@ public class AnalyticsService(
         {
             Filter = filter,
             Departments = departments.Departments,
+            Overview = new AnalyticsOverviewDto
+            {
+                Headcount = workforce.Headcount,
+                AttendanceRatePct = attendance.AttendanceRatePct,
+                PendingLeaveRequests = leave.PendingCount,
+                OpenTickets = tickets.OpenCount,
+                AvgResolutionHours = tickets.AvgResolutionHours
+            },
             Leave = leave,
             Attendance = attendance,
             Tickets = tickets,

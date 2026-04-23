@@ -1,5 +1,6 @@
 using Application.Dtos;
 using Application.Dtos.Paging;
+using Application.Services.Department;
 using Application.Services.Employee;
 using Application.Services.Leave;
 using AspNetCoreHero.ToastNotification.Abstractions;
@@ -11,8 +12,9 @@ namespace Presentation.Controllers;
 
 [Authorize]
 public class LeaveController(
-    ILeaveService _leaveService, 
+    ILeaveService _leaveService,
     IEmployeeService _employeeService,
+    IDepartmentService _departmentService,
     INotyfService _notyf) : Controller
 {
     public async Task<IActionResult> Index()
@@ -136,6 +138,85 @@ public class LeaveController(
         ViewBag.Search = search;
         return View(paged);
     }
+
+    public async Task<IActionResult> Calendar(Guid? dept)
+    {
+        var isAdmin = User.IsInRole("Admin");
+        Guid? scopedDept = dept;
+        string? myDeptName = null;
+
+        if (!isAdmin)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var me = await _employeeService.GetEmployeeByUserIdAsync(userId!);
+            if (me == null)
+            {
+                _notyf.Warning("Please complete your profile to see the team calendar.");
+                return RedirectToAction(nameof(Index));
+            }
+            scopedDept = me.DepartmentId;
+            myDeptName = me.DepartmentName;
+        }
+
+        var departments = isAdmin ? (await _departmentService.GetAllDepartmentsAsync()).Departments : new List<DepartmentDto>();
+
+        ViewBag.IsAdmin = isAdmin;
+        ViewBag.Departments = departments;
+        ViewBag.SelectedDept = scopedDept;
+        ViewBag.MyDeptName = myDeptName;
+        return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CalendarEvents(DateTime start, DateTime end, Guid? dept, string? statuses)
+    {
+        var isAdmin = User.IsInRole("Admin");
+        Guid? scopedDept = dept;
+
+        if (!isAdmin)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var me = await _employeeService.GetEmployeeByUserIdAsync(userId!);
+            if (me == null) return Json(Array.Empty<object>());
+            scopedDept = me.DepartmentId;
+        }
+
+        var statusList = (statuses ?? "Approved,Pending")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        var leaves = await _leaveService.GetLeavesInRangeAsync(start, end, scopedDept, statusList);
+
+        var events = leaves.Select(l => new
+        {
+            id = l.Id,
+            title = $"{l.EmployeeName} · {l.LeaveType}",
+            start = l.StartDate.ToString("yyyy-MM-dd"),
+            end = l.EndDate.AddDays(1).ToString("yyyy-MM-dd"),
+            allDay = true,
+            color = StatusColor(l.Status),
+            extendedProps = new
+            {
+                employee = l.EmployeeName,
+                department = l.DepartmentName,
+                leaveType = l.LeaveType,
+                status = l.Status,
+                reason = l.Reason,
+                days = l.DurationInDays
+            }
+        });
+
+        return Json(events);
+    }
+
+    private static string StatusColor(string status) => status switch
+    {
+        "Approved" => "#10b981",
+        "Pending" => "#f59e0b",
+        "Rejected" => "#ef4444",
+        "Cancelled" => "#64748b",
+        _ => "#1d4ed8"
+    };
 
     [HttpPost]
     [Authorize(Roles = "Admin")]

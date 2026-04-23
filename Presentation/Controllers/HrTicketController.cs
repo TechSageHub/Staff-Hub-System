@@ -1,6 +1,7 @@
 using Application.Dtos;
 using Application.Dtos.Paging;
 using Application.Services.Employee;
+using Application.Services.Department;
 using Application.Services.HrTicket;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ namespace Presentation.Controllers;
 public class HrTicketController(
     IHrTicketService _hrTicketService,
     IEmployeeService _employeeService,
+    IDepartmentService _departmentService,
     INotyfService _notyf) : Controller
 {
     public async Task<IActionResult> Index()
@@ -86,17 +88,20 @@ public class HrTicketController(
     }
 
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AdminDashboard(string? status, string? search, int page = 1, int pageSize = 20)
+    public async Task<IActionResult> AdminDashboard(string? status, string? search, Guid? dept, int page = 1, int pageSize = 20)
     {
         var query = new HrTicketQuery
         {
             Status = status,
             Search = search,
+            DepartmentId = dept,
             Page = page,
             PageSize = pageSize
         };
 
         var paged = await _hrTicketService.GetAllTicketsPagedAsync(query);
+        ViewBag.Departments = (await _departmentService.GetAllDepartmentsAsync()).Departments;
+        ViewBag.SelectedDept = dept;
         ViewBag.SelectedStatus = string.IsNullOrWhiteSpace(status) ? "all" : status;
         ViewBag.Search = search;
         return View(paged);

@@ -99,9 +99,13 @@
 
                 <div class="admin-nav-section-title">HR</div>
                 <div class="admin-nav-group">
-                    <a class="admin-nav-item @(IsActive("Leave") && currentAction != "AdminDashboard" ? "active" : "")" asp-controller="Leave" asp-action="Index">
+                    <a class="admin-nav-item @(IsActive("Leave") && currentAction != "AdminDashboard" && currentAction != "Calendar" ? "active" : "")" asp-controller="Leave" asp-action="Index">
                         <span class="admin-nav-icon"><i class="bi bi-calendar2-check"></i></span>
                         <span>@(isAdmin ? "My leave" : "Leave")</span>
+                    </a>
+                    <a class="admin-nav-item @(IsActive("Leave") && currentAction == "Calendar" ? "active" : "")" asp-controller="Leave" asp-action="Calendar">
+                        <span class="admin-nav-icon"><i class="bi bi-calendar3-week"></i></span>
+                        <span>Leave calendar</span>
                     </a>
                     @if (isAdmin)
                     {

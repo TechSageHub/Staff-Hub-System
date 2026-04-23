@@ -268,6 +268,41 @@ public class LeaveService(EmployeeAppDbContext _context, ILogger<LeaveService> _
         };
     }
 
+    public async Task<List<LeaveRequestDto>> GetLeavesInRangeAsync(DateTime from, DateTime to, Guid? departmentId = null, IEnumerable<string>? statuses = null)
+    {
+        var fromDate = from.Date;
+        var toDate = to.Date;
+
+        IQueryable<LeaveRequest> query = _context.LeaveRequests
+            .Include(l => l.Employee)
+            .ThenInclude(e => e!.Department)
+            .Where(l => l.StartDate.Date <= toDate && l.EndDate.Date >= fromDate);
+
+        if (departmentId.HasValue)
+        {
+            query = query.Where(l => l.Employee != null && l.Employee.DepartmentId == departmentId.Value);
+        }
+
+        var parsedStatuses = statuses?
+            .Select(s => Enum.TryParse<LeaveStatus>(s, true, out var ps) ? (LeaveStatus?)ps : null)
+            .Where(ps => ps.HasValue)
+            .Select(ps => ps!.Value)
+            .ToList();
+        if (parsedStatuses != null && parsedStatuses.Count > 0)
+        {
+            query = query.Where(l => parsedStatuses.Contains(l.Status));
+        }
+
+        var leaves = await query.OrderBy(l => l.StartDate).ToListAsync();
+
+        return leaves.Select(l =>
+        {
+            var dto = l.ToDto();
+            dto.DurationInDays = CountWorkingDays(l.StartDate, l.EndDate);
+            return dto;
+        }).ToList();
+    }
+
     private static int CountWorkingDays(DateTime startDate, DateTime endDate)
     {
         var start = startDate.Date;

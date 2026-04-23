@@ -1,5 +1,6 @@
 using Application.Dtos;
 using Application.Services.Attendance;
+using Application.Services.Department;
 using Application.Services.Employee;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
@@ -12,15 +13,14 @@ namespace Presentation.Controllers;
 public class AttendanceController(
     IAttendanceService _attendanceService,
     IEmployeeService _employeeService,
+    IDepartmentService _departmentService,
     INotyfService _notyf) : Controller
 {
     public async Task<IActionResult> Index()
     {
         if (User.IsInRole("Admin"))
         {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            ViewBag.Employees = employees.Employees;
-            return View("Admin", await _attendanceService.GetAllAttendanceAsync());
+            return RedirectToAction(nameof(Admin));
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -41,15 +41,25 @@ public class AttendanceController(
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<IActionResult> Admin(DateTime? from, DateTime? to, Guid? employeeId)
+    public async Task<IActionResult> Admin(DateTime? from, DateTime? to, Guid? employeeId, Guid? dept)
     {
         var employees = await _employeeService.GetAllEmployeesAsync();
-        ViewBag.Employees = employees.Employees;
+        var filteredEmployees = dept.HasValue
+            ? employees.Employees.Where(e => e.DepartmentId == dept.Value).ToList()
+            : employees.Employees;
+        ViewBag.Employees = filteredEmployees;
+        ViewBag.Departments = (await _departmentService.GetAllDepartmentsAsync()).Departments;
 
         var logs = await _attendanceService.GetAllAttendanceAsync(from, to, employeeId);
+        if (dept.HasValue)
+        {
+            var deptEmployeeIds = filteredEmployees.Select(e => e.Id).ToHashSet();
+            logs = logs.Where(l => deptEmployeeIds.Contains(l.EmployeeId)).ToList();
+        }
         ViewBag.From = from;
         ViewBag.To = to;
         ViewBag.EmployeeId = employeeId;
+        ViewBag.DepartmentId = dept;
         return View("Admin", logs);
     }
 

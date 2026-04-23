@@ -13,4 +13,5 @@ public interface ILeaveService
     Task<bool> ProcessLeaveRequestAsync(LeaveApprovalDto approvalDto);
     Task<int> GetRemainingLeaveDaysAsync(Guid employeeId);
     Task<ActiveLeaveStatusDto?> GetActiveLeaveStatusAsync(Guid employeeId);
+    Task<List<LeaveRequestDto>> GetLeavesInRangeAsync(DateTime from, DateTime to, Guid? departmentId = null, IEnumerable<string>? statuses = null);
 }

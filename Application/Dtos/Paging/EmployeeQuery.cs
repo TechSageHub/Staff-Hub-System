@@ -18,4 +18,5 @@ public class HrTicketQuery : PageRequest
 {
     public string? Status { get; set; }
     public string? Search { get; set; }  // matches subject / employee name
+    public Guid? DepartmentId { get; set; }
 }

@@ -78,6 +78,7 @@ public class HrTicketService(
     {
         IQueryable<Data.Model.HrTicket> query = _context.HrTickets
             .Include(t => t.Employee)
+            .ThenInclude(e => e!.Department)
             .Include(t => t.Comments.OrderBy(c => c.CreatedAt));
 
         if (!string.IsNullOrWhiteSpace(q.Status) && !string.Equals(q.Status, "all", StringComparison.OrdinalIgnoreCase))
@@ -86,6 +87,11 @@ public class HrTicketService(
             {
                 query = query.Where(t => t.Status == parsedStatus);
             }
+        }
+
+        if (q.DepartmentId.HasValue)
+        {
+            query = query.Where(t => t.Employee != null && t.Employee.DepartmentId == q.DepartmentId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(q.Search))

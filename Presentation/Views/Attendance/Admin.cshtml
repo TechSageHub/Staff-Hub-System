@@ -2,9 +2,11 @@
 @{
     ViewData["Title"] = "Attendance overview";
     var employees = ViewBag.Employees as List<Application.Dtos.EmployeeDto> ?? new List<Application.Dtos.EmployeeDto>();
+    var departments = ViewBag.Departments as List<Application.Dtos.DepartmentDto> ?? new List<Application.Dtos.DepartmentDto>();
     DateTime? from = ViewBag.From as DateTime?;
     DateTime? to = ViewBag.To as DateTime?;
     Guid? employeeId = ViewBag.EmployeeId as Guid?;
+    Guid? departmentId = ViewBag.DepartmentId as Guid?;
 }
 
 <div class="sh-page-header">
@@ -25,7 +27,24 @@
                 <label class="form-label">To</label>
                 <input type="date" name="to" class="form-control" value="@(to?.ToString("yyyy-MM-dd"))" />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label">Department</label>
+                <select name="dept" class="form-select">
+                    <option value="">All departments</option>
+                    @foreach (var dept in departments)
+                    {
+                        if (departmentId == dept.Id)
+                        {
+                            <option value="@dept.Id" selected>@dept.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@dept.Id">@dept.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Employee</label>
                 <select name="employeeId" class="form-select">
                     <option value="">All employees</option>
@@ -37,7 +56,7 @@
                     }
                 </select>
             </div>
-            <div class="col-md-2 d-grid">
+            <div class="col-md-3 d-grid">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-funnel"></i> Filter
                 </button>

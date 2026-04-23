@@ -3,6 +3,8 @@
     ViewData["Title"] = "Ticket queue";
     var selectedStatus = (ViewBag.SelectedStatus as string ?? "all").ToLowerInvariant();
     var search = ViewBag.Search as string;
+    var departments = ViewBag.Departments as List<Application.Dtos.DepartmentDto> ?? new List<Application.Dtos.DepartmentDto>();
+    Guid? selectedDept = ViewBag.SelectedDept as Guid?;
 
     string PillClass(string key) => selectedStatus == key ? "sh-filter-pill active" : "sh-filter-pill";
     string PriorityBadge(string p) => p switch
@@ -32,15 +34,32 @@
 <div class="sh-card mb-3">
     <div class="sh-card-body">
         <form method="get" asp-action="AdminDashboard" class="row g-3 align-items-end">
-            <div class="col-lg-6 col-md-8">
+            <div class="col-lg-5 col-md-6">
                 <label class="form-label">Search</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" name="search" value="@search" placeholder="Subject, category, or employee" />
                 </div>
             </div>
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label">Department</label>
+                <select class="form-select" name="dept">
+                    <option value="">All departments</option>
+                    @foreach (var dept in departments)
+                    {
+                        if (selectedDept == dept.Id)
+                        {
+                            <option value="@dept.Id" selected>@dept.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@dept.Id">@dept.Name</option>
+                        }
+                    }
+                </select>
+            </div>
             <input type="hidden" name="status" value="@selectedStatus" />
-            <div class="col-lg-2 col-md-4 d-grid">
+            <div class="col-lg-3 col-md-4 d-grid">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
             </div>
         </form>
@@ -48,11 +67,11 @@
 </div>
 
 <div class="sh-filter-pills mb-4">
-    <a class="@PillClass("all")" asp-action="AdminDashboard" asp-route-search="@search">All</a>
-    <a class="@PillClass("pending")" asp-action="AdminDashboard" asp-route-status="pending" asp-route-search="@search">Pending</a>
-    <a class="@PillClass("inprogress")" asp-action="AdminDashboard" asp-route-status="inprogress" asp-route-search="@search">In progress</a>
-    <a class="@PillClass("resolved")" asp-action="AdminDashboard" asp-route-status="resolved" asp-route-search="@search">Resolved</a>
-    <a class="@PillClass("rejected")" asp-action="AdminDashboard" asp-route-status="rejected" asp-route-search="@search">Rejected</a>
+    <a class="@PillClass("all")" asp-action="AdminDashboard" asp-route-search="@search" asp-route-dept="@selectedDept">All</a>
+    <a class="@PillClass("pending")" asp-action="AdminDashboard" asp-route-status="pending" asp-route-search="@search" asp-route-dept="@selectedDept">Pending</a>
+    <a class="@PillClass("inprogress")" asp-action="AdminDashboard" asp-route-status="inprogress" asp-route-search="@search" asp-route-dept="@selectedDept">In progress</a>
+    <a class="@PillClass("resolved")" asp-action="AdminDashboard" asp-route-status="resolved" asp-route-search="@search" asp-route-dept="@selectedDept">Resolved</a>
+    <a class="@PillClass("rejected")" asp-action="AdminDashboard" asp-route-status="rejected" asp-route-search="@search" asp-route-dept="@selectedDept">Rejected</a>
 </div>
 
 <div class="sh-card">
@@ -122,7 +141,8 @@
             RouteValues = new Dictionary<string, string?>
             {
                 ["status"] = selectedStatus,
-                ["search"] = search
+                ["search"] = search,
+                ["dept"] = selectedDept?.ToString()
             }
         })
     }
