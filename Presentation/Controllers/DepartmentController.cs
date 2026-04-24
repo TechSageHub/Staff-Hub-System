@@ -109,6 +109,7 @@ public class DepartmentController : BaseController
 
         if (!ModelState.IsValid)
         {
+            _notyf.Warning("Please correct the highlighted fields.");
             return View(model);
         }
 
@@ -127,12 +128,13 @@ public class DepartmentController : BaseController
                 return NotFound();
             }
 
+            _notyf.Success("Department updated successfully");
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "An error occurred while updating the department.");
-
+            _notyf.Error("An error occurred while updating the department.");
             return View(model);
         }
     }

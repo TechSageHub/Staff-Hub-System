@@ -66,17 +66,23 @@ public class LeaveController(
 
         dto.EmployeeId = employee.Id;
 
-        if (!ModelState.IsValid) return View(dto);
+        if (!ModelState.IsValid)
+        {
+            _notyf.Warning("Please correct the highlighted fields.");
+            return View(dto);
+        }
 
         if (dto.StartDate < DateTime.Today)
         {
             ModelState.AddModelError("StartDate", "Start date cannot be in the past.");
+            _notyf.Warning("Start date cannot be in the past.");
             return View(dto);
         }
 
         if (dto.EndDate < dto.StartDate)
         {
             ModelState.AddModelError("EndDate", "End date must be after Start date.");
+            _notyf.Warning("End date must be after start date.");
             return View(dto);
         }
 
@@ -85,6 +91,7 @@ public class LeaveController(
         if (requestedDays > remaining)
         {
             ModelState.AddModelError("", $"Requested leave exceeds your remaining annual leave balance ({remaining} days).");
+            _notyf.Warning($"Requested leave exceeds your remaining balance ({remaining} days).");
             return View(dto);
         }
 

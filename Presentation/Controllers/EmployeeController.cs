@@ -188,6 +188,13 @@ public class EmployeeController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateEmployeeViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            await PopulateCreateData(model);
+            _notyf.Warning("Please correct the highlighted fields.");
+            return View(model);
+        }
+
         var dto = new CreateEmployeeDto
         {
             DepartmentId = model.DepartmentId,
@@ -263,15 +270,7 @@ public class EmployeeController : BaseController
         if (!ModelState.IsValid)
         {
             await PopulateUpdateData(model);
-
-            foreach (var entry in ModelState)
-            {
-                foreach (var error in entry.Value.Errors)
-                {
-                    _notyf.Warning($"Field '{entry.Key}': {error.ErrorMessage}");
-                }
-            }
-
+            _notyf.Warning("Please correct the highlighted fields.");
             return View(model);
         }
 
@@ -349,6 +348,7 @@ public class EmployeeController : BaseController
     public async Task<IActionResult> DeleteImage(Guid employeeId)
     {
         await _employeeService.DeleteImageAsync(employeeId);
+        _notyf.Success("Profile photo removed.");
         return RedirectToAction("Details", "Employee", new { id = employeeId });
     }
 

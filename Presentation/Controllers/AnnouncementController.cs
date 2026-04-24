@@ -31,7 +31,11 @@ public class AnnouncementController(IAnnouncementService _announcementService, I
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         dto.AuthorId = userId!;
 
-        if (!ModelState.IsValid) return View(dto);
+        if (!ModelState.IsValid)
+        {
+            _notyf.Warning("Please correct the highlighted fields.");
+            return View(dto);
+        }
 
         await _announcementService.CreateAnnouncementAsync(dto);
         _notyf.Success("Announcement posted successfully!");
