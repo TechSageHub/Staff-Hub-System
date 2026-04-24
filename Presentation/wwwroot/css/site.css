@@ -1095,7 +1095,80 @@ textarea.form-control { min-height: 96px; }
 }
 .sidebar-overlay.show { display: block; }
 
-.notyf { z-index: 2000; }
+/* -------- Toast (Notyf restyled) --------------------------------- */
+.notyf { z-index: 2000; padding: 20px; }
+
+.notyf__toast {
+    min-width: 0 !important;
+    max-width: 420px;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 18px -6px rgba(15, 23, 42, 0.18), 0 2px 6px -2px rgba(15, 23, 42, 0.06) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    padding: 0 !important;
+    font-family: var(--sh-font-sans, 'Inter', system-ui, sans-serif);
+    overflow: hidden;
+}
+
+[data-bs-theme="dark"] .notyf__toast {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.notyf__ripple { display: none !important; }
+
+.notyf__wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 14px 8px 10px !important;
+    background: transparent !important;
+}
+
+/* Solid filled circle with white glyph */
+.notyf__icon {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #22c55e !important;
+    color: #ffffff !important;
+}
+.notyf__toast--success .notyf__icon { background: #22c55e !important; }
+.notyf__toast--error   .notyf__icon { background: #ef4444 !important; }
+.notyf__toast--warning .notyf__icon { background: #f59e0b !important; }
+.notyf__toast--info    .notyf__icon { background: #3b82f6 !important; }
+
+/* Inner glyph — transparent wrapper so the parent's color fills through */
+.notyf__icon--success,
+.notyf__icon--error {
+    width: 12px !important;
+    height: 12px !important;
+    background: transparent !important;
+}
+.notyf__icon--success:before,
+.notyf__icon--success:after,
+.notyf__icon--error:before,
+.notyf__icon--error:after {
+    background: #ffffff !important;
+    border-radius: 2px !important;
+}
+
+.notyf__message {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    color: inherit !important;
+    flex: 0 1 auto;
+    padding: 0 !important;
+}
+
+.notyf__dismiss-btn { display: none !important; }
 
 /* -------- Auth layout --------------------------------------------- */
 body.auth-body {

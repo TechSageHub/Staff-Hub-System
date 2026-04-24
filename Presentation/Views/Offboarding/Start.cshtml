@@ -1,0 +1,64 @@
+@model Application.Dtos.StartOffboardingDto
+@{
+    ViewData["Title"] = "Start offboarding";
+    var employeeName = ViewBag.EmployeeName as string ?? "Employee";
+    var departmentName = ViewBag.DepartmentName as string;
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Start offboarding</h1>
+        <p class="sh-page-subtitle">For <strong>@employeeName</strong>@(string.IsNullOrWhiteSpace(departmentName) ? "" : $" · {departmentName}")</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="sh-card" style="max-width:720px;">
+    <div class="sh-card-body">
+        <form asp-action="Start" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="EmployeeId" />
+
+            <div class="col-md-6">
+                <label asp-for="LastWorkingDay" class="form-label">Last working day</label>
+                <input asp-for="LastWorkingDay" type="date" class="form-control" />
+                <span asp-validation-for="LastWorkingDay" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Reason" class="form-label">Reason</label>
+                <select asp-for="Reason" class="form-select">
+                    <option value="">— Select —</option>
+                    <option value="Resignation">Resignation</option>
+                    <option value="Termination">Termination</option>
+                    <option value="End of Contract">End of contract</option>
+                    <option value="Retirement">Retirement</option>
+                    <option value="Redundancy">Redundancy</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Reason" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Notes" class="form-label">Notes <span class="text-muted small">(optional)</span></label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Context, references, handover notes..."></textarea>
+            </div>
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-box-arrow-right"></i> Start offboarding</button>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="col-12">
+                    <div asp-validation-summary="All" class="text-danger small"></div>
+                </div>
+            }
+        </form>
+    </div>
+</div>

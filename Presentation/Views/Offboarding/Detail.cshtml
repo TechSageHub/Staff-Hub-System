@@ -1,0 +1,198 @@
+@model Application.Dtos.OffboardingSnapshotDto
+@{
+    ViewData["Title"] = "Offboarding · " + Model.EmployeeName;
+    var statusClass = Model.Status switch
+    {
+        "Completed" => "sh-badge-success",
+        "Cancelled" => "sh-badge-neutral",
+        _ => "sh-badge-warning"
+    };
+    var isReadOnly = Model.Status != "InProgress";
+    var statusLabel = Model.Status == "InProgress" ? "In progress" : Model.Status;
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">@Model.EmployeeName</h1>
+        <p class="sh-page-subtitle">
+            @(string.IsNullOrWhiteSpace(Model.DepartmentName) ? "—" : Model.DepartmentName)
+            · Last day @Model.LastWorkingDay.ToString("MMM dd, yyyy")
+            · <span class="sh-badge @statusClass">@statusLabel</span>
+        </p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-8">
+        <div class="sh-card h-100">
+            <div class="sh-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <div class="sh-info-tile-label">Progress</div>
+                        <div class="h4 mb-0" id="progressLabel">@Model.ProgressPercent%</div>
+                    </div>
+                    <div class="text-muted small">
+                        Started @Model.StartedAt.ToLocalTime().ToString("MMM dd, yyyy")
+                        @if (Model.CompletedAt.HasValue)
+                        {
+                            <span> · Completed @Model.CompletedAt.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                        }
+                    </div>
+                </div>
+                <div class="progress" style="height:8px;">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width:@(Model.ProgressPercent)%;" aria-valuenow="@Model.ProgressPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sh-card h-100">
+            <div class="sh-card-body">
+                <div class="sh-info-tile-label">Reason</div>
+                <div class="mb-2">@Model.Reason</div>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <div class="sh-info-tile-label mt-2">Notes</div>
+                    <div class="small text-muted">@Model.Notes</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sh-card mb-3">
+    <div class="sh-card-body">
+        <h5 class="mb-3">Checklist</h5>
+        <div class="list-group list-group-flush" id="checklist">
+            @foreach (var item in Model.Items)
+            {
+                <div class="list-group-item px-0 py-3" data-item-key="@item.Key">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="form-check mt-1">
+                            <input class="form-check-input item-toggle" type="checkbox"
+                                   id="chk-@item.Key"
+                                   @(item.IsCompleted ? "checked" : "")
+                                   @(isReadOnly ? "disabled" : "")>
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="form-check-label fw-semibold" for="chk-@item.Key">
+                                @item.Name
+                                @if (item.IsRequired)
+                                {
+                                    <span class="text-danger small">*</span>
+                                }
+                            </label>
+                            @if (item.CompletedAt.HasValue)
+                            {
+                                <div class="small text-muted">Completed @item.CompletedAt.Value.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</div>
+                            }
+                            <textarea class="form-control form-control-sm mt-2 item-notes"
+                                      rows="2"
+                                      placeholder="Notes (optional)"
+                                      @(isReadOnly ? "disabled" : "")>@item.Notes</textarea>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.Status == "InProgress")
+{
+    <div class="d-flex gap-2 justify-content-end">
+        <form asp-action="Cancel" method="post" class="d-inline" onsubmit="return confirm('Cancel this offboarding? Checklist progress will be retained but no completion will be recorded.');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+            <input type="hidden" name="cancellationReason" id="cancelReason" />
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-x-circle"></i> Cancel offboarding
+            </button>
+        </form>
+        <form asp-action="Complete" method="post" class="d-inline" onsubmit="return confirm('Mark this offboarding as complete? This will flag the employee as offboarded.');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+            <button type="submit" class="btn btn-success" id="completeBtn" @(Model.CanComplete ? "" : "disabled")>
+                <i class="bi bi-check2-circle"></i> Complete offboarding
+            </button>
+        </form>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var url = '@Url.Action("UpdateItem", "Offboarding")';
+            var employeeId = '@Model.EmployeeId';
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            var progressBar = document.getElementById('progressBar');
+            var progressLabel = document.getElementById('progressLabel');
+            var completeBtn = document.getElementById('completeBtn');
+            var debounceTimers = {};
+
+            var notyf = (typeof Notyf !== 'undefined')
+                ? new Notyf({ duration: 3000, position: { x: 'right', y: 'top' }, dismissible: false })
+                : null;
+            function toast(type, message) {
+                if (notyf) { notyf[type](message); }
+                else { console[type === 'error' ? 'error' : 'log'](message); }
+            }
+
+            function submit(row, source) {
+                var key = row.getAttribute('data-item-key');
+                var checkbox = row.querySelector('.item-toggle');
+                var notes = row.querySelector('.item-notes')?.value || '';
+
+                var form = new FormData();
+                form.append('EmployeeId', employeeId);
+                form.append('ItemKey', key);
+                form.append('IsCompleted', checkbox.checked);
+                form.append('Notes', notes);
+                if (token) form.append('__RequestVerificationToken', token);
+
+                fetch(url, { method: 'POST', body: form, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data.ok) {
+                            toast('error', data.message || 'Could not save.');
+                            checkbox.checked = !checkbox.checked;
+                            return;
+                        }
+                        if (progressBar) {
+                            progressBar.style.width = data.progressPercent + '%';
+                            progressBar.setAttribute('aria-valuenow', data.progressPercent);
+                        }
+                        if (progressLabel) progressLabel.textContent = data.progressPercent + '%';
+                        if (completeBtn) completeBtn.disabled = !data.canComplete;
+                        if (source === 'toggle') {
+                            toast('success', checkbox.checked ? 'Item marked complete.' : 'Item reopened.');
+                        } else if (source === 'notes') {
+                            toast('success', 'Notes saved.');
+                        }
+                    })
+                    .catch(function () { toast('error', 'Network error. Please try again.'); });
+            }
+
+            document.querySelectorAll('#checklist [data-item-key]').forEach(function (row) {
+                var checkbox = row.querySelector('.item-toggle');
+                var notes = row.querySelector('.item-notes');
+                var lastNotes = notes ? notes.value : '';
+                if (checkbox && !checkbox.disabled) {
+                    checkbox.addEventListener('change', function () { submit(row, 'toggle'); });
+                }
+                if (notes && !notes.disabled) {
+                    notes.addEventListener('blur', function () {
+                        if (notes.value === lastNotes) return;
+                        lastNotes = notes.value;
+                        submit(row, 'notes');
+                    });
+                }
+            });
+        })();
+    </script>
+}

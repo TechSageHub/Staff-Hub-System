@@ -124,6 +124,10 @@
                             <span class="admin-nav-icon"><i class="bi bi-headset"></i></span>
                             <span>Ticket queue</span>
                         </a>
+                        <a class="admin-nav-item @(IsActive("Offboarding") ? "active" : "")" asp-controller="Offboarding" asp-action="Index">
+                            <span class="admin-nav-icon"><i class="bi bi-door-closed"></i></span>
+                            <span>Offboarding</span>
+                        </a>
                     }
                     <a class="admin-nav-item @(IsActive("Announcement") ? "active" : "")" asp-controller="Announcement" asp-action="Index">
                         <span class="admin-nav-icon"><i class="bi bi-megaphone"></i></span>

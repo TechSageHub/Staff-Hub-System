@@ -1,0 +1,135 @@
+@model Application.Dtos.Paging.PagedResult<Application.Dtos.OffboardingListItemDto>
+@{
+    ViewData["Title"] = "Offboarding";
+    var selectedStatus = (ViewBag.SelectedStatus as string ?? "all").ToLowerInvariant();
+    var search = ViewBag.Search as string;
+
+    string PillClass(string key) => selectedStatus == key ? "sh-filter-pill active" : "sh-filter-pill";
+}
+
+<div class="sh-page-header">
+    <div>
+        <h1 class="sh-page-title">Offboarding</h1>
+        <p class="sh-page-subtitle">Track exits, asset returns, and access revocation from one place.</p>
+    </div>
+    <div class="sh-page-actions">
+        <a asp-controller="Employee" asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Start offboarding
+        </a>
+    </div>
+</div>
+
+<div class="sh-card mb-3">
+    <div class="sh-card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-6 col-md-8">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" value="@search" placeholder="Employee name or reason" />
+                </div>
+            </div>
+            <input type="hidden" name="status" value="@selectedStatus" />
+            <div class="col-lg-2 col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sh-filter-pills mb-4">
+    <a class="@PillClass("all")" asp-action="Index" asp-route-status="all" asp-route-search="@search">All</a>
+    <a class="@PillClass("inprogress")" asp-action="Index" asp-route-status="InProgress" asp-route-search="@search">In progress</a>
+    <a class="@PillClass("completed")" asp-action="Index" asp-route-status="Completed" asp-route-search="@search">Completed</a>
+    <a class="@PillClass("cancelled")" asp-action="Index" asp-route-status="Cancelled" asp-route-search="@search">Cancelled</a>
+</div>
+
+@if (!Model.Items.Any())
+{
+    <div class="sh-card">
+        <div class="sh-card-body">
+            <div class="sh-empty">
+                <div class="sh-empty-icon"><i class="bi bi-inbox"></i></div>
+                <div class="sh-empty-title">No offboardings here</div>
+                <p class="sh-empty-text">Start one from the Employees list when someone is leaving.</p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="sh-card">
+        <div class="table-responsive">
+            <table class="sh-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Reason</th>
+                        <th>Last day</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="sh-avatar sh-avatar-primary">@(row.EmployeeName.Length > 0 ? row.EmployeeName[0].ToString() : "?")</div>
+                                    <div>
+                                        <div style="font-weight:600;">@row.EmployeeName</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(row.DepartmentName) ? "—" : row.DepartmentName)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@row.Reason</td>
+                            <td>@row.LastWorkingDay.ToString("MMM dd, yyyy")</td>
+                            <td style="min-width:140px;">
+                                <div class="progress" style="height:6px;">
+                                    <div class="progress-bar" role="progressbar" style="width:@(row.ProgressPercent)%;" aria-valuenow="@row.ProgressPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="small text-muted mt-1">@row.ProgressPercent%</div>
+                            </td>
+                            <td>
+                                @switch (row.Status)
+                                {
+                                    case "Completed":
+                                        <span class="sh-badge sh-badge-success">Completed</span>
+                                        break;
+                                    case "Cancelled":
+                                        <span class="sh-badge sh-badge-neutral">Cancelled</span>
+                                        break;
+                                    default:
+                                        <span class="sh-badge sh-badge-warning">In progress</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-muted small">@row.StartedAt.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <a asp-action="Detail" asp-route-employeeId="@row.EmployeeId" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-box-arrow-in-right"></i> Open
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @await Html.PartialAsync("_Pagination", new Presentation.Models.PaginationModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.TotalCount,
+            FirstItemNumber = Model.FirstItemNumber,
+            LastItemNumber = Model.LastItemNumber,
+            RouteValues = new Dictionary<string, string?>
+            {
+                ["status"] = selectedStatus,
+                ["search"] = search
+            }
+        })
+    </div>
+}
