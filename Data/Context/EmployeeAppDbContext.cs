@@ -28,6 +28,9 @@ public class EmployeeAppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<EmployeeQualification> EmployeeQualifications { get; set; } = default!;
     public DbSet<EmployeeNextOfKin> EmployeeNextOfKins { get; set; } = default!;
     public DbSet<EmployeeHrInfo> EmployeeHrInfos { get; set; } = default!;
+    public DbSet<OffboardingChecklistItem> OffboardingChecklistItems { get; set; } = default!;
+    public DbSet<EmployeeOffboarding> EmployeeOffboardings { get; set; } = default!;
+    public DbSet<EmployeeOffboardingProgress> EmployeeOffboardingProgress { get; set; } = default!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

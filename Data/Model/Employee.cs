@@ -17,8 +17,11 @@ public class Employee
     public EmployeeAddress? Address { get; set; }
     public bool IsOnboardingComplete { get; set; }
     public DateTime? OnboardingCompletedAt { get; set; }
+    public bool IsOffboarded { get; set; }
+    public DateTime? OffboardedAt { get; set; }
     public ICollection<EmployeeQualification> Qualifications { get; set; } = new List<EmployeeQualification>();
     public EmployeeNextOfKin? NextOfKin { get; set; }
     public EmployeeHrInfo? HrInfo { get; set; }
     public ICollection<EmployeeOnboardingProgress> OnboardingProgress { get; set; } = new List<EmployeeOnboardingProgress>();
+    public EmployeeOffboarding? Offboarding { get; set; }
 }
