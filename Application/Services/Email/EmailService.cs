@@ -16,6 +16,20 @@ namespace Application.Services.Email
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
+            if (string.IsNullOrWhiteSpace(toEmail))
+            {
+                throw new ArgumentException("Recipient email address is required.", nameof(toEmail));
+            }
+
+            if (string.IsNullOrWhiteSpace(_mailSettings.FromEmail) ||
+                string.IsNullOrWhiteSpace(_mailSettings.Password) ||
+                string.IsNullOrWhiteSpace(_mailSettings.SmtpHost) ||
+                _mailSettings.SmtpPort <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Email is not configured. Set MailSettings:FromEmail, MailSettings:Password, MailSettings:SmtpHost, and MailSettings:SmtpPort.");
+            }
+
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_mailSettings.FromEmail),

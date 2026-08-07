@@ -40,9 +40,16 @@ public class AnnouncementService(EmployeeAppDbContext _context, UserManager<Iden
                 <p style='font-size: 12px; color: #777;'>Sent from StaffHub Employee Management System.</p>
             </div>";
 
-        foreach (var email in recipients)
+        try
         {
-            await _emailService.SendEmailAsync(email, subject, body);
+            foreach (var email in recipients)
+            {
+                await _emailService.SendEmailAsync(email, subject, body);
+            }
+        }
+        catch
+        {
+            // Announcement creation should still succeed even when email delivery is unavailable.
         }
         
         return new AnnouncementDto
