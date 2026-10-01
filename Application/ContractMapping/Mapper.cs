@@ -260,6 +260,21 @@ public static class Mapper
         };
     }
 
+    public static NotificationDto ToDto(this Notification notification)
+    {
+        if (notification == null) return null!;
+        return new NotificationDto
+        {
+            Id = notification.Id,
+            Type = notification.Type,
+            Title = notification.Title,
+            Body = notification.Body,
+            LinkUrl = notification.LinkUrl,
+            IsRead = notification.IsRead,
+            CreatedAt = notification.CreatedAt
+        };
+    }
+
     public static LeaveRequestDto ToDto(this LeaveRequest leave)
     {
         if (leave == null) return null!;

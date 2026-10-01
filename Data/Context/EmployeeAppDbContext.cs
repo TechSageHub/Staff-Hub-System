@@ -31,6 +31,7 @@ public class EmployeeAppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<OffboardingChecklistItem> OffboardingChecklistItems { get; set; } = default!;
     public DbSet<EmployeeOffboarding> EmployeeOffboardings { get; set; } = default!;
     public DbSet<EmployeeOffboardingProgress> EmployeeOffboardingProgress { get; set; } = default!;
+    public DbSet<Notification> Notifications { get; set; } = default!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
