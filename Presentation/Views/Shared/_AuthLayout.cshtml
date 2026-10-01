@@ -28,6 +28,12 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="auth-body">
+@if (isLoginMode)
+{
+    @RenderBody()
+}
+else
+{
     <div class="auth-shell">
         <nav class="auth-nav">
             <a class="auth-brand" href="/">
@@ -46,10 +52,10 @@
         </nav>
 
         <main role="main" class="auth-main">
-            <div class="auth-form-panel @(isRegisterMode ? "auth-form-panel-register" : string.Empty) @(isLoginMode ? "auth-form-panel-login" : string.Empty)">
+            <div class="auth-form-panel @(isRegisterMode ? "auth-form-panel-register" : string.Empty)">
                 @RenderBody()
             </div>
-            <aside class="auth-visual @(isRegisterMode ? "auth-visual-register" : string.Empty) @(isLoginMode ? "auth-visual-login" : string.Empty) d-none d-lg-flex">
+            <aside class="auth-visual @(isRegisterMode ? "auth-visual-register" : string.Empty) d-none d-lg-flex">
                 <div class="auth-visual-content">
                     @if (isRegisterMode)
                     {
@@ -205,6 +211,7 @@
             </div>
         </footer>
     </div>
+}
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

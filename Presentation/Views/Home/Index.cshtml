@@ -1,6 +1,6 @@
 @using Application.Dtos
 @{
-    ViewData["Title"] = User.Identity?.IsAuthenticated == true ? "Dashboard" : "Modern HR, Built for Growing Teams";
+    ViewData["Title"] = User.Identity?.IsAuthenticated == true ? "Dashboard" : "StaffHub · From onboarding to offboarding";
 
     var myEmployee = ViewBag.MyEmployee as EmployeeDto;
     int leaveBalance = ViewBag.LeaveBalance as int? ?? 0;
@@ -27,14 +27,14 @@
         <div class="container">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6">
-                    <div class="sh-lander-eyebrow">StaffHub Enterprise HR</div>
-                    <h1 class="sh-lander-title">Run your people operations from one polished workspace.</h1>
+                    <div class="sh-lander-eyebrow">StaffHub · Employee lifecycle workspace</div>
+                    <h1 class="sh-lander-title">From onboarding to offboarding — one HR workspace for the whole employee journey.</h1>
                     <p class="sh-lander-copy">
-                        Centralize onboarding, attendance, leave, announcements, and HR support in a platform designed for teams that want structure without the usual admin drag.
+                        Follow every employee from hire to exit in one place: guided onboarding, employee records and departments, attendance and leave approvals, documents, announcements, HR tickets, analytics, and a clean offboarding close-out.
                     </p>
                     <div class="sh-lander-actions">
                         <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">
-                            Start free trial
+                            Create account
                         </a>
                         <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary btn-lg">
                             Sign in
@@ -42,16 +42,16 @@
                     </div>
                     <div class="sh-lander-proof">
                         <div class="sh-proof-chip">
-                            <strong>20+</strong>
-                            <span>leave rules automated</span>
+                            <strong>5-step</strong>
+                            <span>guided onboarding checklist</span>
                         </div>
                         <div class="sh-proof-chip">
                             <strong>@landingAnnouncementCount</strong>
                             <span>company updates published</span>
                         </div>
                         <div class="sh-proof-chip">
-                            <strong>24/7</strong>
-                            <span>HR visibility</span>
+                            <strong>Hire to exit</strong>
+                            <span>one employee record</span>
                         </div>
                     </div>
                 </div>
@@ -104,37 +104,37 @@
     <section class="sh-lander-section" id="features">
         <div class="container">
             <div class="sh-lander-section-head">
-                <div class="sh-lander-eyebrow">Why teams switch</div>
-                <h2>Everything HR needs, without scattered spreadsheets and approvals.</h2>
-                <p>StaffHub gives operators, managers, and employees one place to work through everyday HR processes with clarity.</p>
+                <div class="sh-lander-eyebrow">One record from hire to exit</div>
+                <h2>The full employee lifecycle, without scattered spreadsheets.</h2>
+                <p>StaffHub carries each employee from onboarding through daily HR to offboarding — one directory, one approval flow, one source of truth for admins, managers, and staff.</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-6 col-xl-3">
                     <article class="sh-feature-card">
                         <div class="sh-feature-icon"><i class="bi bi-person-workspace"></i></div>
-                        <h3>Employee records</h3>
-                        <p>Organize profiles, departments, onboarding progress, and contact details in one clean directory.</p>
+                        <h3>Onboarding & employee records</h3>
+                        <p>Guide hires through the 5-step checklist and keep profiles, departments, and progress in one directory.</p>
                     </article>
                 </div>
                 <div class="col-md-6 col-xl-3">
                     <article class="sh-feature-card">
                         <div class="sh-feature-icon"><i class="bi bi-calendar2-week"></i></div>
-                        <h3>Leave control</h3>
-                        <p>Handle requests, balances, approvals, and current leave visibility with fewer manual follow-ups.</p>
+                        <h3>Attendance & leave</h3>
+                        <p>Track clock-ins, balances, requests, and approvals in one queue with fewer manual follow-ups.</p>
                     </article>
                 </div>
                 <div class="col-md-6 col-xl-3">
                     <article class="sh-feature-card">
                         <div class="sh-feature-icon"><i class="bi bi-clock-history"></i></div>
-                        <h3>Attendance tracking</h3>
-                        <p>See clock-in activity, work history, and team trends without hopping between systems.</p>
+                        <h3>Documents & announcements</h3>
+                        <p>Store employee documents and share company updates without extra tooling.</p>
                     </article>
                 </div>
                 <div class="col-md-6 col-xl-3">
                     <article class="sh-feature-card">
                         <div class="sh-feature-icon"><i class="bi bi-headset"></i></div>
-                        <h3>HR support desk</h3>
-                        <p>Receive employee questions and HR tickets in a workflow that is easy to triage and update.</p>
+                        <h3>HR tickets & offboarding</h3>
+                        <p>Triage employee requests on an auditable timeline, then close out exits with a clean checklist.</p>
                     </article>
                 </div>
             </div>
@@ -146,35 +146,35 @@
             <div class="row g-4 align-items-stretch">
                 <div class="col-lg-7">
                     <div class="sh-story-card">
-                        <div class="sh-lander-eyebrow">Operations visibility</div>
-                        <h2>Designed for fast decisions across HR, leadership, and line managers.</h2>
+                        <div class="sh-lander-eyebrow">Hire to exit, in order</div>
+                        <h2>Each stage hands off cleanly to the next.</h2>
                         <p>
-                            Monitor workforce activity, open approvals, onboarding progress, and internal updates from a dashboard that feels executive-ready, not improvised.
+                            Onboard once, run daily HR from the same record, and exit cleanly — with dashboards and analytics keeping HR, managers, and leadership aligned.
                         </p>
                         <ul class="sh-check-list">
-                            <li>Spot onboarding gaps before they become delays</li>
-                            <li>Review attendance and leave in one workflow</li>
-                            <li>Share company updates without extra tooling</li>
-                            <li>Respond to HR tickets with an auditable timeline</li>
+                            <li>Complete the 5-step onboarding before day-one work starts</li>
+                            <li>Review attendance and leave in one approval queue</li>
+                            <li>Publish announcements and file documents on the same profile</li>
+                            <li>Resolve HR tickets, then close out with offboarding</li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-5">
                     <div class="sh-side-stack">
                         <div class="sh-side-card">
-                            <div class="sh-side-label">Built for</div>
-                            <strong>Growing teams</strong>
-                            <span>Start simple and scale your HR processes cleanly.</span>
+                            <div class="sh-side-label">Start</div>
+                            <strong>Onboard once</strong>
+                            <span>Personal details, qualifications, next of kin, HR info, and documents.</span>
                         </div>
                         <div class="sh-side-card">
-                            <div class="sh-side-label">Ideal for</div>
-                            <strong>Admin-led operations</strong>
-                            <span>Clear approval queues, dashboards, and employee self-service.</span>
+                            <div class="sh-side-label">Run</div>
+                            <strong>Daily HR in one queue</strong>
+                            <span>Attendance, leave approvals, announcements, and HR tickets.</span>
                         </div>
                         <div class="sh-side-card">
-                            <div class="sh-side-label">Outcome</div>
-                            <strong>Less manual overhead</strong>
-                            <span>Fewer status chases, better tracking, stronger visibility.</span>
+                            <div class="sh-side-label">Close</div>
+                            <strong>Exit cleanly</strong>
+                            <span>Offboarding checklist with the full history still on record.</span>
                         </div>
                     </div>
                 </div>
@@ -186,13 +186,13 @@
         <div class="container">
             <div class="sh-cta-panel">
                 <div>
-                    <div class="sh-lander-eyebrow">Ready to modernize HR?</div>
-                    <h2>Give your team a sharper way to manage people operations.</h2>
-                    <p>Start with attendance, leave, onboarding, and support workflows in one branded system.</p>
+                    <div class="sh-lander-eyebrow">Start the lifecycle</div>
+                    <h2>Bring hiring, daily HR, and exits into one place.</h2>
+                    <p>Create an account to complete guided onboarding, or sign in to your workspace.</p>
                 </div>
                 <div class="sh-cta-actions">
                     <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Create account</a>
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary btn-lg">Access workspace</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary btn-lg">Sign in</a>
                 </div>
             </div>
         </div>

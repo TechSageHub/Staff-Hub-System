@@ -1,10 +1,11 @@
-﻿using Application.Services.Analytics;
+﻿using Application.Services.Announcement;
+using Application.Services.Analytics;
 using Application.Services.Authentication;
 using Application.Services.Department;
 using Application.Services.Email;
 using Application.Services.Employee;
 using Application.Services.Leave;
-using Application.Services.Announcement;
+using Application.Services.Notification;
 using Application.Services.Attendance;
 using Application.Services.Document;
 using Application.Services.HrTicket;
@@ -29,6 +30,7 @@ public static class ApplicationServiceExtension
         services.AddScoped<IOffboardingService, OffboardingService>();
         services.AddScoped<IHrTicketService, HrTicketService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }
