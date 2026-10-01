@@ -5,64 +5,117 @@
     Layout = "_AuthLayout";
 }
 
-<div class="auth-form auth-form-login">
-    <div class="auth-login-intro">
-        <span class="auth-form-eyebrow"><i class="bi bi-shield-lock"></i> StaffHub workspace access</span>
-        <h1>Sign in to continue your HR operations day.</h1>
-        <p class="lead">Pick up approvals, attendance reviews, employee updates, and internal requests from the same workspace your team already uses.</p>
-    </div>
-
-    <div class="auth-login-frame">
-        <div class="auth-login-frame-head">
-            <div>
-                <div class="auth-login-frame-title">Secure sign in</div>
-                <div class="auth-login-frame-copy">Use your work credentials to enter the workspace.</div>
-            </div>
-            <span class="auth-login-chip"><i class="bi bi-shield-check"></i> Protected</span>
+<div class="split-login-container">
+    <!-- Left Hero Pane (Indigo / Navy Gradient) -->
+    <section class="split-login-hero" aria-label="Branding and overview">
+        <!-- Top Left Brand Badge -->
+        <div class="split-login-brand-wrapper">
+            <a href="/" class="split-login-brand">
+                <span class="split-login-brand-logo">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </span>
+                <span class="split-login-brand-title">StaffHub - HRMS</span>
+            </a>
         </div>
 
-        <form asp-action="Login" method="post" class="needs-validation" novalidate>
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
-
-            <div class="sh-form-group">
-                <label asp-for="Email" class="form-label">Work email</label>
-                <input asp-for="Email" class="form-control" placeholder="you@company.com" autocomplete="username" />
-                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+        <!-- Center Hero Content -->
+        <div class="split-login-hero-center">
+            <div class="split-login-badge-disc" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
             </div>
 
-            <div class="sh-form-group">
-                <div class="d-flex align-items-center justify-content-between">
-                    <label asp-for="Password" class="form-label mb-0">Password</label>
-                    <a asp-action="ForgotPassword" class="small fw-semibold">Forgot password?</a>
+            <h1 class="split-login-hero-h1">
+                StaffHub Human Resource<br />Management System
+            </h1>
+
+            <p class="split-login-hero-desc">
+                Streamline your workforce workflow. Submit, track, and manage employee operations all in one place.
+            </p>
+
+            <div class="split-login-feature-list">
+                <div class="split-login-feature-item">
+                    <span class="split-login-feature-icon"><i class="bi bi-check-circle"></i></span>
+                    <span>Submit employee requests effortlessly</span>
                 </div>
-                <div class="sh-input-wrap mt-1">
-                    <input asp-for="Password" type="password" id="loginPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
-                    <button type="button" class="sh-input-action" data-sh-toggle-password="#loginPassword" tabindex="-1" aria-label="Show password">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                <div class="split-login-feature-item">
+                    <span class="split-login-feature-icon"><i class="bi bi-book"></i></span>
+                    <span>Track deadlines, leaves, and records</span>
                 </div>
-                <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
-            </div>
-
-            <div class="auth-login-row">
-                <div class="form-check mb-0">
-                    <input asp-for="RememberMe" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">Keep me signed in for 10 days</label>
+                <div class="split-login-feature-item">
+                    <span class="split-login-feature-icon"><i class="bi bi-people"></i></span>
+                    <span>Collaborate across teams and departments</span>
                 </div>
-                <div class="auth-login-meta">SSO-ready workspace</div>
+            </div>
+        </div>
+
+        <!-- Bottom Left Footer -->
+        <div class="split-login-hero-footer">
+            &copy; @DateTime.Now.Year StaffHub. All rights reserved.
+        </div>
+    </section>
+
+    <!-- Right Form Pane (Clean elevated card) -->
+    <section class="split-login-form-pane" aria-label="Sign in form">
+        <a asp-controller="Home" asp-action="Index" class="split-login-back">
+            <i class="bi bi-arrow-left"></i> Back to home
+        </a>
+        <button type="button" class="split-login-theme-toggle" data-sh-theme-toggle aria-pressed="false" aria-label="Toggle theme" title="Toggle theme">
+            <i class="bi bi-moon-stars"></i>
+        </button>
+
+        <div class="split-login-card">
+            <div class="split-login-card-header">
+                <h2>Welcome back</h2>
+                <p>Sign in to your account to continue</p>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 btn-lg auth-login-submit">
-                <span>Enter workspace</span> <i class="bi bi-arrow-right"></i>
-            </button>
+            <form asp-action="Login" method="post" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 px-3 mb-3 small" role="alert" style="@(ViewContext.ModelState.IsValid ? "display:none;" : "")"></div>
 
-            <div class="auth-login-bottom">
-                <span>New to StaffHub?</span>
-                <a asp-action="Register" class="fw-semibold">Create an account</a>
-            </div>
-        </form>
-    </div>
+                <div class="split-login-form-group">
+                    <label asp-for="Email" class="split-login-label">Email or Username</label>
+                    <input asp-for="Email" class="split-login-input" placeholder="name@company.com" autocomplete="username" required />
+                    <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="split-login-form-group">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label asp-for="Password" class="split-login-label mb-0">Password</label>
+                        <a asp-action="ForgotPassword" class="split-login-forgot-link">Forgot password?</a>
+                    </div>
+                    <div class="split-login-input-wrap">
+                        <input asp-for="Password" type="password" id="loginPassword" class="split-login-input" placeholder="••••••••••••" autocomplete="current-password" required />
+                        <button type="button" class="split-login-eye-btn" data-sh-toggle-password="#loginPassword" tabindex="-1" aria-label="Show password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="split-login-meta-row">
+                    <div class="form-check mb-0">
+                        <input asp-for="RememberMe" class="form-check-input" id="loginRememberMe" />
+                        <label asp-for="RememberMe" class="form-check-label small" for="loginRememberMe" style="color: var(--sh-text-muted, #64748b);">
+                            Keep me signed in
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="split-login-btn">
+                    <span>Sign In</span> <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <div class="split-login-card-footer">
+                    <span>Don't have an account?</span>
+                    <a asp-action="Register" class="split-login-admin-link">Contact your administrator</a>
+                </div>
+            </form>
+        </div>
+    </section>
 </div>
 
 @section Scripts {
